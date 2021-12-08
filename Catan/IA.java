@@ -1,6 +1,4 @@
-package Catan.Joueur;
-
-import Catan.Plateau.PlayBoard;
+package Catan;
 
 class IA extends Player {
     

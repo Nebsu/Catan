@@ -1,3 +1,5 @@
+package Catan;
+
 class Road {
     
     protected final Player player;

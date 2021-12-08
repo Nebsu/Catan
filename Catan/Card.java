@@ -1,4 +1,4 @@
-package Catan.Joueur;
+package Catan;
 
 class Card {
     

@@ -1,4 +1,4 @@
-package Joueur;
+package Catan;
 
 import java.util.*;
 
@@ -51,7 +51,7 @@ class Player implements PlayerAction {
         for (Location l : locations) {
             if (l instanceof Colony) {
                 colonies.add((Colony) l);
-                
+            }
         }
         if (colonies.isEmpty()) {
             System.out.println("Pas de chance, personne n'a rien gagné");
@@ -60,7 +60,10 @@ class Player implements PlayerAction {
         for (Colony c : colonies) System.out.println(c);
         for (int i=0; i<boxes.size(); i++) {
             for (Colony c : colonies) {
-                c.player.inventory.put(boxes.get(i).ressource, Integer.valueOf(1));
+                if (c.isCity)
+                    c.player.inventory.put(boxes.get(i).ressource, Integer.valueOf(2));
+                else 
+                    c.player.inventory.put(boxes.get(i).ressource, Integer.valueOf(1));
             }
         }
     }
@@ -83,29 +86,40 @@ class Player implements PlayerAction {
         
     }
 
-    public void buildColony(PlayBoard p) {
+    public void buildNativeColonies(PlayBoard p) {
         Scanner sc = new Scanner(System.in);
         boolean notOk;
         do {
             System.out.println("Joueur "+this.symbol+", placez votre colonie :");
-            String s = sc.nextLine();
-            System.out.println();
-            String i = String.valueOf(s.charAt(0));
-            String j = String.valueOf(s.charAt(1));
-            int k = Integer.valueOf(i);
-            int l = Integer.valueOf(j);
-            if (k-1<0 || k-1>4 || l-1<0 || l-1>4) {
-                System.out.println("Erreur : cet emplacement n'existe pas");
+            try {
+                String s = sc.nextLine();
+                if (s.length()>2 || s.length()<=0) throw new RuntimeException("");
+                System.out.println();
+                String i = String.valueOf(s.charAt(0));
+                String j = String.valueOf(s.charAt(1));
+                int k = Integer.valueOf(i);
+                int l = Integer.valueOf(j);
+                if (k-1<0 || k-1>4 || l-1<0 || l-1>4) {
+                    System.out.println("Erreur : cet emplacement n'existe pas");
+                    notOk = true;
+                } else if (p.locations[k-1][l-1] instanceof Colony) {
+                    System.out.println("Erreur : cet emplacement est occupé");
+                    notOk = true;
+                } else {
+                    p.locations[k-1][l-1] = new Colony(p.locations[k-1][l-1].boxes, this);
+                    this.victoryPoints++;
+                    notOk = false;
+                }
+            } catch (Exception e) {
+                System.out.println("\nErreur de format");
                 notOk = true;
-            } else if (p.locations[k-1][l-1] instanceof Colony) {
-                System.out.println("Erreur : cet emplacement est occupé");
-                notOk = true;
-            } else {
-                p.locations[k-1][l-1] = new Colony(p.locations[k-1][l-1].boxes, this);
-                this.victoryPoints++;
-                notOk = false;
             }
         } while (notOk);
+    }
+
+    public void buildColony(PlayBoard p) {
+        // TODO Auto-generated method stub
+        
     }
 
     public void buildCity() {

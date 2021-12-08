@@ -1,3 +1,5 @@
+package Catan;
+
 class Location {
     
     protected final Box[] boxes;

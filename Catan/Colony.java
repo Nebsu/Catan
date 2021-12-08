@@ -1,6 +1,4 @@
-package Plateau;
-
-import .Joueur;
+package Catan;
 
 class Colony extends Location {
     

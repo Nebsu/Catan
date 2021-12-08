@@ -1,6 +1,4 @@
-package Catan.Joueur;
-
-import Catan.Plateau.PlayBoard;
+package Catan;
 
 interface PlayerAction {
     
@@ -10,6 +8,7 @@ interface PlayerAction {
     void inventorySetup();
     void useSpecialCard();
     void buildRoad();
+    void buildNativeColonies(PlayBoard p);
     void buildColony(PlayBoard p);
     void buildCity();
 

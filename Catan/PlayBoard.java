@@ -1,3 +1,5 @@
+package Catan;
+
 import java.util.*;
 
 public class PlayBoard {
