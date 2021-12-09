@@ -7,34 +7,34 @@ public class PlayBoard {
     // Attributs :
     protected Box[][] boxes;
     protected Location[][] locations;
-    protected Road[][] horizontalRoads;
-    protected Road[][] verticalRoads;
+    protected Path[][] horizontalPaths;
+    protected Path[][] verticalPaths;
 
     PlayBoard() {
         this.boxes = new Box[4][4];
         this.constructBoxes();
-        this.constructRoads();
+        this.constructPaths();
         this.constructLocations();
     }
 
     private final void constructBoxes() {
         // Construction des cases :
-        this.boxes[0][0] = new Box("Forest", "Wood", 6, 0, 0);
-        this.boxes[0][1] = new Box("Grassland", "Wool", 10, 0, 1);
-        this.boxes[0][2] = new Box("Field", "Wheat", 11, 0, 2);
-        this.boxes[0][3] = new Box("Grassland", "Wool", 8, 0, 3);
-        this.boxes[1][0] = new Box("Field", "Wheat", 4, 1,0);
-        this.boxes[1][1] = new Box("Hill", "Clay", 9, 1, 1);
-        this.boxes[1][2] = new Box("Forest", "Wood", 5, 1, 2);
-        this.boxes[1][3] = new Box("Mountain", "Rock", 12, 1, 3);
-        this.boxes[2][0] = new Box("Mountain", "Rock", 3, 2, 0);
-        this.boxes[2][1] = new Box("Desert", null, 7, 2, 1);
-        this.boxes[2][2] = new Box("Field", "Wheat", 10, 2, 2);
-        this.boxes[2][3] = new Box("Hill", "Clay", 6, 2, 3);
-        this.boxes[3][0] = new Box("Hill", "Clay", 9, 3, 0);
-        this.boxes[3][1] = new Box("Mountain", "Rock", 8, 3, 1);
-        this.boxes[3][2] = new Box("Grassland", "Wool", 5, 3, 2);
-        this.boxes[3][3] = new Box("Forest", "Wood", 2, 3, 3);
+        this.boxes[0][0] = new Box("Forêt", "Bois", 6, 0, 0);
+        this.boxes[0][1] = new Box("Pré", "Laine", 10, 0, 1);
+        this.boxes[0][2] = new Box("Champs", "Blé", 11, 0, 2);
+        this.boxes[0][3] = new Box("Pré", "Laine", 8, 0, 3);
+        this.boxes[1][0] = new Box("Champs", "Blé", 4, 1,0);
+        this.boxes[1][1] = new Box("Colline", "Argile", 9, 1, 1);
+        this.boxes[1][2] = new Box("Forêt", "Bois", 5, 1, 2);
+        this.boxes[1][3] = new Box("Montagne", "Roche", 12, 1, 3);
+        this.boxes[2][0] = new Box("Montagne", "Roche", 3, 2, 0);
+        this.boxes[2][1] = new Box("Désert", null, 7, 2, 1);
+        this.boxes[2][2] = new Box("Champs", "Blé", 10, 2, 2);
+        this.boxes[2][3] = new Box("Colline", "Argile", 6, 2, 3);
+        this.boxes[3][0] = new Box("Colline", "Argile", 9, 3, 0);
+        this.boxes[3][1] = new Box("Montagne", "Roche", 8, 3, 1);
+        this.boxes[3][2] = new Box("Pré", "Laine", 5, 3, 2);
+        this.boxes[3][3] = new Box("Forêt", "Bois", 2, 3, 3);
     }
 
     ArrayList<Box> getBoxes(int dice) {
@@ -49,17 +49,17 @@ public class PlayBoard {
         return res;
     }
 
-    private final void constructRoads() {
-        this.horizontalRoads = new Road[5][4];
+    private final void constructPaths() {
+        this.horizontalPaths = new Path[5][4];
         for (int i=0; i<5; i++) {
             for (int j=0; j<4; j++) {
-                this.horizontalRoads[i][j] = new Road('h');
+                this.horizontalPaths[i][j] = new Path('h', this.locations[i][j], this.locations[i][j+1]);
             }
         }
-        this.verticalRoads = new Road[5][4];
+        this.verticalPaths = new Path[5][4];
         for (int i=0; i<5; i++) {
             for (int j=0; j<4; j++) {
-                this.verticalRoads[i][j] = new Road('v');
+                this.verticalPaths[i][j] = new Path('v', this.locations[i][j], this.locations[i][j+1]);
             }
         }
     }
@@ -77,7 +77,7 @@ public class PlayBoard {
                     Box[] b = {this.boxes[k][l]};
                     try {this.locations[i][j] = new Location(b);}
                     catch (IllegalArgumentException e) {
-                        System.out.println("Argument error");
+                        System.out.println("Erreur d'argument");
                         return;
                     }
                 // Arêtes horizontales du plateau (2 cases adjacentes) :
@@ -91,7 +91,7 @@ public class PlayBoard {
                     Box[] b = {this.boxes[i-1][l], this.boxes[i][l]};
                     try {this.locations[i][j] = new Location(b);}
                     catch (IllegalArgumentException e) {
-                        System.out.println("Argument error");
+                        System.out.println("Erreur d'argument");
                         return;
                     }
                 // Centre du plateau (4 cases adjacentes) :
@@ -99,7 +99,7 @@ public class PlayBoard {
                     Box[] b = {this.boxes[i-1][j-1], this.boxes[i-1][j], this.boxes[i][j-1], this.boxes[i][j]};
                     try {this.locations[i][j] = new Location(b);}
                     catch (IllegalArgumentException e) {
-                        System.out.println("Argument error");
+                        System.out.println("Erreur d'argument");
                         return;
                     }
                 }
@@ -121,13 +121,21 @@ public class PlayBoard {
                 System.out.println(" |");
                 break;
             }
-            System.out.print("-------");
+            if (this.horizontalPaths[0][i].player!=null) {
+                for (int j=1; j<=7; j++) System.out.print(this.horizontalPaths[0][i].player.symbol);
+            } else System.out.print("-------");
         }
         for (int i=0; i<4; i++) {
-            System.out.print("         | ||");
+            System.out.print("         | ");
+            if (this.verticalPaths[i+1][0].player!=null) {
+                for (int j=1; j<=2; j++) System.out.print(this.verticalPaths[i+1][0].player.symbol);
+            } else System.out.print("||");
             for (int j=0; j<4; j++) {
                 System.out.print(" "+this.boxes[i][j]);
                 System.out.print(" ||");
+                if (this.verticalPaths[i+1][j].player!=null) {
+                    for (int k=1; k<=2; k++) System.out.print(this.verticalPaths[i+1][j].player.symbol);
+                } else System.out.print("||");
             }
             System.out.println(" |");
             System.out.print("         | ");
@@ -141,7 +149,9 @@ public class PlayBoard {
                     System.out.println(" |");
                     break;
                 }
-                System.out.print("-------");
+                if (this.horizontalPaths[i+1][j].player!=null) {
+                    for (int k=1; k<=7; k++) System.out.print(this.horizontalPaths[i+1][j].player.symbol);
+                } else System.out.print("-------");
             }
         }
         System.out.println("         -----------------------------------------");

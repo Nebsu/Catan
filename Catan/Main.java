@@ -12,33 +12,38 @@ public class Main {
         PlayBoard p = new PlayBoard();
         p.display(); // affichage du plateau vide
         // Placement des colonies de base :
-        for (int i=0; i<players.length; i++) players[i].buildNativeColonies(p);
-        for (int i=0; i<players.length; i++) players[i].buildNativeColonies(p);
+        for (int i=0; i<players.length; i++) {
+            players[i].buildNativeColonies(p);
+            players[i].buildRoad(p);
+        }
+        for (int i=0; i<players.length; i++) {
+            players[i].buildNativeColonies(p);
+            players[i].buildRoad(p);
+        }
         for (int i=0; i<players.length; i++) {
             System.out.println(players[i]);
         }
         p.display();
-        players[0].play(p);
-        for (int i=0; i<players.length; i++) {
-            System.out.println(players[i].inventory);
+        boolean end = false;
+        Player winner = null; 
+        int turns = 0;
+        while (turns==3) {
+            turns++;
+            for (int i=0; i<players.length; i++) {
+                players[i].play(p);
+                p.display();
+                for (int j=0; i<players.length; j++) {
+                    System.out.println(players[i].name+" : "+players[i].inventory);
+                }
+                if (players[i].isWinner()) {
+                    end = true;
+                    winner = players[i];
+                    break;
+                } 
+            }
         }
-        // boolean end = false;
-        // Player winner = null;
-        // int turns = 0;
-        // while (!end) {
-        //     turns++;
-        //     for (int i=0; i<players.length; i++) {
-        //         players[i].play(p);
-        //         p.display();
-        //         if (players[i].isWinner()) {
-        //             end = true;
-        //             winner = players[i];
-        //             break;
-        //         } 
-        //     }
-        // }
-        // System.out.println("Félicitations "+winner.name+" ! Vous avez gagné la partie !");
-        // System.out.println("Nombre de tours total de la partie : "+turns);
+        System.out.println("Félicitations "+winner.name+" ! Vous avez gagné la partie !");
+        System.out.println("Nombre de tours total de la partie : "+turns);
     }
 
     // Créations des différents joueurs :

@@ -1,22 +1,25 @@
 package Catan;
 
 import java.util.*;
+import Catan.Exceptions.*;
 
 class Player implements PlayerAction {
     
-    protected final ArrayList<Card> specialCards;
-    protected final Map<String, Integer> inventory;
-    protected int victoryPoints;
     protected final String name;
     protected final char symbol;
+    protected int victoryPoints;
+    protected final Map<String, Integer> inventory;
+    protected final ArrayList<Path> roads;
+    protected final ArrayList<Card> specialCards;
 
     Player(String name, int s) {
-        this.specialCards = new ArrayList<Card>();
-        this.inventory = new HashMap<String, Integer>();
-        this.inventorySetup();
-        this.victoryPoints = 0;
         this.name = name;
         this.symbol = String.valueOf(s).charAt(0);
+        this.victoryPoints = 0;
+        this.inventory = new HashMap<String, Integer>();
+        this.inventorySetup();
+        this.roads = new ArrayList<Path>();
+        this.specialCards = new ArrayList<Card>();
     }
 
     public boolean isWinner() {return (this.victoryPoints==10);}
@@ -58,22 +61,25 @@ class Player implements PlayerAction {
             return;
         }
         for (Colony c : colonies) System.out.println(c);
-        for (int i=0; i<boxes.size(); i++) {
-            for (Colony c : colonies) {
-                if (c.isCity)
-                    c.player.inventory.put(boxes.get(i).ressource, Integer.valueOf(2));
-                else 
-                    c.player.inventory.put(boxes.get(i).ressource, Integer.valueOf(1));
+        for (Colony c : colonies) {
+            for (int i=0; i<c.boxes.length; i++) {
+                if (c.boxes[i].number==dice) {
+                    Integer a = c.player.inventory.get(c.boxes[i].ressource);
+                    if (c.isCity)
+                        c.player.inventory.put(c.boxes[i].ressource, a+Integer.valueOf(2));
+                    else 
+                        c.player.inventory.put(c.boxes[i].ressource, a+Integer.valueOf(1));
+                }
             }
         }
     }
 
     public void inventorySetup() {
-        this.inventory.put("Wood", 0); // bois
-        this.inventory.put("Clay", 0); // argile
-        this.inventory.put("Wool", 0); // laine
-        this.inventory.put("Wheat", 0); // blé
-        this.inventory.put("Rock", 0); // minerai
+        this.inventory.put("Bois", 0); // bois
+        this.inventory.put("Argile", 0); // argile
+        this.inventory.put("Laine", 0); // laine
+        this.inventory.put("Blé", 0); // blé
+        this.inventory.put("Roche", 0); // minerai
     }
 
     public void useSpecialCard() {
@@ -81,19 +87,14 @@ class Player implements PlayerAction {
         
     }
 
-    public void buildRoad() {
-        // TODO Auto-generated method stub
-        
-    }
-
     public void buildNativeColonies(PlayBoard p) {
-        Scanner sc = new Scanner(System.in);
+        Scanner sc1 = new Scanner(System.in);
         boolean notOk;
         do {
-            System.out.println("Joueur "+this.symbol+", placez votre colonie :");
             try {
-                String s = sc.nextLine();
-                if (s.length()>2 || s.length()<=0) throw new RuntimeException("");
+                System.out.println("Joueur "+this.symbol+", placez votre colonie :");
+                String s = sc1.nextLine();
+                if (s.length()>2 || s.length()<=0) throw new RuntimeException();
                 System.out.println();
                 String i = String.valueOf(s.charAt(0));
                 String j = String.valueOf(s.charAt(1));
@@ -126,9 +127,76 @@ class Player implements PlayerAction {
         // TODO Auto-generated method stub
     }
 
+    public void buildRoad(PlayBoard p) {
+        Scanner sc2 = new Scanner(System.in);
+        boolean notOk = true;
+        char c;
+        do {
+            try {
+                System.out.println("Joueur "+this.symbol+", voulez-vous placer une route " 
+                +"horizontale ou verticale ?");
+                System.out.println("Tapez h pour horizontale ou v pour verticale :");
+                c = sc2.nextLine().charAt(0);
+                System.out.println();
+                    if (c!='h' && c!='v') throw new WrongInputException();
+                    System.out.println("Placez votre route :");
+                    String s = sc2.nextLine();
+                    if (s.length()>2 || s.length()<=0) throw new RuntimeException();
+                    System.out.println();
+                    String i = String.valueOf(s.charAt(0));
+                    String j = String.valueOf(s.charAt(1));
+                    int k = Integer.valueOf(i);
+                    int l = Integer.valueOf(j);
+                    Path selectedPath;
+                    if (c=='h') selectedPath = p.horizontalPaths[k-1][l-1];
+                    else selectedPath = p.verticalPaths[k-1][l-1];
+                    if (k-1<0 || k-1>5 || l-1<0 || l-1>4) {
+                        System.out.println("Erreur : cet emplacement n'existe pas");
+                        notOk = true;
+                    } else if (selectedPath.player!=null) {
+                        System.out.println("Erreur : cet emplacement est occupé");
+                        notOk = true;
+                    } else if (!(selectedPath.startPoint instanceof Colony && ((Colony) selectedPath.startPoint).player==this)) {
+                        System.out.println("Erreur : Une route doit avoir comme point de départ une de vos colonies");
+                        notOk = true;
+                    } else {
+                        int acc = 0;
+                        ArrayList<Location> endPoints = this.getEndPoints();
+                        for (Location endPoint : endPoints) {
+                            if (selectedPath.startPoint==endPoint) {
+                                selectedPath.player = this;
+                                this.roads.add(selectedPath);
+                                notOk = false;
+                                break;
+                            }
+                            acc++;
+                        }
+                        if (acc==endPoints.size()) {
+                            System.out.println("Erreur : Votre route doit être liée à une autre de vos routes");
+                            notOk = true;
+                        }
+                    }
+            } catch (WrongInputException w) {
+                System.out.println(w);
+                notOk = true;
+            } catch (Exception e) {
+                System.out.println("\nErreur de format");
+                notOk = true;
+            }
+        } while (notOk);
+    }
+
+    public ArrayList<Location> getEndPoints() {
+        ArrayList<Location> endPoints = new ArrayList<Location>();
+        for (Path p : this.roads) {
+            endPoints.add(p.endPoint);
+        }
+        return endPoints;
+    }
+
     @Override
     public String toString() {
-        return (this.name+" has "+this.victoryPoints+" victory points.");
+        return (this.name+" possède "+this.victoryPoints+" points de victoire.");
     }
 
 }

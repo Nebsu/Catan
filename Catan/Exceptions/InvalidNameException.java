@@ -10,7 +10,7 @@ public class InvalidNameException extends Exception {
 
     @Override
     public String toString() {
-        return this.message;
+        return (this.message+"\n");
     }
 
 }
