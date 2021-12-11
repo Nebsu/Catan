@@ -4,13 +4,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 class Deck {
+
     private ArrayList<Card> deck = new ArrayList<Card>();
 
     /*
        5 cartes pts de victoire 
        6 cartes progres 
        14 cartes chevalier 
-       19 cartes de chaques ressource
        
        0 = Point de Victoire
        1 = Chevalier
@@ -19,7 +19,7 @@ class Deck {
        4 = Monopole
     */
     
-    Deck(){
+    Deck() {
         for(int i = 0; i < 5; i++){
             deck.add(new Card("Point de Victoire", 0));
         }
@@ -37,13 +37,6 @@ class Deck {
             deck.add(new Card("Chevalier", 1));
         }
         Collections.shuffle(deck);
-    }
-
-    public static void main(String[] args) {
-        Deck deck = new Deck();
-        for(Card c : deck.deck){
-            System.out.println(c);
-        }
     }
     
 }

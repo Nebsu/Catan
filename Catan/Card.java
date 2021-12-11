@@ -1,6 +1,7 @@
 package Catan;
 
 class Card {
+    
     private String cardname;
     private int id;
 
@@ -12,5 +13,5 @@ class Card {
     public String toString(){
         return this.cardname + " " + this.id;
     }
-}
+
 }

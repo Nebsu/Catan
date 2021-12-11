@@ -293,6 +293,9 @@ class Player {
                         break;
                     }
                 }
+            } catch (WrongInputException w) {
+                System.out.println("Erreur : Cette colonie n'existe pas ou ne vous appartient pas");
+                notOk = true;
             } catch (Exception e) {
                 System.out.println(WrongInputException.message);
                 notOk = true;
