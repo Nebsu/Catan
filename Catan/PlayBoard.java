@@ -2,7 +2,7 @@ package Catan;
 
 import java.util.*;
 
-class PlayBoard {
+final class PlayBoard {
 
     protected Box[][] boxes;
     protected Location[][] locations;
@@ -92,7 +92,7 @@ class PlayBoard {
         }
     }
 
-    ArrayList<Box> getBoxes(int dice) {
+    final ArrayList<Box> getBoxes(int dice) {
         ArrayList<Box> res = new ArrayList<Box>();
         for (int i=0; i<boxes.length; i++) {
             for (int j=0; j<boxes[i].length; j++) {
@@ -104,7 +104,7 @@ class PlayBoard {
         return res;
     }
 
-    void updatePaths() {
+    final void updatePaths() {
         for (int i=0; i<this.horizontalPaths.length; i++) {
             for (int j=0; j<this.horizontalPaths[i].length; j++) {
                 this.horizontalPaths[i][j].point1 = this.locations[i][j];
@@ -119,7 +119,7 @@ class PlayBoard {
         }
     }
 
-    boolean isFilledLocations() {
+    final boolean isFilledLocations() {
         int numberOfColonies = 0;
         for (int i=0; i<this.locations.length; i++) {
             for (int j=0; j<this.locations[i].length; j++) {
@@ -130,7 +130,7 @@ class PlayBoard {
         }
         return (numberOfColonies==25);
     }
-    boolean isFilledPaths() {
+    final boolean isFilledPaths() {
         int numberOfRoads = 0;
         for (int i=0; i<this.horizontalPaths.length; i++) {
             for (int j=0; j<this.horizontalPaths[i].length; j++) {
@@ -146,7 +146,7 @@ class PlayBoard {
     }
 
     // Affichage du plateau :
-    void display() {
+    final void display() {
         System.out.println();
         System.out.println("          _________________________________________");
         System.out.print("         | ");

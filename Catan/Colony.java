@@ -1,6 +1,6 @@
 package Catan;
 
-class Colony extends Location {
+final class Colony extends Location {
     
     protected final Player player;
     protected boolean isCity;

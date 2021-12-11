@@ -1,16 +1,13 @@
 package Catan.Exceptions;
 
-public class WrongInputException extends Exception {
+public final class WrongInputException extends Exception {
     
-    private final String message;
-
-    public WrongInputException() {
-        this.message = "Erreur : Veuillez tapez une entrée valide";
-    }
+    public static final String message = 
+    "Erreur : Veuillez tapez une entrée valide !";
 
     @Override
     public String toString() {
-        return (this.message+"\n");
+        return (message);
     }
 
 }

@@ -1,6 +1,6 @@
 package Catan;
 
-class Road extends Path {
+final class Road extends Path {
 
     protected final Player player;
     protected final Location startPoint;

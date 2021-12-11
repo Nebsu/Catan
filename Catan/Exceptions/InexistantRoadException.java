@@ -1,6 +1,6 @@
 package Catan.Exceptions;
 
-public class InexistantRoadException extends Exception {
+public final class InexistantRoadException extends Exception {
     
     private final String message;
 
@@ -10,7 +10,7 @@ public class InexistantRoadException extends Exception {
 
     @Override
     public String toString() {
-        return (this.message+"\n");
+        return this.message;
     }
 
 }

@@ -1,6 +1,6 @@
 package Catan;
 
-class Box {
+final class Box {
     
     protected final String name;
     protected final String ressource;
@@ -22,7 +22,7 @@ class Box {
         return (s+String.valueOf(this.number)+" "+this.name.substring(0, 2));
     }
 
-    Location[] getLocations(PlayBoard p) {
+    final Location[] getLocations(PlayBoard p) {
         Location[] res = new Location[4];
         res[0] = p.locations[this.indexI][this.indexJ];
         res[1] = p.locations[this.indexI][this.indexJ+1];

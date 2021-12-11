@@ -1,9 +1,12 @@
 package Catan;
 
 import java.util.*;
+
+import org.w3c.dom.DocumentType;
+
 import Catan.Exceptions.*;
 
-class Player implements PlayerAction {
+class Player {
     
     protected final String name;
     protected final char symbol;
@@ -13,7 +16,7 @@ class Player implements PlayerAction {
     private final ArrayList<Card> specialCards;
     private final ArrayList<Colony> coloniesOnPlayBoard;
 
-    int getVictoryPoints() {return this.victoryPoints;}
+    final int getVictoryPoints() {return this.victoryPoints;}
 
     Player(String name, int s) {
         this.name = name;
@@ -25,7 +28,7 @@ class Player implements PlayerAction {
         this.specialCards = new ArrayList<Card>();
         this.coloniesOnPlayBoard = new ArrayList<Colony>();
     }
-    private void inventorySetup() {
+    private final void inventorySetup() {
         this.inventory.put("Bois", 0); // bois
         this.inventory.put("Argile", 0); // argile
         this.inventory.put("Laine", 0); // laine
@@ -38,14 +41,14 @@ class Player implements PlayerAction {
         return (this.name+" possède "+this.victoryPoints+" points de victoire.");
     }
 
-    public boolean isWinner() {return (this.victoryPoints==10);}
-
-    boolean canConstructColony(PlayBoard p) {
+    boolean isWinner() {return (this.victoryPoints==10);}
+    
+    protected boolean canConstructColony(PlayBoard p) {
         return ((this.inventory.get("Bois")>=1 && this.inventory.get("Argile")>=1 &&
                 this.inventory.get("Laine")>=1 && this.inventory.get("Blé")>=1) &&
                 (this.coloniesOnPlayBoard.size()<5) && (!p.isFilledLocations()));
     }
-    boolean canConstructCity() {
+    protected boolean canConstructCity() {
         int numberOfCities = 0;
         for (Colony col : this.coloniesOnPlayBoard) {
             if (col.isCity) numberOfCities++;
@@ -53,39 +56,42 @@ class Player implements PlayerAction {
         return ((numberOfCities<4) && 
                 (this.inventory.get("Roche")>=3 && this.inventory.get("Blé")>=2));
     }
-    boolean canConstructRoad(PlayBoard p) {
+    protected boolean canConstructRoad(PlayBoard p) {
         return ((this.roads.size()<15) && (!p.isFilledPaths()) &&
                 (this.inventory.get("Bois")>=1 && this.inventory.get("Argile")>=1));
     }
-    boolean hasEnoughToBuyACard() {
+    protected boolean hasEnoughToBuyACard() {
         return (this.inventory.get("Roche")>=1 && this.inventory.get("Laine")>=1 &&
                 this.inventory.get("Blé")>=1);
     }
 
     public void play(PlayBoard p) {
         System.out.println("Au tour de "+this.name+" :");
-        int dice = this.throwDices();
+        int dice = throwDices();
         System.out.println("Résultat du lancer des dés : " + dice);
         if (dice!=7) earnResources(dice, p);
-        else System.out.println("CHEH T'AS RIEN ! :)");
+        else System.out.println("CHEH PERSONNE N'A RIEN ! :)");
+        p.display();
+        System.out.println("Votre inventaire : "+this.inventory);
+        if (!this.specialCards.isEmpty()) System.out.println("Vos cartes développement : "+this.specialCards);
         this.proposeToUseSpecialCard();
         this.proposeToConstructColony(p);
         this.proposeToConstructCity(p);
         this.proposeToConstructRoad(p);
         this.proposeToBuySpecialCard();
-        p.display();
-        System.out.println("Votre inventaire : "+this.inventory);
-        if (!this.specialCards.isEmpty()) System.out.println("Vos cartes développement : "+this.specialCards);
     }
 
-    private int throwDices() { 
+    protected static int throwDices() { 
+        System.out.println("Tapez sur une touche, puis entrée pour lancer les dés :");
+        Scanner sc0 = new Scanner(System.in);
+        sc0.next();
         Random rd1 = new Random(), rd2 = new Random();
         int dice1 = rd1.nextInt(6)+1;
         int dice2 = rd2.nextInt(6)+1;
         return (dice1+dice2);
     }
 
-    private static void earnResources(int dice, PlayBoard p) {
+    protected final static void earnResources(int dice, PlayBoard p) {
         // On récupère la ou les cases désignée(s) par les dés :
         ArrayList<Box> boxes = p.getBoxes(dice);
         for (Box b : boxes) System.out.println(b);
@@ -124,79 +130,70 @@ class Player implements PlayerAction {
     // Fonctions de proposition :
     // on demande au joueur s'il veut construire une colonie/ville/route
     // ou utiliser/acheter une carte développement quand c'est possible :
-    private void proposeToConstructColony(PlayBoard p) {
+    private final void proposeToConstructColony(PlayBoard p) {
         if (this.canConstructColony(p)) {
             Scanner sc3 = new Scanner(System.in);
             boolean notOk = true;
+            System.out.println("Voulez-vous construire une colonie ?");
+            System.out.println("Coût : 1 bois, 1 argile, 1 laine et 1 blé");
             do {
                 try {
-                    System.out.println("Voulez-vous construire une colonie ?");
-                    System.out.println("Coût : 1 bois, 1 argile, 1 laine et 1 blé");
                     System.out.println("Tapez oui ou non :");
                     String line = sc3.nextLine();
                     System.out.println();
                     if (!line.equals("oui") && !line.equals("non")) throw new WrongInputException();
                     notOk = false;
                     if (line.equals("oui")) this.buildColony(p);
-                } catch (WrongInputException w) {
-                    System.out.println(w);
-                    notOk = true;
                 } catch (Exception e) {
-                    System.out.println("\nErreur de format");
+                    System.out.println(WrongInputException.message);
                     notOk = true;
                 }
             } while (notOk);
         }
     }
-    private void proposeToConstructCity(PlayBoard p) {
+    private final void proposeToConstructCity(PlayBoard p) {
         if (this.canConstructCity()) {
             Scanner sc4 = new Scanner(System.in);
             boolean notOk = true;
+            System.out.println("Voulez-vous construire une ville ?");
+            System.out.println("Coût : 3 roches et 2 blés");
             do {
                 try {
-                    System.out.println("Voulez-vous construire une ville ?");
-                    System.out.println("Coût : 3 roches et 2 blés");
                     System.out.println("Tapez oui ou non :");
                     String line = sc4.nextLine();
                     System.out.println();
                     if (!line.equals("oui") && !line.equals("non")) throw new WrongInputException();
                     notOk = false;
                     if (line.equals("oui")) this.buildCity(p);
-                } catch (WrongInputException w) {
-                    System.out.println(w);
-                    notOk = true;
                 } catch (Exception e) {
-                    System.out.println("\nErreur de format");
+                    System.out.println(WrongInputException.message);
                     notOk = true;
                 }
             } while (notOk);
         }
     }
-    private void proposeToConstructRoad(PlayBoard p) {
+    private final void proposeToConstructRoad(PlayBoard p) {
         if (this.canConstructRoad(p)) {
             Scanner sc2 = new Scanner(System.in);
             Boolean notOk = true;
+            System.out.println("Voulez-vous construire une route ?");
+            System.out.println("Coût : 1 bois et 1 argile");
             do {
                 try {
-                    System.out.println("Voulez-vous construire une route ?");
-                    System.out.println("Coût : 1 bois et 1 argile");
                     System.out.println("Tapez oui ou non :");
                     String line = sc2.nextLine();
                     System.out.println();
                     if (!line.equals("oui") && !line.equals("non")) throw new WrongInputException();
                     notOk = false;
                     if (line.equals("oui")) this.buildRoad(p);
-                } catch (WrongInputException w) {
-                    System.out.println(w);
-                    notOk = true;
                 } catch (Exception e) {
-                    System.out.println("\nErreur de format");
+                    System.out.println(WrongInputException.message);
                     notOk = true;
                 }
             } while (notOk);
         }
     }
-    private void proposeToUseSpecialCard() {
+    private final void proposeToUseSpecialCard() {
         if (!this.specialCards.isEmpty()) {
             Scanner sc1 = new Scanner(System.in);
             boolean notOk = true;
@@ -205,32 +202,29 @@ class Player implements PlayerAction {
             } while (notOk);
         }
     }
-    private void proposeToBuySpecialCard() {
+    private final void proposeToBuySpecialCard() {
         if (this.hasEnoughToBuyACard()) {
             Scanner sc5 = new Scanner(System.in);
             boolean notOk = true;
             do {
+                System.out.println("Voulez-vous acheter une carte développement ?");
+                System.out.println("Coût : 1 roche, 1 laine et 1 blé");
                 try {
-                    System.out.println("Voulez-vous acheter une carte développement ?");
-                    System.out.println("Coût : 1 roche, 1 laine et 1 blé");
                     System.out.println("Tapez oui ou non :");
                     String line = sc5.nextLine();
                     System.out.println();
                     if (!line.equals("oui") && !line.equals("non")) throw new WrongInputException();
                     notOk = false;
                     if (line.equals("oui")) this.buySpecialCard();
-                } catch (WrongInputException w) {
-                    System.out.println(w);
-                    notOk = true;
                 } catch (Exception e) {
-                    System.out.println("\nErreur de format");
+                    System.out.println(WrongInputException.message);
                     notOk = true;
                 }
             } while (notOk);
         }
     }
 
-    private static int[] scanLocationOrPath(Scanner sc) throws Exception {
+    private final static int[] scanLocationOrPath(Scanner sc) throws Exception {
         try {
             String s = sc.nextLine();
             if (s.length()>2 || s.length()<=0) throw new RuntimeException();
@@ -248,12 +242,12 @@ class Player implements PlayerAction {
 
     // Fonctions de construction :
     // Construction d'une colonie :
-    void buildColony(PlayBoard p) {
+    protected void buildColony(PlayBoard p) {
         Scanner sc6 = new Scanner(System.in);
         boolean notOk;
         do {
             try {
-                System.out.println("Joueur "+this.symbol+", placez votre colonie :");
+                System.out.println(this.name+", placez votre colonie :");
                 int[] indexs = scanLocationOrPath(sc6);
                 int k = indexs[0]; int l = indexs[1];
                 if (k-1<0 || k-1>4 || l-1<0 || l-1>4) {
@@ -268,7 +262,7 @@ class Player implements PlayerAction {
                     notOk = false;
                 }
             } catch (Exception e) {
-                System.out.println("\nErreur de format");
+                System.out.println(WrongInputException.message);
                 notOk = true;
             }
         } while (notOk);
@@ -276,7 +270,7 @@ class Player implements PlayerAction {
     }
 
     // Construction d'une ville :
-    void buildCity(PlayBoard p) {
+    protected void buildCity(PlayBoard p) {
         ArrayList<Integer> ids = new ArrayList<Integer>();
         for (Colony col : this.coloniesOnPlayBoard) {
             System.out.println(col);
@@ -299,24 +293,21 @@ class Player implements PlayerAction {
                         break;
                     }
                 }
-            } catch (WrongInputException w) {
-                System.out.println(w);
-                notOk = true;
             } catch (Exception e) {
-                System.out.println("\nErreur de format");
+                System.out.println(WrongInputException.message);
                 notOk = true;
             }
         } while (notOk);
     }
 
     // Construction d'une route :
-    void buildRoad(PlayBoard p) {
+    protected void buildRoad(PlayBoard p) {
         Scanner sc8 = new Scanner(System.in);
         boolean notOk = true;
         char c;
         do {
             try {
-                System.out.println("Joueur "+this.symbol+", voulez-vous placer une route " 
+                System.out.println(this.name+", voulez-vous placer une route " 
                 +"horizontale ou verticale ?");
                 System.out.println("Tapez h pour horizontale ou v pour verticale :");
                 c = sc8.nextLine().charAt(0);
@@ -326,9 +317,9 @@ class Player implements PlayerAction {
                 int[] indexs = scanLocationOrPath(sc8);
                 int k = indexs[0]-1; int l = indexs[1]-1;
                 if (c=='h') {
-                    if (k<0 || k>4 || l<0 || l>3) throw new WrongInputException();
+                    if (k<0 || k>4 || l<0 || l>3) throw new IndexOutOfBoundsException();
                 } else {
-                    if (k<0 || k>3 || l<0 || l>4) throw new WrongInputException();
+                    if (k<0 || k>3 || l<0 || l>4) throw new IndexOutOfBoundsException();
                 }
                 if ((c=='h' && p.horizontalPaths[k][l] instanceof Road) || (c=='v' && p.verticalPaths[k][l] instanceof Road)) {
                     System.out.println("Erreur : cet emplacement est occupé");
@@ -355,12 +346,11 @@ class Player implements PlayerAction {
                         }
                     }
                 }
-            } catch (WrongInputException w) {
-                System.out.println(w);
+            } catch (InexistantRoadException ind) {
+                System.out.println("Erreur : ce chemin n'existe pas");
                 notOk = true;
             } catch (Exception e) {
-                e.printStackTrace();
-                System.out.println("\nErreur de format");
+                System.out.println(WrongInputException.message);
                 notOk = true;
             }
         } while (notOk);
@@ -394,7 +384,6 @@ class Player implements PlayerAction {
         }
         throw new InexistantRoadException();
     }
-    
     private ArrayList<Location> getEndPoints() {
         ArrayList<Location> endPoints = new ArrayList<Location>();
         for (Road p : this.roads) {
@@ -403,11 +392,11 @@ class Player implements PlayerAction {
         return endPoints;
     }
 
-    private void useSpecialCard() {
+    protected void useSpecialCard() {
         // TODO Auto-generated method stub 
     }
 
-    private void buySpecialCard() {
+    protected void buySpecialCard() {
         // TODO Auto-generated method stub
     }
 

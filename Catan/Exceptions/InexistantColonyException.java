@@ -1,6 +1,6 @@
 package Catan.Exceptions;
 
-public class InexistantColonyException extends Exception {
+public final class InexistantColonyException extends Exception {
     
     private final String message;
 
@@ -10,7 +10,7 @@ public class InexistantColonyException extends Exception {
 
     @Override
     public String toString() {
-        return (this.message+"\n");
+        return this.message;
     }
 
 }
