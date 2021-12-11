@@ -2,7 +2,7 @@ package Catan.Exceptions;
 
 public class InvalidNameException extends Exception {
  
-    private String message;
+    private final String message;
 
     public InvalidNameException() {
         this.message = "Erreur : Veuillez entrer un nom qui contient au moins un caractère";

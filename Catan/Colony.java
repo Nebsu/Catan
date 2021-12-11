@@ -2,21 +2,22 @@ package Catan;
 
 class Colony extends Location {
     
-    protected Player player;
+    protected final Player player;
     protected boolean isCity;
+    protected final int id;
+    private static int acc = 0;
 
-    Colony(Box[] boxes, Player player) {
-        super(boxes);
+    Colony(Box[] boxes, int i, int j, Player player) {
+        super(boxes, i, j);
         this.player = player;
         this.isCity = false;
+        this.id = acc++;
     }
-
-    void convertIntoCity() {this.isCity = true;}
 
     @Override
     public String toString() {
-        String type = (this.isCity)? "Ville" : "Colonie";
-        return (type+" appartenant à "+this.player.name);
+        String type = (this.isCity)? "La ville" : "La colonie";
+        return (type+"n°"+this.id+" appartenant à "+this.player.name);
     }
 
 }

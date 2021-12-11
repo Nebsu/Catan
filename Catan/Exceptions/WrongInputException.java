@@ -2,7 +2,7 @@ package Catan.Exceptions;
 
 public class WrongInputException extends Exception {
     
-    private String message;
+    private final String message;
 
     public WrongInputException() {
         this.message = "Erreur : Veuillez tapez une entrée valide";

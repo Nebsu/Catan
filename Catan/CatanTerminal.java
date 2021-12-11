@@ -1,40 +1,43 @@
 package Catan;
 
-import java.util.Scanner;
+import java.util.*;
 import Catan.Exceptions.*;
 
-public class Main {
+public class CatanTerminal {
 
-    public final static void catanTerminal() {
+    public final static void catan() {
         // Créations des différents joueurs :
         Player[] players = setPlayers();
         // Création du plateau :
         PlayBoard p = new PlayBoard();
         p.display(); // affichage du plateau vide
-        // Placement des colonies de base :
+        // Placement des colonies et routes de base :
         for (int i=0; i<players.length; i++) {
-            players[i].buildNativeColonies(p);
+            players[i].buildColony(p);
             players[i].buildRoad(p);
+            p.display();
         }
         for (int i=0; i<players.length; i++) {
-            players[i].buildNativeColonies(p);
+            players[i].buildColony(p);
             players[i].buildRoad(p);
+            p.display();
         }
+        // Affichage des joueurs et du plateau au commencement du jeu :
         for (int i=0; i<players.length; i++) {
             System.out.println(players[i]);
         }
         p.display();
+        // Début de la partie :
         boolean end = false;
         Player winner = null; 
         int turns = 0;
-        while (turns==3) {
+        while (!end) {
             turns++;
             for (int i=0; i<players.length; i++) {
                 players[i].play(p);
-                p.display();
-                for (int j=0; i<players.length; j++) {
-                    System.out.println(players[i].name+" : "+players[i].inventory);
-                }
+                for (int j=0; j<players.length; j++) 
+                    System.out.println(players[j].name+" possède "+
+                    players[j].getVictoryPoints()+"points de victoire");
                 if (players[i].isWinner()) {
                     end = true;
                     winner = players[i];
@@ -47,7 +50,7 @@ public class Main {
     }
 
     // Créations des différents joueurs :
-    private static Player[] setPlayers() {
+    static Player[] setPlayers() {
         // Nombre de joueurs :
         byte nbPlayers = requestNumPlayers();
         Player[] players = new Player[nbPlayers];

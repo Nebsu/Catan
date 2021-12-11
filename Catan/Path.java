@@ -2,19 +2,22 @@ package Catan;
 
 class Path {
     
-    protected Player player;
     protected final char position;
-    protected final Location startPoint;
-    protected final Location endPoint;
+    protected Location point1;
+    protected Location point2;
 
-    Path(Player player, char position, Location startPoint, Location endPoint) {
-        this.player = player;
+    Path(char position, Location point1, Location point2) {
+        if (position!='h' && position!='v') throw new IllegalArgumentException();
         this.position = position;
-        this.startPoint = startPoint;
-        this.endPoint = endPoint;
+        this.point1 = point1;
+        this.point2 = point2;
     }
-    Path(char position, Location startPoint, Location endPoint) {
-        this(null, position, startPoint, endPoint);
+
+    @Override
+    public String toString() {
+        String pos = (this.position=='h')? "horizontal" : "vertical";
+        return ("Chemin "+pos+" qui relie "+this.point1.toString()+
+                " et "+this.point2.toString());
     }
 
 }

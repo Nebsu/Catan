@@ -7,7 +7,6 @@ class Box {
     protected final int number;
     protected final int indexI;
     protected final int indexJ;
-    protected boolean hasColony;
 
     Box(String name, String ressource, int number, int indexI, int indexJ) {
         this.name = name;
@@ -15,11 +14,7 @@ class Box {
         this.number = number;
         this.indexI = indexI;
         this.indexJ = indexJ;
-        this.hasColony = false;
     }
-
-    protected boolean hasColony() {return this.hasColony;}
-    protected void setColony(boolean value) {this.hasColony = value;}
 
     @Override
     public String toString() {
