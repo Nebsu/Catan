@@ -2,8 +2,6 @@ package Catan;
 
 import java.util.*;
 
-import org.w3c.dom.DocumentType;
-
 import Catan.Exceptions.*;
 
 class Player {
@@ -70,7 +68,10 @@ class Player {
         int dice = throwDices();
         System.out.println("Résultat du lancer des dés : " + dice);
         if (dice!=7) earnResources(dice, p);
-        else System.out.println("CHEH PERSONNE N'A RIEN ! :)");
+        else {
+            System.out.println("Voleur activé");
+            this.thief(p);
+        }
         p.display();
         System.out.println("Votre inventaire : "+this.inventory);
         if (!this.specialCards.isEmpty()) System.out.println("Vos cartes développement : "+this.specialCards);
@@ -125,6 +126,10 @@ class Player {
                 }
             }
         }
+    }
+
+    protected void thief(PlayBoard p) {
+
     }
 
     // Fonctions de proposition :
