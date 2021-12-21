@@ -5,9 +5,17 @@ import Catan.Exceptions.*;
 
 public final class CatanTerminal {
 
+    // Joueurs :
     final static Player[] players = setPlayers();
+    // Plateau :
     final static PlayBoard p = new PlayBoard();
-    protected static boolean army = false;
+    // Cartes développement :
+    final static Deck deck = new Deck();
+    // Armée la plus puissante :
+    static boolean army = false;
+    static Player hasTheStrongestArmy = null;
+    // Joueur qui a la route la plus longue :
+    static Player hasTheLongestRoad = null;
 
     public static final void catan() {
         p.display(); // affichage du plateau vide
@@ -16,12 +24,10 @@ public final class CatanTerminal {
             for (int i=0; i<players.length; i++) {
                 players[i].buildColony(true);
                 players[i].buildRoad(true);
-                p.display();
             }
         }
-        // Affichage des joueurs et du plateau au commencement du jeu :
+        // Affichage des joueurs au commencement du jeu :
         for (int i=0; i<players.length; i++) System.out.println(players[i]);
-        p.display();
         // Début de la partie :
         boolean end = false;
         Player winner = null; 
@@ -30,23 +36,23 @@ public final class CatanTerminal {
             turns++;
             for (int i=0; i<players.length; i++) {
                 players[i].play();
-                for (int j=0; j<players.length; j++) 
-                    System.out.println(players[j].name+" possède "+
-                    players[j].getVictoryPoints()+" points de victoire");
-                System.out.println();
+                hasTheLongestRoad = longestRoad();
                 if (players[i].isWinner()) {
                     end = true;
                     winner = players[i];
                     break;
                 } 
             }
+            for (int i=0; i<players.length; i++) 
+                System.out.println(players[i]);
+            System.out.println();
         }
         System.out.println("Félicitations "+winner.name+" ! Vous avez gagné la partie !");
         System.out.println("Nombre de tours total de la partie : "+turns);
     }
 
     // Créations des différents joueurs :
-    static final Player[] setPlayers() {
+    private static final Player[] setPlayers() {
         // Nombre de joueurs :
         byte nbPlayers = requestNumPlayers();
         Player[] players = new Player[nbPlayers];
@@ -63,8 +69,7 @@ public final class CatanTerminal {
         System.out.println("Choisissez le nombre de joueurs (3 ou 4) :");
         do {
             System.out.println("Tapez 3 ou 4 :");
-            Scanner sc1 = new Scanner(System.in);
-            try {
+            try (Scanner sc1 = new Scanner(System.in);) {
                 nb = sc1.nextByte();
                 if (nb!=3 && nb!=4) throw new WrongInputException();
             } catch (Exception e) {
@@ -81,22 +86,21 @@ public final class CatanTerminal {
         System.out.println("Joueur "+i+" : Humain ou IA ?");
         char c;
         do {
-            Scanner sc2 = new Scanner(System.in);
-            System.out.println("Tapez h ou i");
-            try {
+            System.out.println("Tapez H ou I");
+            try (Scanner sc2 = new Scanner(System.in);) {
                 c = sc2.nextLine().charAt(0);
-                if (c!='h' && c!='i') throw new WrongInputException();
+                if (c!='H' && c!='I') throw new WrongInputException();
             } catch (Exception e) {
                 System.out.println(WrongInputException.message);
                 // on met e pour que la boucle se répète :
                 c = 'e';
             }
-        } while (c!='h' && c!='i');
+        } while (c!='H' && c!='I');
         Player res = null;
         // Si le joueur choisi humain, on crée un joueur humain:
-        if (c=='h') res = createRealPlayer(i);
+        if (c=='H') res = createRealPlayer(i);
         // Sinon on crée un nouvel IA :
-        if (c=='i') res = new IA("IA "+String.valueOf(i), i);
+        if (c=='I') res = new IA("IA "+String.valueOf(i), i);
         return res;
     }  
 
@@ -122,7 +126,25 @@ public final class CatanTerminal {
             // Se répète s'il y a une erreur de format ou si le joueur
             // n'a rien mis (le nom doit contenir au moins une lettre) :
         } while (name==null);
+        sc3.close();
         return (new Player(name, i));
+    }
+
+    private static Player longestRoad() {
+        int[] sizes = new int[players.length];
+        for (int i=0; i<players.length; i++) {
+            sizes[i] = players[i].longestRoad();
+        }
+        int max = 0;
+        int index = 0;
+        for (int i=0; i<sizes.length; i++) {
+            if (sizes[i]>max) {
+                max = sizes[i];
+                index = i;
+            }
+            if (sizes[i]==max) return null;
+        }
+        return players[index];
     }
 
 }

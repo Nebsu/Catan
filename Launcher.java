@@ -16,12 +16,11 @@ public final class Launcher {
         System.out.println("Tapez 1 pour la version texte sur le terminal");
         System.out.println("Tapez 2 pour la version avec interface graphique");
         do {
-            System.out.println("Votre choix :");
-            Scanner sc = new Scanner(System.in);
-            try {
-                int choice = sc.nextInt();
-                if (choice!=1 && choice!=2) throw new WrongInputException();
-                return (choice==2);
+            try (Scanner sc = new Scanner(System.in)) {
+                System.out.println("Votre choix :");
+                    int choice = sc.nextInt();
+                    if (choice!=1 && choice!=2) throw new WrongInputException();
+                    return (choice==2);
             } catch (Exception e) {
                 System.out.println(WrongInputException.message);
             }

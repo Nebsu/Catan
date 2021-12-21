@@ -1,6 +1,6 @@
 package Catan;
 
-import java.util.*;
+import java.util.ArrayList;
 
 final class PlayBoard {
 
@@ -8,33 +8,31 @@ final class PlayBoard {
     protected Location[][] locations;
     protected Path[][] horizontalPaths;
     protected Path[][] verticalPaths;
-    protected Deck deck;
 
     PlayBoard() {
         this.boxes = new Box[4][4];
         this.constructBoxes();
         this.constructLocations();
         this.constructPaths();
-        this.deck = new Deck();
     }
     // Construction des cases :
     private final void constructBoxes() {
-        this.boxes[0][0] = new Box("Forêt", "Bois", 6, 0, 0);
-        this.boxes[0][1] = new Box("Pré", "Laine", 10, 0, 1);
-        this.boxes[0][2] = new Box("Champs", "Blé", 11, 0, 2);
-        this.boxes[0][3] = new Box("Pré", "Laine", 8, 0, 3);
-        this.boxes[1][0] = new Box("Champs", "Blé", 4, 1,0);
-        this.boxes[1][1] = new Box("Colline", "Argile", 9, 1, 1);
-        this.boxes[1][2] = new Box("Forêt", "Bois", 5, 1, 2);
-        this.boxes[1][3] = new Box("Montagne", "Roche", 12, 1, 3);
-        this.boxes[2][0] = new Box("Montagne", "Roche", 3, 2, 0);
-        this.boxes[2][1] = new Box("Désert", null, 7, 2, 1);
-        this.boxes[2][2] = new Box("Champs", "Blé", 10, 2, 2);
-        this.boxes[2][3] = new Box("Colline", "Argile", 6, 2, 3);
-        this.boxes[3][0] = new Box("Colline", "Argile", 9, 3, 0);
-        this.boxes[3][1] = new Box("Montagne", "Roche", 8, 3, 1);
-        this.boxes[3][2] = new Box("Pré", "Laine", 5, 3, 2);
-        this.boxes[3][3] = new Box("Forêt", "Bois", 2, 3, 3);
+        this.boxes[0][0] = new Box("Forêt", "Bois", 6, 0, 0, false);
+        this.boxes[0][1] = new Box("Pré", "Laine", 10, 0, 1, false);
+        this.boxes[0][2] = new Box("Champs", "Blé", 11, 0, 2, false);
+        this.boxes[0][3] = new Box("Pré", "Laine", 8, 0, 3, false);
+        this.boxes[1][0] = new Box("Champs", "Blé", 4, 1,0, false);
+        this.boxes[1][1] = new Box("Colline", "Argile", 9, 1, 1, false);
+        this.boxes[1][2] = new Box("Forêt", "Bois", 5, 1, 2, false);
+        this.boxes[1][3] = new Box("Montagne", "Roche", 12, 1, 3, false);
+        this.boxes[2][0] = new Box("Montagne", "Roche", 3, 2, 0, false);
+        this.boxes[2][1] = new Box("Désert", null, 7, 2, 1, true);
+        this.boxes[2][2] = new Box("Champs", "Blé", 10, 2, 2, false);
+        this.boxes[2][3] = new Box("Colline", "Argile", 6, 2, 3, false);
+        this.boxes[3][0] = new Box("Colline", "Argile", 9, 3, 0, false);
+        this.boxes[3][1] = new Box("Montagne", "Roche", 8, 3, 1, false);
+        this.boxes[3][2] = new Box("Pré", "Laine", 5, 3, 2, false);
+        this.boxes[3][3] = new Box("Forêt", "Bois", 2, 3, 3, false);
     }
     // Construction des intersections (nommées emplacements) :
     private final void constructLocations() throws IllegalArgumentException {
@@ -83,13 +81,13 @@ final class PlayBoard {
         this.horizontalPaths = new Path[5][4];
         for (int i=0; i<5; i++) {
             for (int j=0; j<4; j++) {
-                this.horizontalPaths[i][j] = new Path('h', this.locations[i][j], this.locations[i][j+1]);
+                this.horizontalPaths[i][j] = new Path('H', this.locations[i][j], this.locations[i][j+1]);
             }
         }
         this.verticalPaths = new Path[4][5];
         for (int i=0; i<4; i++) {
             for (int j=0; j<5; j++) {
-                this.verticalPaths[i][j] = new Path('v', this.locations[i][j], this.locations[i+1][j]);
+                this.verticalPaths[i][j] = new Path('V', this.locations[i][j], this.locations[i+1][j]);
             }
         }
     }
@@ -196,8 +194,7 @@ final class PlayBoard {
             }
         }
         System.out.println("         -----------------------------------------");
-        System.out.println();
-        System.out.println();
+        System.out.println("\n");
     }
 
 }
