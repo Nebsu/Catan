@@ -8,12 +8,14 @@ final class PlayBoard {
     protected Location[][] locations;
     protected Path[][] horizontalPaths;
     protected Path[][] verticalPaths;
+    protected Deck deck;
 
     PlayBoard() {
         this.boxes = new Box[4][4];
         this.constructBoxes();
         this.constructLocations();
         this.constructPaths();
+        this.deck = new Deck();
     }
     // Construction des cases :
     private final void constructBoxes() {

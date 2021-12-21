@@ -1,29 +1,29 @@
 package Catan;
 
-import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Stack;
 
 class Deck {
-
-    private ArrayList<Card> deck = new ArrayList<Card>();
+    private Stack<Card> deck = new Stack<Card>();
 
     /*
        5 cartes pts de victoire 
        6 cartes progres 
        14 cartes chevalier 
-       
+       19 cartes de chaques ressource
+
        0 = Point de Victoire
        1 = Chevalier
        2 = Construction de routes
        3 = Invention
        4 = Monopole
     */
-    
-    Deck() {
+
+    Deck(){
         for(int i = 0; i < 5; i++){
             deck.add(new Card("Point de Victoire", 0));
         }
-        //Contruction de route (peut contruire)
+        //Contruction de route (peut contruire 2 routes)
         deck.add(new Card("Construction de route", 2));
         deck.add(new Card("Construction de route", 2));
         //Invention (choisi 2 ressources de son choix)
@@ -38,5 +38,16 @@ class Deck {
         }
         Collections.shuffle(deck);
     }
-    
+
+    public static void main(String[] args) {
+        Deck deck = new Deck();
+        for(Card c : deck.deck){
+            System.out.println(c);
+        }
+    }
+
+    public Stack<Card> getDeck() {
+        return deck;
+    }
+
 }

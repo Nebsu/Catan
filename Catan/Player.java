@@ -399,13 +399,125 @@ class Player {
         }
         return endPoints;
     }
-
-    protected void useSpecialCard() {
-        // TODO Auto-generated method stub 
+    // Fonction des cartes :
+    private void proposeToUseSpecialCard(PlayBoard p) {
+        if (!this.specialCards.isEmpty()) {
+            Scanner sc1 = new Scanner(System.in);
+            boolean notOk = true;
+            do {
+                try {
+                    System.out.println("Voulez vous utiliser une carte ?");
+                    String s = sc1.next();
+                    if(s.equals("Non")){
+                        return;
+                    }else if(s.equals("Oui")){
+                        useSpecialCard(p);
+                        return;
+                    }else{
+                        throw new WrongInputException();
+                    }
+                } catch (WrongInputException e) {
+                    System.out.println(e);
+                }
+            } while (notOk);
+        }
     }
 
-    protected void buySpecialCard() {
-        // TODO Auto-generated method stub
+    private void proposeToBuySpecialCard(PlayBoard p) {
+        if (this.hasEnoughToBuyACard()) {
+            Scanner sc5 = new Scanner(System.in);
+            boolean notOk = true;
+            do {
+                try {
+                    System.out.println("Voulez-vous acheter une carte développement ?");
+                    System.out.println("Coût : 1 roche, 1 laine et 1 blé");
+                    System.out.println("Tapez oui ou non :");
+                    String line = sc5.nextLine();
+                    System.out.println();
+                    if (!line.equals("oui") && !line.equals("non")) throw new WrongInputException();
+                    notOk = false;
+                    if (line.equals("oui")) this.buySpecialCard(p);
+                } catch (WrongInputException w) {
+                    System.out.println(w);
+                    notOk = true;
+                } catch (Exception e) {
+                    System.out.println("\nErreur de format");
+                    notOk = true;
+                }
+            } while (notOk);
+        }
+    }
+
+    private void useSpecialCard(PlayBoard p) {
+        Scanner sc = new Scanner(System.in);       
+        while(true){
+            System.out.println("Choisissez la carte que vous voulez utiliser (ID)");
+            System.out.println("1 = Chevalier\n2 = Construction de Route\n3 = Invention\n4 = Monopole");
+            String s = sc.next();
+            int n = Integer.parseInt(s);
+            n = Integer.parseInt(s);
+            if(n==1 || n==3 || n==2 || n==4){
+                for(Card c : this.specialCards){
+                    if(c.getId()==1 && n==1){
+                        //Bouge le voleur
+                        this.specialCards.remove(c);
+                        this.specialCards.add(new Card("Chevalier", 11));
+                        return;
+                    }else if(c.getId()==3 && n==3){
+                        this.specialCards.remove(c);
+                        invention();
+                        return;
+                    }else if(c.getId()==2 && n==2){
+                        this.specialCards.remove(c);
+                        carteRoute(p);
+                        return;
+                    }else if(c.getId()==4 && n==4){
+                        //TODO Carte Monopole
+                        return;
+                    }
+                }
+            }else System.out.println("Veuillez saisir un entrée valide");
+        }
+    }
+
+    private void invention(){
+        Scanner sc = new Scanner(System.in);
+        boolean notOk = true;
+        int acc = 1;
+        do{
+            try{
+                if(acc == 1){
+                    System.out.println("Choisissez votre première ressource");
+                }else if(acc == 2){
+                    System.out.println("Choisissez votre deuxième ressource");
+                }
+                String s = sc.nextLine();
+                if(s.equals("Roche") || s.equals("Laine") || s.equals("Blé") || s.equals("Argile") || s.equals("Bois")){
+                    this.inventory.replace(s, this.inventory.get(s)+1);
+                    acc = 2;
+                    if(acc == 2)notOk = false;
+                }else{
+                    throw new WrongInputException();
+                }
+            }catch(WrongInputException e){
+                System.out.println(e);
+            }
+        }while (notOk && acc != 2);
+        sc.close();
+    }
+
+    private void carteRoute(PlayBoard p){
+        System.out.println("Veuillez construire votre première route");
+        buildRoad(p);
+        System.out.println("Veuillez construire votre seconde route");
+        buildRoad(p);
+    }
+
+    private void buySpecialCard(PlayBoard p) {
+        this.inventory.replace("Roche", this.inventory.get("Roche")-1); 
+        this.inventory.replace("Laine", this.inventory.get("Laine")-1); 
+        this.inventory.replace("Blé", this.inventory.get("Blé")-1); 
+        this.specialCards.add(p.deck.getDeck().pop());
     }
 
 }
