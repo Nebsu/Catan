@@ -603,14 +603,6 @@ class Player {
 
     
     // Fonctions des cartes développement :
-    // Achat d'une carte développement :
-    protected void buySpecialCard() {
-        this.inventory.replace("Roche", this.inventory.get("Roche")-1); 
-        this.inventory.replace("Laine", this.inventory.get("Laine")-1); 
-        this.inventory.replace("Blé", this.inventory.get("Blé")-1); 
-        this.specialCards.add(CatanTerminal.deck.getDeck().pop());
-    }
-
     // Utilisation d'une carte développement :
     protected void useSpecialCard() {
         Scanner sc13 = new Scanner(System.in);       
@@ -677,12 +669,24 @@ class Player {
     // Carte progrès route :
     protected void carteRoute() {
         System.out.println("Veuillez construire votre première route");
-        buildRoad(true);
+        this.buildRoad(true);
         System.out.println("Veuillez construire votre seconde route");
-        buildRoad(true);
+        this.buildRoad(true);
+    }
+    // Carte monopole :
+    protected void monopole() {
+        // TODO 
     }
 
+    // Achat d'une carte développement :
+    protected void buySpecialCard() {
+        this.inventory.replace("Roche", this.inventory.get("Roche")-1); 
+        this.inventory.replace("Laine", this.inventory.get("Laine")-1); 
+        this.inventory.replace("Blé", this.inventory.get("Blé")-1); 
+        this.specialCards.add(CatanTerminal.deck.getDeck().pop());
+    }
     
+
     // Route la plus longue du joueur courant :
     protected int longestRoad() {
         // TODO
