@@ -4,7 +4,7 @@ import java.util.*;
 
 final class PlayBoard {
 
-    protected Box[][] boxes;
+    protected final Box[][] boxes;
     protected Location[][] locations;
     protected Path[][] horizontalPaths;
     protected Path[][] verticalPaths;

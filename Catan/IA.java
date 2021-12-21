@@ -11,34 +11,34 @@ final class IA extends Player {
     public boolean isWinner() {return super.isWinner();}
 
     @Override
-    public void play(PlayBoard p) {
+    public void play() {
         // TODO Auto-generated method stub
     }
 
     @Override
-    protected boolean canConstructColony(PlayBoard p) {return super.canConstructColony(p);}
+    protected boolean canConstructColony() {return super.canConstructColony();}
 
     @Override
     protected boolean canConstructCity() {return super.canConstructCity();}
 
     @Override
-    protected boolean canConstructRoad(PlayBoard p) {return super.canConstructRoad(p);}
+    protected boolean canConstructRoad() {return super.canConstructRoad();}
 
     @Override
     protected boolean hasEnoughToBuyACard() {return super.hasEnoughToBuyACard();}
 
     @Override
-    protected void buildColony(PlayBoard p) {
+    protected void buildColony(boolean isFree) {
         // TODO Auto-generated method stub
     }
 
     @Override
-    protected void buildCity(PlayBoard p) {
+    protected void buildCity() {
         // TODO Auto-generated method stub
     }
 
     @Override
-    protected void buildRoad(PlayBoard p) {
+    protected void buildRoad(boolean isFree) {
         // TODO Auto-generated method stub
     }
 

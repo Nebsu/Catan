@@ -22,12 +22,12 @@ final class Box {
         return (s+String.valueOf(this.number)+" "+this.name.substring(0, 2));
     }
 
-    final Location[] getLocations(PlayBoard p) {
+    final Location[] getLocations() {
         Location[] res = new Location[4];
-        res[0] = p.locations[this.indexI][this.indexJ];
-        res[1] = p.locations[this.indexI][this.indexJ+1];
-        res[2] = p.locations[this.indexI+1][this.indexJ];
-        res[3] = p.locations[this.indexI+1][this.indexJ+1];
+        res[0] = CatanTerminal.p.locations[this.indexI][this.indexJ];
+        res[1] = CatanTerminal.p.locations[this.indexI][this.indexJ+1];
+        res[2] = CatanTerminal.p.locations[this.indexI+1][this.indexJ];
+        res[3] = CatanTerminal.p.locations[this.indexI+1][this.indexJ+1];
         return res;
     }
 

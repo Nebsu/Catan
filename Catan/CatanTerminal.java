@@ -5,17 +5,17 @@ import Catan.Exceptions.*;
 
 public final class CatanTerminal {
 
+    final static Player[] players = setPlayers();
+    final static PlayBoard p = new PlayBoard();
+    protected static boolean army = false;
+
     public static final void catan() {
-        // Créations des différents joueurs :
-        Player[] players = setPlayers();
-        // Création du plateau :
-        PlayBoard p = new PlayBoard();
         p.display(); // affichage du plateau vide
         // Placement des colonies et routes de base :
         for (int k=0; k<2; k++) {
             for (int i=0; i<players.length; i++) {
-                players[i].buildColony(p);
-                players[i].buildRoad(p);
+                players[i].buildColony(true);
+                players[i].buildRoad(true);
                 p.display();
             }
         }
@@ -29,7 +29,7 @@ public final class CatanTerminal {
         while (!end) {
             turns++;
             for (int i=0; i<players.length; i++) {
-                players[i].play(p);
+                players[i].play();
                 for (int j=0; j<players.length; j++) 
                     System.out.println(players[j].name+" possède "+
                     players[j].getVictoryPoints()+" points de victoire");

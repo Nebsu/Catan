@@ -1,8 +1,9 @@
 package Catan;
 
 class Card {
-    private String cardname;
-    private int id;
+
+    private final String cardname;
+    private final int id;
 
     Card(String cardname, int id){
         this.cardname = cardname;
@@ -20,4 +21,5 @@ class Card {
     public String toString(){
         return this.cardname + " " + this.id;
     }
+
 }
