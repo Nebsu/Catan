@@ -71,7 +71,6 @@ class Player {
 
     // Fonction principale (tour du joueur):
     protected void play() {
-        System.out.println();
         System.out.println("Au tour de "+this.name+" :");
         int dice = throwDices();
         System.out.println("Résultat du lancer des dés : " + dice);
@@ -100,7 +99,6 @@ class Player {
         Random rd1 = new Random(), rd2 = new Random();
         int dice1 = rd1.nextInt(6)+1;
         int dice2 = rd2.nextInt(6)+1;
-        sc1.close();
         return (dice1+dice2);
     }
 
@@ -193,7 +191,6 @@ class Player {
                 }
             } while (notOk);
         }
-        sc2.close();
     }
 
     protected Box moveThief() {
@@ -216,7 +213,6 @@ class Player {
         } while (notOk);
         CatanTerminal.p.updatePaths();
         CatanTerminal.p.display();
-        sc3.close();
         return res;
     }
 
@@ -251,6 +247,7 @@ class Player {
                 System.out.println();
                 String name = sc4.nextLine();
                 if (!playersNames.contains(name)) throw new WrongInputException();
+                if (name.equals(this.name)) throw new WrongInputException();
                 notOk = false;
                 for (Player p : nearPlayers) {
                     if (p.name.equals(name)) {
@@ -263,7 +260,6 @@ class Player {
                 notOk = true;
             }
         } while (notOk);
-        sc4.close();
         return selectedPlayer;
     }
 
@@ -318,7 +314,6 @@ class Player {
                     notOk = true;
                 }
             } while (notOk);
-            sc5.close();
         }
     }
 
@@ -342,7 +337,6 @@ class Player {
                     notOk = true;
                 }
             } while (notOk);
-            sc6.close();
         }
     }
 
@@ -366,7 +360,6 @@ class Player {
                     notOk = true;
                 }
             } while (notOk);
-            sc7.close();
         }
     }
 
@@ -390,7 +383,6 @@ class Player {
                     notOk = true;
                 }
             } while (notOk);
-            sc8.close();
         }
     }
 
@@ -414,7 +406,6 @@ class Player {
                     notOk = true;
                 }
             } while (notOk);
-            sc9.close();
         }
     }
 
@@ -429,30 +420,29 @@ class Player {
                 System.out.println(this.name+", placez votre colonie :");
                 int[] indexs = scanLocationOrPath(sc10);
                 int k = indexs[0]; int l = indexs[1];
-                if (k-1<0 || k-1>4 || l-1<0 || l-1>4) {
-                    System.out.println("Erreur : cet emplacement n'existe pas");
-                    notOk = true;
-                } else if (CatanTerminal.p.locations[k-1][l-1] instanceof Colony) {
-                    System.out.println("Erreur : cet emplacement est occupé");
-                    notOk = true;
-                } else {
-                    CatanTerminal.p.locations[k-1][l-1] = new Colony(CatanTerminal.p.locations[k-1][l-1].boxes, k-1, l-1, this);
-                    this.coloniesOnPlayBoard.add((Colony) CatanTerminal.p.locations[k-1][l-1]);
-                    if (!isFree) {
-                        this.inventory.replace("Bois", this.inventory.get("Bois")-1); 
-                        this.inventory.replace("Laine", this.inventory.get("Laine")-1); 
-                        this.inventory.replace("Blé", this.inventory.get("Blé")-1); 
-                        this.inventory.replace("Argile", this.inventory.get("Argile")-1);
-                    }
-                    this.victoryPoints++;
-                    notOk = false;
+                if (k-1<0 || k-1>4 || l-1<0 || l-1>4) throw new IndexOutOfBoundsException();
+                if (CatanTerminal.p.locations[k-1][l-1] instanceof Colony) throw new WrongInputException();
+                CatanTerminal.p.locations[k-1][l-1] = new Colony(CatanTerminal.p.locations[k-1][l-1].boxes, k-1, l-1, this);
+                this.coloniesOnPlayBoard.add((Colony) CatanTerminal.p.locations[k-1][l-1]);
+                if (!isFree) {
+                    this.inventory.replace("Bois", this.inventory.get("Bois")-1); 
+                    this.inventory.replace("Laine", this.inventory.get("Laine")-1); 
+                    this.inventory.replace("Blé", this.inventory.get("Blé")-1); 
+                    this.inventory.replace("Argile", this.inventory.get("Argile")-1);
                 }
+                this.victoryPoints++;
+                notOk = false;
+            } catch (IndexOutOfBoundsException ind) {
+                System.out.println("Erreur : cet emplacement n'existe pas");
+                notOk = true;
+            } catch (WrongInputException w) {
+                System.out.println("Erreur : cet emplacement est occupé");
+                notOk = true;
             } catch (Exception e) {
                 System.out.println(WrongInputException.message);
                 notOk = true;
             }
         } while (notOk);
-        sc10.close();
         CatanTerminal.p.updatePaths();
         CatanTerminal.p.display();
     }
@@ -466,7 +456,8 @@ class Player {
         }
         boolean notOk = true;
         do {   
-            try (Scanner sc11 = new Scanner(System.in);) {
+            try {
+                Scanner sc11 = new Scanner(System.in);
                 System.out.println("Pour choisir la colonie à transformer en ville,");
                 System.out.println("veuillez tapez le numéro de la colonie en question :");
                 int selectedId = sc11.nextInt();
@@ -555,7 +546,6 @@ class Player {
                 notOk = true;
             }
         } while (notOk);
-        sc12.close();
         CatanTerminal.p.display();
     }
     private Road buildRoadNextToColony(char c, Path selectedPath) throws InexistantColonyException {
@@ -658,7 +648,6 @@ class Player {
                 notOk = true;
             }
         } while (notOk);
-        sc13.close();
     }
     // Carte progrès invention :
     protected void invention() {
@@ -684,7 +673,6 @@ class Player {
                 System.out.println(e);
             }
         }while (notOk && acc != 2);
-        sc14.close();
     }
     // Carte progrès route :
     protected void carteRoute() {

@@ -22,8 +22,9 @@ final class Box {
 
     @Override
     public String toString() {
-        String s = (String.valueOf(this.number).length()==1)? "0" : "";
-        return (s+String.valueOf(this.number)+" "+this.name.substring(0, 2));
+        String s1 = (String.valueOf(this.number).length()==1)? "0" : "";
+        String s2 = (this.hasThief)? "^" : " ";
+        return (s1+String.valueOf(this.number)+s2+this.name.substring(0, 2));
     }
 
     final ArrayList<Location> getLocations() {

@@ -36,6 +36,7 @@ public final class CatanTerminal {
             turns++;
             for (int i=0; i<players.length; i++) {
                 players[i].play();
+                System.out.println();
                 hasTheLongestRoad = longestRoad();
                 if (players[i].isWinner()) {
                     end = true;
@@ -43,6 +44,7 @@ public final class CatanTerminal {
                     break;
                 } 
             }
+            System.out.println();
             for (int i=0; i<players.length; i++) 
                 System.out.println(players[i]);
             System.out.println();
@@ -69,7 +71,8 @@ public final class CatanTerminal {
         System.out.println("Choisissez le nombre de joueurs (3 ou 4) :");
         do {
             System.out.println("Tapez 3 ou 4 :");
-            try (Scanner sc1 = new Scanner(System.in);) {
+            try {
+                Scanner sc1 = new Scanner(System.in);
                 nb = sc1.nextByte();
                 if (nb!=3 && nb!=4) throw new WrongInputException();
             } catch (Exception e) {
@@ -87,7 +90,8 @@ public final class CatanTerminal {
         char c;
         do {
             System.out.println("Tapez H ou I");
-            try (Scanner sc2 = new Scanner(System.in);) {
+            try {
+                Scanner sc2 = new Scanner(System.in);
                 c = sc2.nextLine().charAt(0);
                 if (c!='H' && c!='I') throw new WrongInputException();
             } catch (Exception e) {
@@ -126,7 +130,6 @@ public final class CatanTerminal {
             // Se répète s'il y a une erreur de format ou si le joueur
             // n'a rien mis (le nom doit contenir au moins une lettre) :
         } while (name==null);
-        sc3.close();
         return (new Player(name, i));
     }
 
