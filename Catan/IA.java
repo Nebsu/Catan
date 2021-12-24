@@ -2,23 +2,12 @@ package Catan;
 
 import java.util.ArrayList;
 import java.util.Random;
-
-import Catan.Exceptions.InexistantColonyException;
-import Catan.Exceptions.InexistantRoadException;
-import Catan.Exceptions.WrongInputException;
+import Catan.Exceptions.*;
 
 final class IA extends Player {
     
     public IA(String name, int s) {
         super(name, s);
-        // TODO
-    }
-
-    protected static int throwDices() { 
-        Random rd1 = new Random(), rd2 = new Random();
-        int dice1 = rd1.nextInt(6)+1;
-        int dice2 = rd2.nextInt(6)+1;
-        return (dice1+dice2);
     }
 
     @Override
@@ -26,14 +15,10 @@ final class IA extends Player {
         return super.toString();
     }
 
-    // Fonction booleennes :
+
+    ////////// Fonctions booléennes //////////
     @Override
     public boolean isWinner() {return super.isWinner();}
-
-    @Override
-    protected boolean isRich() {
-        return super.isRich();
-    }
 
     @Override
     protected boolean canConstructColony() {return super.canConstructColony();}
@@ -48,7 +33,7 @@ final class IA extends Player {
     protected boolean hasEnoughToBuyACard() {return super.hasEnoughToBuyACard();}
 
 
-    // Fonction principale :
+    ////////// Fonction principale (tour de l'IA) //////////
     @Override
     public void play() {
         System.out.println("Au tour de "+this.name+" :");
@@ -59,7 +44,7 @@ final class IA extends Player {
             System.out.println("Voleur active");
             this.thief();
         }
-        CatanTerminal.p.display();
+        CatanTerminal.PLAYBOARD.display();
         this.proposeToUseSpecialCard();
         this.proposeToConstructColony();
         this.proposeToConstructCity();
@@ -68,7 +53,16 @@ final class IA extends Player {
     }
 
 
-    // Fonctions du voleur :
+    ////////// Lancé des dés //////////
+    protected static int throwDices() { 
+        Random rd1 = new Random(), rd2 = new Random();
+        int dice1 = rd1.nextInt(6)+1;
+        int dice2 = rd2.nextInt(6)+1;
+        return (dice1+dice2);
+    }
+
+
+    ////////// Fonctions du voleur //////////
     @Override
     protected void thief() {
         super.thief();
@@ -113,14 +107,14 @@ final class IA extends Player {
                 int k = indexs[0]-1; int l = indexs[1]-1;
                 if (k<0 || k>4 || l<0 || l>4) throw new WrongInputException();
                 notOk = false;
-                CatanTerminal.p.boxes[k][l].hasThief = true;
-                res = CatanTerminal.p.boxes[k][l];
+                CatanTerminal.PLAYBOARD.boxes[k][l].hasThief = true;
+                res = CatanTerminal.PLAYBOARD.boxes[k][l];
             } catch (Exception e) {
                 notOk = true;
             }
         } while (notOk);
-        CatanTerminal.p.updatePaths();
-        CatanTerminal.p.display();
+        CatanTerminal.PLAYBOARD.updatePaths();
+        CatanTerminal.PLAYBOARD.display();
         return res;
     }
 
@@ -143,7 +137,7 @@ final class IA extends Player {
             if (!nearPlayers.contains(c.player)) nearPlayers.add(c.player);
         }
         ArrayList<String> playersNames = new ArrayList<String>();
-        for (Player p : nearPlayers) playersNames.add(p.name);
+        for (Player PLAYBOARD : nearPlayers) playersNames.add(PLAYBOARD.name);
         boolean notOk = true;
         Player selectedPlayer = null;
         do {
@@ -155,9 +149,9 @@ final class IA extends Player {
                 if (!playersNames.contains(name)) throw new WrongInputException();
                 if (name.equals(this.name)) throw new WrongInputException();
                 notOk = false;
-                for (Player p : nearPlayers) {
-                    if (p.name.equals(name)) {
-                        selectedPlayer = p;
+                for (Player PLAYBOARD : nearPlayers) {
+                    if (PLAYBOARD.name.equals(name)) {
+                        selectedPlayer = PLAYBOARD;
                         break;
                     }
                 }
@@ -259,9 +253,10 @@ final class IA extends Player {
                 int[]indexs = {n1,n2};
                 int k = indexs[0]; int l = indexs[1];
                 if (k-1<0 || k-1>4 || l-1<0 || l-1>4) throw new IndexOutOfBoundsException();
-                if (CatanTerminal.p.locations[k-1][l-1] instanceof Colony) throw new WrongInputException();
-                CatanTerminal.p.locations[k-1][l-1] = new Colony(CatanTerminal.p.locations[k-1][l-1].boxes, k-1, l-1, this);
-                this.coloniesOnPlayBoard.add((Colony) CatanTerminal.p.locations[k-1][l-1]);
+                if (CatanTerminal.PLAYBOARD.locations[k-1][l-1] instanceof Colony) throw new WrongInputException();
+                CatanTerminal.PLAYBOARD.locations[k-1][l-1] = new Colony(CatanTerminal.PLAYBOARD.locations[k-1][l-1].boxes, 
+                k-1, l-1, (Player) this);
+                this.coloniesOnPlayBoard.add((Colony) CatanTerminal.PLAYBOARD.locations[k-1][l-1]);
                 if (!isFree) {
                     this.inventory.replace("Bois", this.inventory.get("Bois")-1); 
                     this.inventory.replace("Laine", this.inventory.get("Laine")-1); 
@@ -269,8 +264,8 @@ final class IA extends Player {
                     this.inventory.replace("Argile", this.inventory.get("Argile")-1);
                 }
                 this.victoryPoints++;
-                CatanTerminal.p.updatePaths();
-                CatanTerminal.p.display();
+                CatanTerminal.PLAYBOARD.updatePaths();
+                CatanTerminal.PLAYBOARD.display();
                 return;
             }catch(Exception e){}
         }
@@ -295,7 +290,7 @@ final class IA extends Player {
                 for (Colony col : this.coloniesOnPlayBoard) {
                     if (col.id==selectedId) {
                         col.isCity = true;
-                        ((Colony) CatanTerminal.p.locations[col.indexI][col.indexJ]).isCity = true;
+                        ((Colony) CatanTerminal.PLAYBOARD.locations[col.indexI][col.indexJ]).isCity = true;
                         this.inventory.replace("Roche", this.inventory.get("Roche")-3); 
                         this.inventory.replace("Ble", this.inventory.get("Ble")-2); 
                         this.victoryPoints++;
@@ -304,7 +299,7 @@ final class IA extends Player {
                 }
             } catch (Exception e) {}
         } while (notOk);
-        CatanTerminal.p.display();
+        CatanTerminal.PLAYBOARD.display();
     }
 
     // Construction d'une route :
@@ -330,13 +325,13 @@ final class IA extends Player {
                     if (k<0 || k>3 || l<0 || l>4) throw new IndexOutOfBoundsException();
                 }
 
-                if ((c=='H' && CatanTerminal.p.horizontalPaths[k][l] instanceof Road) || (c=='V' && CatanTerminal.p.verticalPaths[k][l] instanceof Road)) {
+                if ((c=='H' && CatanTerminal.PLAYBOARD.horizontalPaths[k][l] instanceof Road) || (c=='V' && CatanTerminal.PLAYBOARD.verticalPaths[k][l] instanceof Road)) {
                     notOk = true;
                 } else {
                     try {
-                        Road r = this.buildRoadNextToColony(c, (c=='H')? CatanTerminal.p.horizontalPaths[k][l] : CatanTerminal.p.verticalPaths[k][l]);
-                        if (c=='H') CatanTerminal.p.horizontalPaths[k][l] = r;
-                        else CatanTerminal.p.verticalPaths[k][l] = r;
+                        Road r = this.buildRoadNextToColony(c, (c=='H')? CatanTerminal.PLAYBOARD.horizontalPaths[k][l] : CatanTerminal.PLAYBOARD.verticalPaths[k][l]);
+                        if (c=='H') CatanTerminal.PLAYBOARD.horizontalPaths[k][l] = r;
+                        else CatanTerminal.PLAYBOARD.verticalPaths[k][l] = r;
                         this.roads.add(r);
                         if (!isFree) {
                             this.inventory.replace("Bois", this.inventory.get("Bois")-1); 
@@ -346,9 +341,9 @@ final class IA extends Player {
                     } catch (InexistantColonyException ice) {
                         notOk = true;
                         try {
-                            Road r = this.buildRoadNextToRoad(c, (c=='H')? CatanTerminal.p.horizontalPaths[k][l] : CatanTerminal.p.verticalPaths[k][l]);
-                            if (c=='H') CatanTerminal.p.horizontalPaths[k][l] = r;
-                            else CatanTerminal.p.verticalPaths[k][l] = r;
+                            Road r = this.buildRoadNextToRoad(c, (c=='H')? CatanTerminal.PLAYBOARD.horizontalPaths[k][l] : CatanTerminal.PLAYBOARD.verticalPaths[k][l]);
+                            if (c=='H') CatanTerminal.PLAYBOARD.horizontalPaths[k][l] = r;
+                            else CatanTerminal.PLAYBOARD.verticalPaths[k][l] = r;
                             this.roads.add(r);
                             if (!isFree) {
                                 this.inventory.replace("Bois", this.inventory.get("Bois")-1); 
@@ -364,7 +359,7 @@ final class IA extends Player {
                 notOk = true;
             }
         } while (notOk);
-        CatanTerminal.p.display();
+        CatanTerminal.PLAYBOARD.display();
     }
 
     protected Road buildRoadNextToColony(char c, Path selectedPath) throws InexistantColonyException {
@@ -458,10 +453,10 @@ final class IA extends Player {
             }else if(n == 3){
                 s = "Argile";
             }else s = "Bois";
-            for(Player p : CatanTerminal.players){
-                if(p!=this){
-                    acc += p.inventory.get(s);
-                    p.inventory.replace(s, 0);
+            for(Player PLAYBOARD : CatanTerminal.PLAYERS){
+                if(PLAYBOARD!=this){
+                    acc += PLAYBOARD.inventory.get(s);
+                    PLAYBOARD.inventory.replace(s, 0);
                 }
             }
             this.inventory.replace(s, this.inventory.get(s) + acc);

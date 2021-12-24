@@ -4,15 +4,22 @@ import java.util.ArrayList;
 
 final class PlayBoard {
 
-    protected final Box[][] boxes;
-    protected Location[][] locations;
-    protected Path[][] horizontalPaths;
-    protected Path[][] verticalPaths;
+    ////////// Attributs ////////// 
+
+    protected final Box[][] boxes; // cases terrain
+    protected Location[][] locations; // intersections
+    protected final SeaBox[] seaBoxes; // cases maritimes
+    protected Path[][] horizontalPaths; // chemins horizontaux
+    protected Path[][] verticalPaths; // chemins verticaux
+
+    ////////// Constructeur et fonctions associées à ce dernier //////////
 
     PlayBoard() {
         this.boxes = new Box[4][4];
         this.constructBoxes();
         this.constructLocations();
+        this.seaBoxes = new SeaBox[16];
+        this.constructSeaBoxes();
         this.constructPaths();
     }
     // Construction des cases :
@@ -76,6 +83,25 @@ final class PlayBoard {
             }
         }
     }
+    // Construction des cases maritimes et des ports :
+    private final void constructSeaBoxes() {
+        this.seaBoxes[0] = new SeaBox(this.locations[0][0], this.locations[0][1]);
+        this.seaBoxes[1] = new Harbor(this.locations[0][1], this.locations[0][2], "Special", "Laine");
+        this.seaBoxes[2] = new SeaBox(this.locations[0][2], this.locations[0][3]);
+        this.seaBoxes[3] = new Harbor(this.locations[0][3], this.locations[0][4], "Simple");
+        this.seaBoxes[4] = new SeaBox(this.locations[0][4], this.locations[1][4]);
+        this.seaBoxes[5] = new Harbor(this.locations[1][4], this.locations[2][4], "Special", "Bois");
+        this.seaBoxes[6] = new SeaBox(this.locations[2][4], this.locations[3][4]);
+        this.seaBoxes[7] = new Harbor(this.locations[3][4], this.locations[4][4], "Simple");
+        this.seaBoxes[8] = new SeaBox(this.locations[4][4], this.locations[4][3]);
+        this.seaBoxes[9] = new Harbor(this.locations[4][3], this.locations[4][2], "Special", "Argile");
+        this.seaBoxes[10] = new SeaBox(this.locations[4][2], this.locations[4][1]);
+        this.seaBoxes[11] = new Harbor(this.locations[4][1], this.locations[4][0], "Special", "Roche");
+        this.seaBoxes[12] = new SeaBox(this.locations[4][0], this.locations[3][0]);
+        this.seaBoxes[13] = new Harbor(this.locations[3][0], this.locations[2][0], "Special", "Blé");
+        this.seaBoxes[14] = new SeaBox(this.locations[2][0], this.locations[1][0]);
+        this.seaBoxes[15] = new Harbor(this.locations[1][0], this.locations[0][0], "Simple");
+    }
     // Construction des chemins :
     private final void constructPaths() {
         this.horizontalPaths = new Path[5][4];
@@ -92,6 +118,10 @@ final class PlayBoard {
         }
     }
 
+
+    ////////// Fonctions auxiliaires //////////
+
+    // Récupération des cases désignées par les dés :
     final ArrayList<Box> getBoxes(int dice) {
         ArrayList<Box> res = new ArrayList<Box>();
         for (int i=0; i<boxes.length; i++) {
@@ -104,6 +134,7 @@ final class PlayBoard {
         return res;
     }
 
+    // Mise à jour des chemins après la constructions de colonies/villes :
     final void updatePaths() {
         for (int i=0; i<this.horizontalPaths.length; i++) {
             for (int j=0; j<this.horizontalPaths[i].length; j++) {
@@ -119,6 +150,9 @@ final class PlayBoard {
         }
     }
 
+    ////////// Fonctions booléennes //////////
+
+    // Renvoie true si toutes les intersections sont occupées par une colonie/ville :
     final boolean isFilledLocations() {
         int numberOfColonies = 0;
         for (int i=0; i<this.locations.length; i++) {
@@ -130,6 +164,8 @@ final class PlayBoard {
         }
         return (numberOfColonies==25);
     }
+    
+    // Renvoie true si tous les chemins ont été pris :
     final boolean isFilledPaths() {
         int numberOfRoads = 0;
         for (int i=0; i<this.horizontalPaths.length; i++) {
@@ -145,55 +181,73 @@ final class PlayBoard {
         return (numberOfRoads==40);
     }
 
-    // Affichage du plateau :
+
+    ////////// Affichage du plateau //////////
     final void display() {
+        int seaAcc1 = 4;
+        int seaAcc2 = 15;
         System.out.println();
-        System.out.println("          _________________________________________");
-        System.out.print("         | ");
+        System.out.print("                  ");
+        for (int i=0; i<4; i++) 
+            System.out.print("    "+this.seaBoxes[i]+"  ");
+        System.out.println();
+        System.out.print("                  ");
         for (int i=0; i<5; i++) {
             if (this.locations[0][i] instanceof Colony) {
                 Colony col = (Colony) this.locations[0][i];
-                if (col.isCity) System.out.print("V"+col.player.symbol);
-                else System.out.print("C"+col.player.symbol);
+                if (col.isCity) System.out.print(col.player.color+"V"+col.player.symbol+CatanTerminal.RESET);
+                else System.out.print(col.player.color+"C"+col.player.symbol+CatanTerminal.RESET);
             } else System.out.print("OO");
             if (i==4) {
-                System.out.println(" |");
+                System.out.println();
                 break;
             }
             if (this.horizontalPaths[0][i] instanceof Road) {
-                for (int j=1; j<=7; j++) System.out.print(((Road)this.horizontalPaths[0][i]).player.symbol);
+                for (int j=1; j<=7; j++) 
+                    System.out.print(((Road) this.horizontalPaths[0][i]).player.color+
+                    ((Road) this.horizontalPaths[0][i]).player.symbol+CatanTerminal.RESET);
             } else System.out.print("-------");
         }
         for (int i=0; i<4; i++) {
-            System.out.print("         | ");
+            System.out.print("             ");
+            System.out.print(this.seaBoxes[seaAcc2]+"  ");seaAcc2--;
             if (this.verticalPaths[i][0] instanceof Road) {
-                for (int j=1; j<=2; j++) System.out.print(((Road)this.verticalPaths[i][0]).player.symbol);
+                for (int j=1; j<=2; j++) 
+                    System.out.print(((Road) this.verticalPaths[i][0]).player.color+
+                    ((Road) this.verticalPaths[i][0]).player.symbol+CatanTerminal.RESET);
             } else System.out.print("||");
             for (int j=0; j<4; j++) {
                 System.out.print(" "+this.boxes[i][j]);
                 if (this.verticalPaths[i][j+1] instanceof Road) {
                     System.out.print(" ");
-                    for (int k=1; k<=2; k++) System.out.print(((Road)this.verticalPaths[i][j+1]).player.symbol);
+                    for (int k=1; k<=2; k++) 
+                        System.out.print(((Road) this.verticalPaths[i][j+1]).player.color+
+                        ((Road) this.verticalPaths[i][j+1]).player.symbol+CatanTerminal.RESET);
                 } else System.out.print(" ||");
             }
-            System.out.println(" |");
-            System.out.print("         | ");
+            System.out.println("  "+this.seaBoxes[seaAcc1]); seaAcc1++;
+            System.out.print("                  ");
             for (int j=0; j<5; j++) {
                 if (this.locations[i+1][j] instanceof Colony) {
                     Colony col = (Colony) this.locations[i+1][j];
-                    if (col.isCity) System.out.print("V"+col.player.symbol);
-                    else System.out.print("C"+col.player.symbol);
+                    if (col.isCity) System.out.print(col.player.color+"V"+col.player.symbol+CatanTerminal.RESET);
+                    else System.out.print(col.player.color+"C"+col.player.symbol+CatanTerminal.RESET);
                 } else System.out.print("OO");
                 if (j==4) {
-                    System.out.println(" |");
+                    System.out.println();
                     break;
                 }
                 if (this.horizontalPaths[i+1][j] instanceof Road) {
-                    for (int k=1; k<=7; k++) System.out.print(((Road)this.horizontalPaths[i+1][j]).player.symbol);
+                    for (int k=1; k<=7; k++) 
+                        System.out.print(((Road) this.horizontalPaths[i+1][j]).player.color+
+                        ((Road) this.horizontalPaths[i+1][j]).player.symbol+CatanTerminal.RESET);
                 } else System.out.print("-------");
             }
         }
-        System.out.println("         -----------------------------------------");
+        System.out.print("                  ");
+        for (int i=11; i>=8; i--) 
+            System.out.print("    "+this.seaBoxes[i]+"  ");
+        System.out.println();
         System.out.println("\n");
     }
 

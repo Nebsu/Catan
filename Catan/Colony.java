@@ -20,4 +20,9 @@ final class Colony extends Location {
         return (type+" n°"+this.id+" appartenant à "+this.player.name);
     }
 
+    @Override
+    protected final boolean hasAnHarbor() {
+        return super.hasAnHarbor();
+    }
+
 }

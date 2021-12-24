@@ -10,7 +10,8 @@ class Card {
         this.id = id;
     }
 
-    public String toString(){
+    @Override
+    public String toString() {
         return this.cardname + " " + this.id;
     }
 
