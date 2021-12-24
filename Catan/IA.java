@@ -83,7 +83,7 @@ final class IA extends Player {
             }else if(r == 1){
                 line = "Laine";
             }else if(r == 2){
-                line = "Ble";
+                line = "Blé";
             }else if(r == 3){
                 line = "Argile";
             }else line = "Bois";
@@ -260,7 +260,7 @@ final class IA extends Player {
                 if (!isFree) {
                     this.inventory.replace("Bois", this.inventory.get("Bois")-1); 
                     this.inventory.replace("Laine", this.inventory.get("Laine")-1); 
-                    this.inventory.replace("Ble", this.inventory.get("Ble")-1); 
+                    this.inventory.replace("Blé", this.inventory.get("Blé")-1); 
                     this.inventory.replace("Argile", this.inventory.get("Argile")-1);
                 }
                 this.victoryPoints++;
@@ -292,7 +292,7 @@ final class IA extends Player {
                         col.isCity = true;
                         ((Colony) CatanTerminal.PLAYBOARD.locations[col.indexI][col.indexJ]).isCity = true;
                         this.inventory.replace("Roche", this.inventory.get("Roche")-3); 
-                        this.inventory.replace("Ble", this.inventory.get("Ble")-2); 
+                        this.inventory.replace("Blé", this.inventory.get("Blé")-2); 
                         this.victoryPoints++;
                         break;
                     }
@@ -421,7 +421,7 @@ final class IA extends Player {
             }else if(n == 1){
                 s = "Laine";
             }else if(n == 2){
-                s = "Ble";
+                s = "Blé";
             }else if(n == 3){
                 s = "Argile";
             }else s = "Bois";
@@ -449,7 +449,7 @@ final class IA extends Player {
             }else if(n == 1){
                 s = "Laine";
             }else if(n == 2){
-                s = "Ble";
+                s = "Blé";
             }else if(n == 3){
                 s = "Argile";
             }else s = "Bois";

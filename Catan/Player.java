@@ -50,7 +50,7 @@ class Player {
         this.inventory.put("Bois", 0); // bois
         this.inventory.put("Argile", 0); // argile
         this.inventory.put("Laine", 0); // laine
-        this.inventory.put("Ble", 0); // ble
+        this.inventory.put("Blé", 0); // blé
         this.inventory.put("Roche", 0); // minerai
     }
     
@@ -66,7 +66,7 @@ class Player {
     
     protected boolean canConstructColony() {
         return ((this.inventory.get("Bois")>=1 && this.inventory.get("Argile")>=1 &&
-                this.inventory.get("Laine")>=1 && this.inventory.get("Ble")>=1) &&
+                this.inventory.get("Laine")>=1 && this.inventory.get("Blé")>=1) &&
                 (this.coloniesOnPlayBoard.size()<5) && (!CatanTerminal.PLAYBOARD.isFilledLocations()));
     }
 
@@ -76,7 +76,7 @@ class Player {
             if (col.isCity) numberOfCities++;
         }
         return ((numberOfCities<4) && 
-                (this.inventory.get("Roche")>=3 && this.inventory.get("Ble")>=2));
+                (this.inventory.get("Roche")>=3 && this.inventory.get("Blé")>=2));
     }
 
     protected boolean canConstructRoad() {
@@ -86,7 +86,7 @@ class Player {
 
     protected boolean hasEnoughToBuyACard() {
         return (this.inventory.get("Roche")>=1 && this.inventory.get("Laine")>=1 &&
-                this.inventory.get("Ble")>=1);
+                this.inventory.get("Blé")>=1);
     }
 
     protected boolean hasAnHarbor() {
@@ -182,7 +182,7 @@ class Player {
             nbRessources[i] += CatanTerminal.PLAYERS[i].inventory.get("Bois");
             nbRessources[i] += CatanTerminal.PLAYERS[i].inventory.get("Argile");
             nbRessources[i] += CatanTerminal.PLAYERS[i].inventory.get("Laine");
-            nbRessources[i] += CatanTerminal.PLAYERS[i].inventory.get("Ble");
+            nbRessources[i] += CatanTerminal.PLAYERS[i].inventory.get("Blé");
             nbRessources[i] += CatanTerminal.PLAYERS[i].inventory.get("Roche");
         }
         // Les joueurs qui possèdent plus de 8 ressources,
@@ -211,14 +211,15 @@ class Player {
             System.out.println("Choisissez une ressource à donner au voleur :");
             do {
                 try {
-                    System.out.println("Tapez Bois, Argile, Laine, Ble ou Roche :");
+                    System.out.println("Tapez Bois, Argile, Laine, Blé ou Roche :");
                     String line = sc.nextLine();
                     if (!line.equals("Bois") && !line.equals("Argile") && !line.equals("Laine") && 
-                        !line.equals("Ble") && !line.equals("Roche")) throw new WrongInputException();
+                        !line.equals("Blé") && !line.equals("Roche")) throw new WrongInputException();
                     Integer a = this.inventory.get(line);
                     if (a==0) throw new IllegalStateException(line);
                     notOk = false;
                     this.inventory.put(line, a-Integer.valueOf(1));
+                    System.out.println("Vous avez perdu 1 "+line);
                 } catch (IllegalStateException ill) {
                     System.out.println("Erreur : Vous n'avez plus aucun "+ill.getMessage());
                     notOk = true;
@@ -273,7 +274,7 @@ class Player {
             if (!nearPlayers.contains(c.player)) nearPlayers.add(c.player);
         }
         ArrayList<String> playersNames = new ArrayList<String>();
-        for (Player PLAYBOARD : nearPlayers) playersNames.add(PLAYBOARD.name);
+        for (Player p : nearPlayers) playersNames.add(p.name);
         System.out.println("Choisissez le joueur que vous voulez racketter :");
         Scanner sc = new Scanner(System.in);
         boolean notOk = true;
@@ -281,16 +282,17 @@ class Player {
         do {
             try {
                 System.out.println("Tapez l'un des noms ci-dessous :");
-                for (Player PLAYBOARD : nearPlayers) 
-                    System.out.print(PLAYBOARD.name+"  ");
+                for (Player p : nearPlayers) 
+                    System.out.print(p.name+"  ");
                 System.out.println();
                 String name = sc.nextLine();
                 if (!playersNames.contains(name)) throw new WrongInputException();
                 if (name.equals(this.name)) throw new WrongInputException();
                 notOk = false;
-                for (Player PLAYBOARD : nearPlayers) {
-                    if (PLAYBOARD.name.equals(name)) {
-                        selectedPlayer = PLAYBOARD;
+                for (Player p : nearPlayers) {
+                    if (p.name.equals(name)) {
+                        selectedPlayer = p;
+                        System.out.println("Vous avez décidé de voler une carte à "+selectedPlayer.name);
                         break;
                     }
                 }
@@ -310,23 +312,28 @@ class Player {
             case 1: Integer a = victim.inventory.get("Bois");
                     victim.inventory.put("Bois", a-Integer.valueOf(1));
                     a = this.inventory.get("Bois");
-                    this.inventory.put("Bois", a+Integer.valueOf(1)); break;
+                    this.inventory.put("Bois", a+Integer.valueOf(1)); 
+                    System.out.println("Vous avez pris 1 bois à "+victim.name); break;
             case 2: Integer b = victim.inventory.get("Argile");
                     victim.inventory.put("Argile", b-Integer.valueOf(1));
                     b = this.inventory.get("Argile");
-                    this.inventory.put("Argile", b+Integer.valueOf(1)); break;
+                    this.inventory.put("Argile", b+Integer.valueOf(1));
+                    System.out.println("Vous avez pris 1 argile à "+victim.name); break;
             case 3: Integer c = victim.inventory.get("Laine");
                     victim.inventory.put("Laine", c-Integer.valueOf(1));
                     c = this.inventory.get("Laine");
-                    this.inventory.put("Laine", c+Integer.valueOf(1)); break;
-            case 4: Integer d = victim.inventory.get("Ble");
-                    victim.inventory.put("Ble", d-Integer.valueOf(1));
-                    d = this.inventory.get("Ble");
-                    this.inventory.put("Ble", d+Integer.valueOf(1)); break;
+                    this.inventory.put("Laine", c+Integer.valueOf(1));
+                    System.out.println("Vous avez pris 1 laine à "+victim.name); break;
+            case 4: Integer d = victim.inventory.get("Blé");
+                    victim.inventory.put("Blé", d-Integer.valueOf(1));
+                    d = this.inventory.get("Blé");
+                    this.inventory.put("Blé", d+Integer.valueOf(1));
+                    System.out.println("Vous avez pris 1 blé à "+victim.name); break;
             case 5: Integer e = victim.inventory.get("Roche");
                     victim.inventory.put("Roche", e-Integer.valueOf(1));
                     e = this.inventory.get("Roche");
-                    this.inventory.put("Roche", e+Integer.valueOf(1)); break;
+                    this.inventory.put("Roche", e+Integer.valueOf(1));
+                    System.out.println("Vous avez pris 1 roche à "+victim.name); break;
         }
     }
 
@@ -341,7 +348,7 @@ class Player {
         nbRessources += this.inventory.get("Bois");
         nbRessources += this.inventory.get("Argile");
         nbRessources += this.inventory.get("Laine");
-        nbRessources += this.inventory.get("Ble");
+        nbRessources += this.inventory.get("Blé");
         nbRessources += this.inventory.get("Roche");
         if (nbRessources>=4) {
             Scanner sc = new Scanner(System.in);
@@ -354,7 +361,7 @@ class Player {
                     System.out.println();
                     if (!line.equals("OUI") && !line.equals("NON")) throw new WrongInputException();
                     notOk = false;
-                    if (line.equals("OUI")) this.exchange41();
+                    if (line.equals("OUI")) this.exchange(4, null);
                 } catch (Exception e) {
                     System.out.println(WrongInputException.MESSAGE);
                     notOk = true;
@@ -394,7 +401,7 @@ class Player {
             Scanner sc = new Scanner(System.in);
             boolean notOk = true;
             System.out.println("Voulez-vous construire une colonie ?");
-            System.out.println("Coût : 1 bois, 1 argile, 1 laine et 1 ble");
+            System.out.println("Coût : 1 bois, 1 argile, 1 laine et 1 blé");
             do {
                 try {
                     System.out.println("Tapez OUI ou NON :");
@@ -417,7 +424,7 @@ class Player {
             Scanner sc = new Scanner(System.in);
             boolean notOk = true;
             System.out.println("Voulez-vous construire une ville ?");
-            System.out.println("Coût : 3 roches et 2 bles");
+            System.out.println("Coût : 3 roches et 2 blés");
             do {
                 try {
                     System.out.println("Tapez OUI ou NON :");
@@ -463,7 +470,7 @@ class Player {
             Scanner sc = new Scanner(System.in);
             boolean notOk = true;
             System.out.println("Voulez vous utiliser une carte ?");
-            System.out.println("Coût : 1 roche, 1 laine et 1 ble");
+            System.out.println("Coût : 1 roche, 1 laine et 1 blé");
             do {
                 try {
                     System.out.println("Tapez OUI ou NON :");
@@ -487,7 +494,7 @@ class Player {
             boolean notOk = true;
             do {
                 System.out.println("Voulez-vous acheter une carte developpement ?");
-                System.out.println("Coût : 1 roche, 1 laine et 1 ble");
+                System.out.println("Coût : 1 roche, 1 laine et 1 blé");
                 try {
                     System.out.println("Tapez OUI ou NON :");
                     String line = sc.nextLine();
@@ -524,7 +531,7 @@ class Player {
                 if (!isFree) {
                     this.inventory.replace("Bois", this.inventory.get("Bois")-1); 
                     this.inventory.replace("Laine", this.inventory.get("Laine")-1); 
-                    this.inventory.replace("Ble", this.inventory.get("Ble")-1); 
+                    this.inventory.replace("Blé", this.inventory.get("Blé")-1); 
                     this.inventory.replace("Argile", this.inventory.get("Argile")-1);
                 }
                 this.victoryPoints++;
@@ -565,7 +572,7 @@ class Player {
                         col.isCity = true;
                         ((Colony) CatanTerminal.PLAYBOARD.locations[col.indexI][col.indexJ]).isCity = true;
                         this.inventory.replace("Roche", this.inventory.get("Roche")-3); 
-                        this.inventory.replace("Ble", this.inventory.get("Ble")-2); 
+                        this.inventory.replace("Blé", this.inventory.get("Blé")-2); 
                         this.victoryPoints++;
                         break;
                     }
@@ -703,12 +710,59 @@ class Player {
 
     ////////// Fonctions des ports et du commerce maritime //////////
 
-    protected void exchange41() {
-        // TODO
+    protected void exchange(int n, String ressource) {
+        System.out.println("Veuillez donner "+n+" ressources de votre choix :");
+        boolean notOk = true;
+        Scanner sc = new Scanner(System.in);
+        for (int i=0; i<n; i++) {
+            System.out.println("Votre inventaire : "+this.inventory);
+            System.out.println("Choisissez une ressource à donner :");
+            do {
+                try {
+                    System.out.println("Tapez Bois, Argile, Laine, Blé ou Roche :");
+                    String line = sc.nextLine();
+                    if (!line.equals("Bois") && !line.equals("Argile") && !line.equals("Laine") && 
+                        !line.equals("Blé") && !line.equals("Roche")) throw new WrongInputException();
+                    Integer a = this.inventory.get(line);
+                    if (a==0) throw new IllegalStateException(line);
+                    notOk = false;
+                    this.inventory.put(line, a-Integer.valueOf(1));
+                } catch (IllegalStateException ill) {
+                    System.out.println("Erreur : Vous n'avez plus aucun "+ill.getMessage());
+                    notOk = true;
+                } catch (Exception e) {
+                    System.out.println(WrongInputException.MESSAGE);
+                    notOk = true;
+                }
+            } while (notOk);
+        }
+        if (ressource==null) {
+            System.out.println("Veuillez maintenant prendre une ressource au choix :");
+            System.out.println("Votre inventaire : "+this.inventory);
+            System.out.println("Choisissez une ressource :");
+            do {
+                try {
+                    System.out.println("Tapez Bois, Argile, Laine, Blé ou Roche :");
+                    String line = sc.nextLine();
+                    if (!line.equals("Bois") && !line.equals("Argile") && !line.equals("Laine") && 
+                        !line.equals("Blé") && !line.equals("Roche")) throw new WrongInputException();
+                    notOk = false;
+                    Integer a = this.inventory.get(line);
+                    this.inventory.put(line, a+Integer.valueOf(1));
+                } catch (Exception e) {
+                    System.out.println(WrongInputException.MESSAGE);
+                    notOk = true;
+                }
+            } while (notOk);
+        } else {
+            Integer a = this.inventory.get(ressource);
+            this.inventory.put(ressource, a+Integer.valueOf(1));
+            System.out.println("Vous avez gagnez 1 "+ressource+".");
+        }            
     }
 
     protected void useHarbor() {
-        
+
     }
 
     
@@ -766,7 +820,7 @@ class Player {
                     System.out.println("Choisissez votre deuxième ressource");
                 }
                 String s = sc.nextLine();
-                if(s.equals("Roche") || s.equals("Laine") || s.equals("Ble") || s.equals("Argile") || s.equals("Bois")){
+                if(s.equals("Roche") || s.equals("Laine") || s.equals("Blé") || s.equals("Argile") || s.equals("Bois")){
                     this.inventory.replace(s, this.inventory.get(s)+1);
                     acc = 2;
                     if(acc == 2)notOk = false;
@@ -793,8 +847,8 @@ class Player {
             try{
                 String s = sc.nextLine();
                 System.out.println("Veuillez choisir une ressource à monopoliser");
-                System.out.println("Roche | Laine | Argile | Ble | Bois");
-                if(s.equals("Roche") || s.equals("Laine") || s.equals("Ble") || s.equals("Bois") || s.equals("Argile")){
+                System.out.println("Roche | Laine | Argile | Blé | Bois");
+                if(s.equals("Roche") || s.equals("Laine") || s.equals("Blé") || s.equals("Bois") || s.equals("Argile")){
                     for(Player PLAYBOARD : CatanTerminal.PLAYERS){
                         if(PLAYBOARD!=this){
                             n += PLAYBOARD.inventory.get(s);
@@ -816,7 +870,7 @@ class Player {
     protected void buySpecialCard() {
         this.inventory.replace("Roche", this.inventory.get("Roche")-1); 
         this.inventory.replace("Laine", this.inventory.get("Laine")-1); 
-        this.inventory.replace("Ble", this.inventory.get("Ble")-1); 
+        this.inventory.replace("Blé", this.inventory.get("Blé")-1); 
         this.specialCards.add(CatanTerminal.DECK.getDeck().pop());
     }
     
