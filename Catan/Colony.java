@@ -17,7 +17,7 @@ final class Colony extends Location {
     @Override
     public String toString() {
         String type = (this.isCity)? "La ville" : "La colonie";
-        return (type+" n°"+this.id+" appartenant à "+this.player.name);
+        return (type+" numero "+this.id+" appartenant a "+this.player.name);
     }
 
     @Override

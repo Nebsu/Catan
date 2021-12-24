@@ -4,7 +4,7 @@ public final class CatanUI {
     
     public final static void catan() {
         // TODO
-        System.out.println("Inteface Graphique à faire");
+        System.out.println("Inteface Graphique a faire");
     } 
 
 }

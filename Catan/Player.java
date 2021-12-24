@@ -18,8 +18,6 @@ class Player {
     protected final ArrayList<Harbor> harbors; // ports possédés par le joueur
     protected int knights; // nombre de cartes chevalier jouées par le joueur
 
-    final int getVictoryPoints() {return this.victoryPoints;}
-
     ////////// Constructeur et fonctions associées à ce dernier ////////// 
 
     Player(String name, int s) {
@@ -50,13 +48,23 @@ class Player {
         this.inventory.put("Bois", 0); // bois
         this.inventory.put("Argile", 0); // argile
         this.inventory.put("Laine", 0); // laine
-        this.inventory.put("Blé", 0); // blé
+        this.inventory.put("Ble", 0); // blé
         this.inventory.put("Roche", 0); // minerai
     }
     
     @Override
     public String toString() {
-        return (this.color+" possède "+this.victoryPoints+" points de victoire."+CatanTerminal.RESET);
+        return (this.color+this.name+" possede "+this.victoryPoints+" points de victoire."+CatanTerminal.RESET);
+    }
+
+    protected int nbRessources() {
+        int nbRessources = 0;
+        nbRessources += this.inventory.get("Bois");
+        nbRessources += this.inventory.get("Argile");
+        nbRessources += this.inventory.get("Laine");
+        nbRessources += this.inventory.get("Ble");
+        nbRessources += this.inventory.get("Roche");
+        return nbRessources;
     }
 
 
@@ -66,7 +74,7 @@ class Player {
     
     protected boolean canConstructColony() {
         return ((this.inventory.get("Bois")>=1 && this.inventory.get("Argile")>=1 &&
-                this.inventory.get("Laine")>=1 && this.inventory.get("Blé")>=1) &&
+                this.inventory.get("Laine")>=1 && this.inventory.get("Ble")>=1) &&
                 (this.coloniesOnPlayBoard.size()<5) && (!CatanTerminal.PLAYBOARD.isFilledLocations()));
     }
 
@@ -76,7 +84,7 @@ class Player {
             if (col.isCity) numberOfCities++;
         }
         return ((numberOfCities<4) && 
-                (this.inventory.get("Roche")>=3 && this.inventory.get("Blé")>=2));
+                (this.inventory.get("Roche")>=3 && this.inventory.get("Ble")>=2));
     }
 
     protected boolean canConstructRoad() {
@@ -86,11 +94,28 @@ class Player {
 
     protected boolean hasEnoughToBuyACard() {
         return (this.inventory.get("Roche")>=1 && this.inventory.get("Laine")>=1 &&
-                this.inventory.get("Blé")>=1);
+                this.inventory.get("Ble")>=1);
     }
 
-    protected boolean hasAnHarbor() {
-        return (!this.harbors.isEmpty());
+    protected boolean canUseHarbor() {
+        if (this.harbors.isEmpty()) return false;
+        if (this.onlyContainsSimpleHarbour()) {
+            return (this.nbRessources()>=3);
+        } else {
+            for (Harbor h : this.harbors) {
+                if (h.type.equals("Special")) {
+                    if (this.inventory.get(h.ressource)>=2) return true;
+                }
+            }
+            return false;
+        }
+    }
+
+    protected boolean onlyContainsSimpleHarbour() {
+        for (Harbor h : this.harbors) {
+            if (h.type.equals("Special")) return false;
+        }
+        return true;
     }
 
 
@@ -100,16 +125,16 @@ class Player {
         System.out.println("Au tour de "+this.name+" :");
         this.proposeToUseSpecialCard();
         int dice = throwDices();
-        System.out.println("Résultat du lancer des dés : " + dice);
+        System.out.println("Resultat du lancer : " + dice);
         if (dice!=7) earnResources(dice);
         else {
-            System.out.println("Voleur activé");
+            System.out.println("Voleur active");
             this.thief();
         }
         CatanTerminal.PLAYBOARD.display();
         System.out.println("Votre inventaire : "+this.inventory);
         if (!this.specialCards.isEmpty()) 
-            System.out.println("Vos cartes développement : "+this.specialCards);
+            System.out.println("Vos cartes developpement : "+this.specialCards);
         this.proposeToExchange41();
         this.proposeToUseHarbor();
         this.proposeToConstructColony();
@@ -122,7 +147,7 @@ class Player {
     ////////// Lancé des dés //////////
 
     protected static int throwDices() { 
-        System.out.println("Tapez sur une touche, puis entrée pour lancer les dés :");
+        System.out.println("Tapez sur une touche, puis entree pour lancer les des :");
         Scanner sc = new Scanner(System.in);
         sc.next();
         System.out.println();
@@ -153,7 +178,7 @@ class Player {
         }
         // Cas où aucune colonie est adjacentes aux cases designees par les des :
         if (colonies.isEmpty()) {
-            System.out.println("Pas de chance, personne n'a rien gagné");
+            System.out.println("Pas de chance, personne n'a rien gagne");
             return;
         }
         for (Colony c : colonies) System.out.println(c);
@@ -179,11 +204,7 @@ class Player {
         // On compte les ressources de chaque joueur :
         int[] nbRessources = new int[CatanTerminal.PLAYERS.length];
         for (int i=0; i<CatanTerminal.PLAYERS.length; i++) {
-            nbRessources[i] += CatanTerminal.PLAYERS[i].inventory.get("Bois");
-            nbRessources[i] += CatanTerminal.PLAYERS[i].inventory.get("Argile");
-            nbRessources[i] += CatanTerminal.PLAYERS[i].inventory.get("Laine");
-            nbRessources[i] += CatanTerminal.PLAYERS[i].inventory.get("Blé");
-            nbRessources[i] += CatanTerminal.PLAYERS[i].inventory.get("Roche");
+            nbRessources[i] += CatanTerminal.PLAYERS[i].nbRessources();
         }
         // Les joueurs qui possèdent plus de 8 ressources,
         //  doivent donner la moitie de leurs ressources au voleur :
@@ -191,7 +212,7 @@ class Player {
             if (nbRessources[i]>=8) CatanTerminal.PLAYERS[i].giveRessources(nbRessources[i]);
         }
         // Ensuite, le joueur qui a lance les des deplace le voleur :
-        Box b = this.moveThief();    
+        Box b = this.moveThief();
         // Ensuite, le joueur courant choisi le joueur a qui il veut voler une ressource :
         Player victim = this.selectPlayerToStealFrom(b);
         // Si le joueur courant a choisi une case avec des colonies adjacentes, 
@@ -204,52 +225,52 @@ class Player {
         System.out.println("Vous avez "+n+" ressources");
         n /= 2;
         System.out.println("Veuillez donner "+n+" ressources au voleur");
-        boolean notOk = true;
         Scanner sc = new Scanner(System.in);
         for (int i=0; i<n; i++) {
             System.out.println("Votre inventaire : "+this.inventory);
             System.out.println("Choisissez une ressource à donner au voleur :");
             do {
                 try {
-                    System.out.println("Tapez Bois, Argile, Laine, Blé ou Roche :");
+                    System.out.println("Tapez Bois, Argile, Laine, Ble ou Roche :");
                     String line = sc.nextLine();
                     if (!line.equals("Bois") && !line.equals("Argile") && !line.equals("Laine") && 
-                        !line.equals("Blé") && !line.equals("Roche")) throw new WrongInputException();
+                        !line.equals("Ble") && !line.equals("Roche")) throw new WrongInputException();
                     Integer a = this.inventory.get(line);
                     if (a==0) throw new IllegalStateException(line);
-                    notOk = false;
                     this.inventory.put(line, a-Integer.valueOf(1));
                     System.out.println("Vous avez perdu 1 "+line);
+                    break;
                 } catch (IllegalStateException ill) {
                     System.out.println("Erreur : Vous n'avez plus aucun "+ill.getMessage());
-                    notOk = true;
                 } catch (Exception e) {
                     System.out.println(WrongInputException.MESSAGE);
-                    notOk = true;
                 }
-            } while (notOk);
+            } while (true);
         }
     }
 
     // Déplacer le voleur :
     protected Box moveThief() {
-        Scanner sc = new Scanner(System.in);
-        boolean notOk;
         Box res = null;
+        Scanner sc = new Scanner(System.in);
         do {
             try {
                 System.out.println(this.name+", placez le voleur sur la case de votre choix :");
                 int[] indexs = scanLocationOrPath(sc);
                 int k = indexs[0]-1; int l = indexs[1]-1;
                 if (k<0 || k>4 || l<0 || l>4) throw new WrongInputException();
-                notOk = false;
+                if (CatanTerminal.PLAYBOARD.boxes[k][l]==CatanTerminal.PLAYBOARD.thief) throw new IllegalStateException();
                 CatanTerminal.PLAYBOARD.boxes[k][l].hasThief = true;
+                CatanTerminal.PLAYBOARD.thief.hasThief = false;
+                CatanTerminal.PLAYBOARD.thief = CatanTerminal.PLAYBOARD.boxes[k][l];
                 res = CatanTerminal.PLAYBOARD.boxes[k][l];
+                break;
+            } catch (IllegalArgumentException ill) {
+                System.out.println("Erreur : Vous etes oblige de deplacer le voleur sur une nouvelle case");
             } catch (Exception e) {
                 System.out.println(WrongInputException.MESSAGE);
-                notOk = true;
             }
-        } while (notOk);
+        } while (true);
         CatanTerminal.PLAYBOARD.updatePaths();
         CatanTerminal.PLAYBOARD.display();
         return res;
@@ -276,9 +297,8 @@ class Player {
         ArrayList<String> playersNames = new ArrayList<String>();
         for (Player p : nearPlayers) playersNames.add(p.name);
         System.out.println("Choisissez le joueur que vous voulez racketter :");
-        Scanner sc = new Scanner(System.in);
-        boolean notOk = true;
         Player selectedPlayer = null;
+        Scanner sc = new Scanner(System.in);
         do {
             try {
                 System.out.println("Tapez l'un des noms ci-dessous :");
@@ -288,52 +308,61 @@ class Player {
                 String name = sc.nextLine();
                 if (!playersNames.contains(name)) throw new WrongInputException();
                 if (name.equals(this.name)) throw new WrongInputException();
-                notOk = false;
                 for (Player p : nearPlayers) {
                     if (p.name.equals(name)) {
                         selectedPlayer = p;
-                        System.out.println("Vous avez décidé de voler une carte à "+selectedPlayer.name);
+                        System.out.println("Vous avez decide de voler une carte a "+selectedPlayer.name);
                         break;
                     }
                 }
+                break;
             } catch (Exception e) {
                 System.out.println(WrongInputException.MESSAGE);
-                notOk = true;
             }
-        } while (notOk);
+        } while (true);
         return selectedPlayer;
     }
 
     // Voler une ressource au hasard au joueur choisi :
     protected void steal(Player victim) {
+        ArrayList<Integer> codes = new ArrayList<Integer>();
         Random rd = new Random();
-        int code = rd.nextInt(5)+1;
+        if (victim.inventory.get("Bois")>0) codes.add(1);
+        if (victim.inventory.get("Argile")>0) codes.add(2);
+        if (victim.inventory.get("Laine")>0) codes.add(3);
+        if (victim.inventory.get("Ble")>0) codes.add(4);
+        if (victim.inventory.get("Roche")>0) codes.add(5);
+        if (codes.isEmpty()) {
+            System.out.println(victim.name+" n'a aucune ressource, aucun vol subi");
+            return;
+        }
+        int code = codes.get(rd.nextInt(codes.size()));
         switch (code) {
             case 1: Integer a = victim.inventory.get("Bois");
                     victim.inventory.put("Bois", a-Integer.valueOf(1));
                     a = this.inventory.get("Bois");
                     this.inventory.put("Bois", a+Integer.valueOf(1)); 
-                    System.out.println("Vous avez pris 1 bois à "+victim.name); break;
+                    System.out.println("Vous avez pris 1 bois a "+victim.name); break;
             case 2: Integer b = victim.inventory.get("Argile");
                     victim.inventory.put("Argile", b-Integer.valueOf(1));
                     b = this.inventory.get("Argile");
                     this.inventory.put("Argile", b+Integer.valueOf(1));
-                    System.out.println("Vous avez pris 1 argile à "+victim.name); break;
+                    System.out.println("Vous avez pris 1 argile a "+victim.name); break;
             case 3: Integer c = victim.inventory.get("Laine");
                     victim.inventory.put("Laine", c-Integer.valueOf(1));
                     c = this.inventory.get("Laine");
                     this.inventory.put("Laine", c+Integer.valueOf(1));
-                    System.out.println("Vous avez pris 1 laine à "+victim.name); break;
-            case 4: Integer d = victim.inventory.get("Blé");
-                    victim.inventory.put("Blé", d-Integer.valueOf(1));
-                    d = this.inventory.get("Blé");
-                    this.inventory.put("Blé", d+Integer.valueOf(1));
-                    System.out.println("Vous avez pris 1 blé à "+victim.name); break;
+                    System.out.println("Vous avez pris 1 laine a "+victim.name); break;
+            case 4: Integer d = victim.inventory.get("Ble");
+                    victim.inventory.put("Ble", d-Integer.valueOf(1));
+                    d = this.inventory.get("Ble");
+                    this.inventory.put("Ble", d+Integer.valueOf(1));
+                    System.out.println("Vous avez pris 1 blé a "+victim.name); break;
             case 5: Integer e = victim.inventory.get("Roche");
                     victim.inventory.put("Roche", e-Integer.valueOf(1));
                     e = this.inventory.get("Roche");
                     this.inventory.put("Roche", e+Integer.valueOf(1));
-                    System.out.println("Vous avez pris 1 roche à "+victim.name); break;
+                    System.out.println("Vous avez pris 1 roche a "+victim.name); break;
         }
     }
 
@@ -344,52 +373,43 @@ class Player {
     // (échange réalisable du moment que le joueur a au moins 4 ressources,
     //  même si ce dernier ne possède pas de port) :
     protected void proposeToExchange41() {
-        int nbRessources = 0;
-        nbRessources += this.inventory.get("Bois");
-        nbRessources += this.inventory.get("Argile");
-        nbRessources += this.inventory.get("Laine");
-        nbRessources += this.inventory.get("Blé");
-        nbRessources += this.inventory.get("Roche");
+        int nbRessources = this.nbRessources();
         if (nbRessources>=4) {
+            System.out.println("Voulez-vous echanger 4 ressources contre une de votre choix ?");
             Scanner sc = new Scanner(System.in);
-            boolean notOk = true;
-            System.out.println("Voulez-vous échanger 4 ressources contre une de votre choix ?");
             do {
                 try {
                     System.out.println("Tapez OUI ou NON :");
                     String line = sc.nextLine();
                     System.out.println();
                     if (!line.equals("OUI") && !line.equals("NON")) throw new WrongInputException();
-                    notOk = false;
                     if (line.equals("OUI")) this.exchange(4, null);
+                    break;
                 } catch (Exception e) {
                     System.out.println(WrongInputException.MESSAGE);
-                    notOk = true;
                 }
-            } while (notOk);
+            } while (true);
         }
     }
 
     // Proposition d'utilisation d'un port pour faire un échange :
     protected void proposeToUseHarbor() {
-        if (this.hasAnHarbor()) {
+        if (this.canUseHarbor()) {
+            System.out.println("Vous possedez un ou plusieurs port(s).");
+            System.out.println("Voulez vous faire un echange base sur l'un de vos ports ?");
             Scanner sc = new Scanner(System.in);
-            boolean notOk = true;
-            System.out.println("Vous possédez un ou plusieurs port(s).");
-            System.out.println("Voulez vous faire un échange basé sur l'un de vos ports ?");
             do {
                 try {
                     System.out.println("Tapez OUI ou NON :");
                     String line = sc.nextLine();
                     System.out.println();
                     if (!line.equals("OUI") && !line.equals("NON")) throw new WrongInputException();
-                    notOk = false;
                     if (line.equals("OUI")) this.useHarbor();
+                    break;
                 } catch (Exception e) {
                     System.out.println(WrongInputException.MESSAGE);
-                    notOk = true;
                 }
-            } while (notOk);
+            } while (true);
         }
     }
 
@@ -398,115 +418,105 @@ class Player {
     // ou utiliser/acheter une carte developpement quand c'est possible :
     protected void proposeToConstructColony() {
         if (this.canConstructColony()) {
-            Scanner sc = new Scanner(System.in);
-            boolean notOk = true;
             System.out.println("Voulez-vous construire une colonie ?");
-            System.out.println("Coût : 1 bois, 1 argile, 1 laine et 1 blé");
+            System.out.println("Cout : 1 bois, 1 argile, 1 laine et 1 ble");
+            Scanner sc = new Scanner(System.in);
             do {
                 try {
                     System.out.println("Tapez OUI ou NON :");
                     String line = sc.nextLine();
                     System.out.println();
                     if (!line.equals("OUI") && !line.equals("NON")) throw new WrongInputException();
-                    notOk = false;
                     if (line.equals("OUI")) this.buildColony(false);
+                    break;
                 } catch (Exception e) {
                     System.out.println(WrongInputException.MESSAGE);
-                    notOk = true;
                 }
-            } while (notOk);
+            } while (true);
         }
     }
 
     // Proposition de construction d'une ville :
     protected void proposeToConstructCity() {
         if (this.canConstructCity()) {
-            Scanner sc = new Scanner(System.in);
-            boolean notOk = true;
             System.out.println("Voulez-vous construire une ville ?");
-            System.out.println("Coût : 3 roches et 2 blés");
+            System.out.println("Cout : 3 roches et 2 bles");
+            Scanner sc = new Scanner(System.in);
             do {
                 try {
                     System.out.println("Tapez OUI ou NON :");
                     String line = sc.nextLine();
                     System.out.println();
                     if (!line.equals("OUI") && !line.equals("NON")) throw new WrongInputException();
-                    notOk = false;
                     if (line.equals("OUI")) this.buildCity();
+                    break;
                 } catch (Exception e) {
                     System.out.println(WrongInputException.MESSAGE);
-                    notOk = true;
                 }
-            } while (notOk);
+            } while (true);
         }
     }
 
     // Proposition de construction d'une route :
     protected void proposeToConstructRoad() {
         if (this.canConstructRoad()) {
-            Scanner sc = new Scanner(System.in);
-            Boolean notOk = true;
             System.out.println("Voulez-vous construire une route ?");
-            System.out.println("Coût : 1 bois et 1 argile");
+            System.out.println("Cout : 1 bois et 1 argile");
+            Scanner sc = new Scanner(System.in);
             do {
                 try {
                     System.out.println("Tapez OUI ou NON :");
                     String line = sc.nextLine();
                     System.out.println();
                     if (!line.equals("OUI") && !line.equals("NON")) throw new WrongInputException();
-                    notOk = false;
                     if (line.equals("OUI")) this.buildRoad(false);
+                    break;
                 } catch (Exception e) {
                     System.out.println(WrongInputException.MESSAGE);
-                    notOk = true;
                 }
-            } while (notOk);
+            } while (true);
         }
     }
 
     // Proposition d'utilisation d'une carte developpement :
     protected void proposeToUseSpecialCard() {
         if (!this.specialCards.isEmpty()) {
-            Scanner sc = new Scanner(System.in);
-            boolean notOk = true;
             System.out.println("Voulez vous utiliser une carte ?");
-            System.out.println("Coût : 1 roche, 1 laine et 1 blé");
+            System.out.println("Cout : 1 roche, 1 laine et 1 ble");
+            Scanner sc = new Scanner(System.in);
             do {
                 try {
                     System.out.println("Tapez OUI ou NON :");
                     String line = sc.nextLine();
                     System.out.println();
                     if (!line.equals("OUI") && !line.equals("NON")) throw new WrongInputException();
-                    notOk = false;
                     if (line.equals("OUI")) this.useSpecialCard();
-                } catch (WrongInputException e) {
-                    System.out.println(e);
-                    notOk = true;
+                    break;
+                } catch (Exception e) {
+                    System.out.println(WrongInputException.MESSAGE);
                 }
-            } while (notOk);
+            } while (true);
         }
     }
 
     // Proposition d'achat d'une carte developpement :
     protected void proposeToBuySpecialCard() {
         if (this.hasEnoughToBuyACard()) {
-            Scanner sc = new Scanner(System.in);
-            boolean notOk = true;
             do {
                 System.out.println("Voulez-vous acheter une carte developpement ?");
-                System.out.println("Coût : 1 roche, 1 laine et 1 blé");
+                System.out.println("Cout : 1 roche, 1 laine et 1 ble");
+                Scanner sc = new Scanner(System.in);
                 try {
                     System.out.println("Tapez OUI ou NON :");
                     String line = sc.nextLine();
                     System.out.println();
                     if (!line.equals("OUI") && !line.equals("NON")) throw new WrongInputException();
-                    notOk = false;
                     if (line.equals("OUI")) this.buySpecialCard();
+                    break;
                 } catch (Exception e) {
                     System.out.println(WrongInputException.MESSAGE);
-                    notOk = true;
                 }
-            } while (notOk);
+            } while (true);
         }
     }
 
@@ -516,7 +526,6 @@ class Player {
     // Construction d'une colonie :
     protected void buildColony(boolean isFree) {
         Scanner sc = new Scanner(System.in);
-        boolean notOk;
         do {
             try {
                 System.out.println(this.name+", placez votre colonie :");
@@ -531,22 +540,19 @@ class Player {
                 if (!isFree) {
                     this.inventory.replace("Bois", this.inventory.get("Bois")-1); 
                     this.inventory.replace("Laine", this.inventory.get("Laine")-1); 
-                    this.inventory.replace("Blé", this.inventory.get("Blé")-1); 
+                    this.inventory.replace("Ble", this.inventory.get("Ble")-1); 
                     this.inventory.replace("Argile", this.inventory.get("Argile")-1);
                 }
                 this.victoryPoints++;
-                notOk = false;
+                break;
             } catch (IndexOutOfBoundsException ind) {
                 System.out.println("Erreur : cet emplacement n'existe pas");
-                notOk = true;
             } catch (WrongInputException w) {
-                System.out.println("Erreur : cet emplacement est occupe");
-                notOk = true;
+                System.out.print("Erreur : cet emplacement est occupe");
             } catch (Exception e) {
                 System.out.println(WrongInputException.MESSAGE);
-                notOk = true;
             }
-        } while (notOk);
+        } while (true);
         CatanTerminal.PLAYBOARD.updatePaths();
         CatanTerminal.PLAYBOARD.display();
     }
@@ -558,40 +564,36 @@ class Player {
             System.out.println(col);
             ids.add(col.id);
         }
-        boolean notOk = true;
         do {   
             try {
                 Scanner sc = new Scanner(System.in);
-                System.out.println("Pour choisir la colonie à transformer en ville,");
+                System.out.println("Pour choisir la colonie a transformer en ville,");
                 System.out.println("veuillez tapez le numero de la colonie en question :");
                 int selectedId = sc.nextInt();
                 if (!ids.contains(selectedId)) throw new WrongInputException();
-                notOk = false;
                 for (Colony col : this.coloniesOnPlayBoard) {
                     if (col.id==selectedId) {
                         col.isCity = true;
                         ((Colony) CatanTerminal.PLAYBOARD.locations[col.indexI][col.indexJ]).isCity = true;
                         this.inventory.replace("Roche", this.inventory.get("Roche")-3); 
-                        this.inventory.replace("Blé", this.inventory.get("Blé")-2); 
+                        this.inventory.replace("Ble", this.inventory.get("Ble")-2); 
                         this.victoryPoints++;
                         break;
                     }
                 }
+                break;
             } catch (WrongInputException w) {
                 System.out.println("Erreur : Cette colonie n'existe pas ou ne vous appartient pas");
-                notOk = true;
             } catch (Exception e) {
                 System.out.println(WrongInputException.MESSAGE);
-                notOk = true;
             }
-        } while (notOk);
+        } while (true);
         CatanTerminal.PLAYBOARD.display();
     }
 
     // Construction d'une route :
     protected void buildRoad(boolean isFree) {
         Scanner sc = new Scanner(System.in);
-        boolean notOk = true;
         char c;
         do {
             try {
@@ -599,7 +601,6 @@ class Player {
                 +"horizontale ou verticale ?");
                 System.out.println("Tapez H pour horizontale ou V pour verticale :");
                 c = sc.nextLine().charAt(0);
-                System.out.println();
                 if (c!='H' && c!='V') throw new WrongInputException();
                 System.out.println("Placez votre route :");
                 int[] indexs = scanLocationOrPath(sc);
@@ -612,7 +613,6 @@ class Player {
                 if ((c=='H' && CatanTerminal.PLAYBOARD.horizontalPaths[k][l] instanceof Road) || 
                     (c=='V' && CatanTerminal.PLAYBOARD.verticalPaths[k][l] instanceof Road)) {
                     System.out.println("Erreur : cet emplacement est occupe");
-                    notOk = true;
                 } else {
                     try {
                         Road r = this.buildRoadNextToColony(c, (c=='H')? CatanTerminal.PLAYBOARD.horizontalPaths[k][l] : 
@@ -624,10 +624,9 @@ class Player {
                             this.inventory.replace("Bois", this.inventory.get("Bois")-1); 
                             this.inventory.replace("Argile", this.inventory.get("Argile")-1); 
                         }
-                        notOk = false;
+                        break;
                     } catch (InexistantColonyException ice) {
                         System.out.println(ice);
-                        notOk = true;
                         try {
                             Road r = this.buildRoadNextToRoad(c, (c=='H')? CatanTerminal.PLAYBOARD.horizontalPaths[k][l] :
                             CatanTerminal.PLAYBOARD.verticalPaths[k][l]);
@@ -638,21 +637,18 @@ class Player {
                                 this.inventory.replace("Bois", this.inventory.get("Bois")-1); 
                                 this.inventory.replace("Argile", this.inventory.get("Argile")-1); 
                             }
-                            notOk = false;
+                            break;
                         } catch (InexistantRoadException ire) {
                             System.out.println(ire);
-                            notOk = true;
                         }
                     }
                 }
             } catch (InexistantRoadException ind) {
                 System.out.println("Erreur : ce chemin n'existe pas");
-                notOk = true;
             } catch (Exception e) {
                 System.out.println(WrongInputException.MESSAGE);
-                notOk = true;
             }
-        } while (notOk);
+        } while (true);
         CatanTerminal.PLAYBOARD.display();
     }
     protected Road buildRoadNextToColony(char c, Path selectedPath) throws InexistantColonyException {
@@ -711,78 +707,109 @@ class Player {
     ////////// Fonctions des ports et du commerce maritime //////////
 
     protected void exchange(int n, String ressource) {
-        System.out.println("Veuillez donner "+n+" ressources de votre choix :");
-        boolean notOk = true;
-        Scanner sc = new Scanner(System.in);
-        for (int i=0; i<n; i++) {
-            System.out.println("Votre inventaire : "+this.inventory);
-            System.out.println("Choisissez une ressource à donner :");
-            do {
-                try {
-                    System.out.println("Tapez Bois, Argile, Laine, Blé ou Roche :");
-                    String line = sc.nextLine();
-                    if (!line.equals("Bois") && !line.equals("Argile") && !line.equals("Laine") && 
-                        !line.equals("Blé") && !line.equals("Roche")) throw new WrongInputException();
-                    Integer a = this.inventory.get(line);
-                    if (a==0) throw new IllegalStateException(line);
-                    notOk = false;
-                    this.inventory.put(line, a-Integer.valueOf(1));
-                } catch (IllegalStateException ill) {
-                    System.out.println("Erreur : Vous n'avez plus aucun "+ill.getMessage());
-                    notOk = true;
-                } catch (Exception e) {
-                    System.out.println(WrongInputException.MESSAGE);
-                    notOk = true;
-                }
-            } while (notOk);
-        }
         if (ressource==null) {
-            System.out.println("Veuillez maintenant prendre une ressource au choix :");
-            System.out.println("Votre inventaire : "+this.inventory);
-            System.out.println("Choisissez une ressource :");
-            do {
-                try {
-                    System.out.println("Tapez Bois, Argile, Laine, Blé ou Roche :");
-                    String line = sc.nextLine();
-                    if (!line.equals("Bois") && !line.equals("Argile") && !line.equals("Laine") && 
-                        !line.equals("Blé") && !line.equals("Roche")) throw new WrongInputException();
-                    notOk = false;
-                    Integer a = this.inventory.get(line);
-                    this.inventory.put(line, a+Integer.valueOf(1));
-                } catch (Exception e) {
-                    System.out.println(WrongInputException.MESSAGE);
-                    notOk = true;
-                }
-            } while (notOk);
+            System.out.println("Veuillez donner "+n+" ressources de votre choix :");
+            Scanner sc = new Scanner(System.in);
+            for (int i=0; i<n; i++) {
+                System.out.println("Votre inventaire : "+this.inventory);
+                System.out.println("Choisissez une ressource a donner :");
+                do {
+                    try {
+                        System.out.println("Tapez Bois, Argile, Laine, Ble ou Roche :");
+                        String line = sc.nextLine();
+                        System.out.println();
+                        if (!line.equals("Bois") && !line.equals("Argile") && !line.equals("Laine") && 
+                            !line.equals("Ble") && !line.equals("Roche")) throw new WrongInputException();
+                        Integer a = this.inventory.get(line);
+                        if (a==0) throw new IllegalStateException(line);
+                        this.inventory.put(line, a-Integer.valueOf(1));
+                        System.out.println(this.inventory);
+                        break;
+                    } catch (IllegalStateException ill) {
+                        System.out.println("Erreur : Vous n'avez plus aucun(e) "+ill.getMessage());
+                    } catch (Exception e) {
+                        System.out.println(WrongInputException.MESSAGE);
+                    }
+                } while (true);
+            }
         } else {
             Integer a = this.inventory.get(ressource);
-            this.inventory.put(ressource, a+Integer.valueOf(1));
-            System.out.println("Vous avez gagnez 1 "+ressource+".");
-        }            
+            this.inventory.put(ressource, a-Integer.valueOf(n));
+            System.out.println("Vous avez donne "+n+" "+ressource);
+        }
+        System.out.println("Veuillez maintenant prendre une ressource au choix :");
+        System.out.println("Votre inventaire : "+this.inventory);
+        System.out.println("Choisissez une ressource :");
+        Scanner sc = new Scanner(System.in);
+        do {
+            try {
+                System.out.println("Tapez Bois, Argile, Laine, Ble ou Roche :");
+                String line = sc.nextLine();
+                System.out.println();
+                if (!line.equals("Bois") && !line.equals("Argile") && !line.equals("Laine") && 
+                    !line.equals("Ble") && !line.equals("Roche")) throw new WrongInputException();
+                Integer a = this.inventory.get(line);
+                this.inventory.put(line, a+Integer.valueOf(1));
+                System.out.println("Vous avez gagne 1 "+line);
+                break;
+            } catch (Exception e) {
+                System.out.println(WrongInputException.MESSAGE);
+            }
+        } while (true);        
     }
 
     protected void useHarbor() {
-
+        int[] ids = new int[this.harbors.size()];
+        int a = 0;
+        System.out.println("Vos ports :");
+        for (Harbor h : this.harbors) {
+            ids[a] = h.id;
+            a++;
+            System.out.print(h+" "+CatanTerminal.CYAN_BOLD_BRIGHT+h.id+CatanTerminal.RESET+"   ");
+        }
+        System.out.println();
+        System.out.println("Choisissez l'un de vos ports :");
+        do {
+            try {
+                Scanner sc = new Scanner(System.in);
+                System.out.println("Tapez l'ID du port que vous voulez utiliser :");
+                int selectedId = sc.nextInt();
+                int b = 0;
+                for (int i=0; i<ids.length; i++) {
+                    if (ids[i]!=selectedId) b++;
+                }
+                if (b==ids.length) throw new WrongInputException();
+                Harbor selectedHarbor = CatanTerminal.PLAYBOARD.getHarbor(selectedId);
+                if (selectedHarbor.type.equals("Simple")) 
+                    if (this.nbRessources()<3) throw new NotEnoughRessourcesException();
+                else 
+                    if (this.inventory.get(selectedHarbor.ressource)<2) throw new NotEnoughRessourcesException();
+                this.exchange(selectedHarbor.price, selectedHarbor.ressource);
+                break;
+            } catch (NotEnoughRessourcesException not) {
+                System.out.println(not);
+            } catch (Exception e) {
+                System.out.println(WrongInputException.MESSAGE);
+            }
+        } while (true);
     }
 
     
     ////////// Fonctions des cartes developpement //////////
 
     // Utilisation d'une carte developpement :
-    protected void useSpecialCard() {
-        Scanner sc = new Scanner(System.in);       
+    protected void useSpecialCard() {      
         System.out.println("Vos cartes developpement : "+this.specialCards);
         System.out.println("Choisissez la carte que vous voulez utiliser (ID)");
         System.out.println("1 = Chevalier\n2 = Construction de Route\n3 = Invention\n4 = Monopole");
-        boolean notOk = true;
         do {
             try {
+                Scanner sc = new Scanner(System.in);
                 int n = sc.nextInt();
                 if (n!=1 && n!=2 && n!=3 && n!=4) throw new WrongInputException();
-                notOk = false;
                 for(Card c : this.specialCards){
                     if(c.id==1 && n==1){
-                        // Bouge le voleur
+                        this.moveThief();
                         this.specialCards.remove(c);
                         this.knights++;
                         if (this.knights==3 && !CatanTerminal.army) {
@@ -801,17 +828,16 @@ class Player {
                         monopole();
                     }
                 }
+                break;
             } catch (Exception e) {
                 System.out.println(WrongInputException.MESSAGE);
-                notOk = true;
             }
-        } while (notOk);
+        } while (true);
     }
     // Carte progrès invention :
     protected void invention() {
-        Scanner sc = new Scanner(System.in);
-        boolean notOk = true;
         int acc = 1;
+        Scanner sc = new Scanner(System.in);
         do{
             try{
                 if(acc == 1){
@@ -820,21 +846,21 @@ class Player {
                     System.out.println("Choisissez votre deuxième ressource");
                 }
                 String s = sc.nextLine();
-                if(s.equals("Roche") || s.equals("Laine") || s.equals("Blé") || s.equals("Argile") || s.equals("Bois")){
+                if(s.equals("Roche") || s.equals("Laine") || s.equals("Ble") || s.equals("Argile") || s.equals("Bois")){
                     this.inventory.replace(s, this.inventory.get(s)+1);
                     acc = 2;
-                    if(acc == 2)notOk = false;
+                    if(acc == 2) break;
                 }else{
                     throw new WrongInputException();
                 }
             }catch(WrongInputException e){
                 System.out.println(e);
             }
-        }while (notOk && acc != 2);
+        }while (true);
     }
     // Carte progrès route :
     protected void carteRoute() {
-        System.out.println("Veuillez construire votre première route");
+        System.out.println("Veuillez construire votre premiere route");
         this.buildRoad(true);
         System.out.println("Veuillez construire votre seconde route");
         this.buildRoad(true);
@@ -846,13 +872,13 @@ class Player {
         while(true){
             try{
                 String s = sc.nextLine();
-                System.out.println("Veuillez choisir une ressource à monopoliser");
-                System.out.println("Roche | Laine | Argile | Blé | Bois");
-                if(s.equals("Roche") || s.equals("Laine") || s.equals("Blé") || s.equals("Bois") || s.equals("Argile")){
-                    for(Player PLAYBOARD : CatanTerminal.PLAYERS){
-                        if(PLAYBOARD!=this){
-                            n += PLAYBOARD.inventory.get(s);
-                            PLAYBOARD.inventory.replace(s, 0);
+                System.out.println("Veuillez choisir une ressource a monopoliser");
+                System.out.println("Roche | Laine | Argile | Ble | Bois");
+                if(s.equals("Roche") || s.equals("Laine") || s.equals("Ble") || s.equals("Bois") || s.equals("Argile")){
+                    for(Player p: CatanTerminal.PLAYERS){
+                        if(p!=this){
+                            n += p.inventory.get(s);
+                            p.inventory.replace(s, 0);
                         }
                     }
                     this.inventory.replace(s, this.inventory.get(s) + n);
@@ -870,7 +896,7 @@ class Player {
     protected void buySpecialCard() {
         this.inventory.replace("Roche", this.inventory.get("Roche")-1); 
         this.inventory.replace("Laine", this.inventory.get("Laine")-1); 
-        this.inventory.replace("Blé", this.inventory.get("Blé")-1); 
+        this.inventory.replace("Ble", this.inventory.get("Ble")-1); 
         this.specialCards.add(CatanTerminal.DECK.getDeck().pop());
     }
     

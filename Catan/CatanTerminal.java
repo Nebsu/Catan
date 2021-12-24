@@ -44,6 +44,7 @@ public final class CatanTerminal {
         }
         // Affichage des joueurs au commencement du jeu :
         for (int i=0; i<PLAYERS.length; i++) System.out.println(PLAYERS[i]);
+        System.out.println();
         // Début de la partie :
         boolean end = false; // devient true quand un joueur a 10 points de victoire
         Player winner = null; // gagnant de la partie
@@ -66,7 +67,7 @@ public final class CatanTerminal {
                 System.out.println(PLAYERS[i]);
             System.out.println();
         }
-        System.out.println("Félicitations "+winner.name+" ! Vous avez gagné la partie !");
+        System.out.println("Felicitations "+winner.name+" ! Vous avez gagne la partie !");
         System.out.println("Nombre de tours total de la partie : "+turns);
     }
 
@@ -90,8 +91,8 @@ public final class CatanTerminal {
         System.out.println("Choisissez le nombre de joueurs (3 ou 4) :");
         do {
             System.out.println("Tapez 3 ou 4 :");
+            Scanner sc = new Scanner(System.in);
             try {
-                Scanner sc = new Scanner(System.in);
                 nb = sc.nextByte();
                 if (nb!=3 && nb!=4) throw new WrongInputException();
             } catch (Exception e) {
@@ -106,10 +107,10 @@ public final class CatanTerminal {
     private static final Player createPlayer(int i) {
         System.out.println("Joueur "+i+" : Humain ou IA ?");
         char c;
+        Scanner sc = new Scanner(System.in);
         do {
             System.out.println("Tapez H ou I");
             try {
-                Scanner sc = new Scanner(System.in);
                 c = sc.nextLine().charAt(0);
                 if (c!='H' && c!='I') throw new WrongInputException();
             } catch (Exception e) {
@@ -122,7 +123,7 @@ public final class CatanTerminal {
         // Si le joueur choisi humain, on crée un joueur humain:
         if (c=='H') res = createRealPlayer(i);
         // Sinon on crée un nouvel IA :
-        if (c=='I') res = new IA("IA "+String.valueOf(i), i);
+        if (c=='I') res = new IA("IA"+String.valueOf(i), i);
         return res;
     }  
     // Création d'un "vrai" joueur (humain) :
@@ -137,8 +138,8 @@ public final class CatanTerminal {
             try {
                 name = sc.nextLine();
                 if (name.length()==0) throw new InvalidNameException();
-            } catch (InvalidNameException exp) {
-                System.out.println(exp);
+            } catch (InvalidNameException inv) {
+                System.out.println(inv);
                 name = null;
             } catch (Exception e) {
                 System.out.println(WrongInputException.MESSAGE);

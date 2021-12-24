@@ -24,12 +24,12 @@ final class Box {
     public String toString() {
         String color = null;
         switch (this.name) {
-            case "Forêt": color = CatanTerminal.GREEN; break;
-            case "Pré": color = CatanTerminal.GREEN_BOLD_BRIGHT; break;
+            case "Foret": color = CatanTerminal.GREEN; break;
+            case "Pre": color = CatanTerminal.GREEN_BOLD_BRIGHT; break;
             case "Champs": color = CatanTerminal.YELLOW_BOLD_BRIGHT; break;
             case "Colline": color = CatanTerminal.RED_BOLD; break;
             case "Montagne": color = CatanTerminal.BLACK_BOLD_BRIGHT; break;
-            case "Désert": color = CatanTerminal.WHITE_BOLD_BRIGHT; break;
+            case "Desert": color = CatanTerminal.WHITE_BOLD_BRIGHT; break;
         }
         String s1 = (String.valueOf(this.number).length()==1)? "0" : "";
         String s2 = (this.hasThief)? "^" : " ";

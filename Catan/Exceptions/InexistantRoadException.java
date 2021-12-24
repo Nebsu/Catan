@@ -5,7 +5,7 @@ public final class InexistantRoadException extends Exception {
     private final String message;
 
     public InexistantRoadException() {
-        this.message = "Erreur : Une route doit être liée à une des vos autres routes";
+        this.message = "Erreur : Une route doit etre liee a une des vos autres routes";
     }
 
     @Override

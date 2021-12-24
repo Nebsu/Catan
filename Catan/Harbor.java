@@ -2,21 +2,23 @@ package Catan;
 
 final class Harbor extends SeaBox {
 
-    final String type;
+    final int price;
     final String ressource;
+    final String type;
     final int id;
     private static int count = 1;
 
-    Harbor(Location loc1, Location loc2, String type, String ressource) {
+    Harbor(Location loc1, Location loc2, int price, String ressource) {
         super(loc1, loc2);
-        if (!type.equals("Simple") && !type.equals("Special")) 
-            throw new IllegalArgumentException();
-        this.type = type;
+        if (ressource==null && price==3) this.type = "Simple";
+        else if (ressource!=null && price==2) this.type = "Special";
+        else throw new IllegalArgumentException();
+        this.price = price;
         this.ressource = ressource;
         this.id = count++;
     }
-    Harbor(Location loc1, Location loc2, String type) {
-        this(loc1, loc2, type, null);
+    Harbor(Location loc1, Location loc2) {
+        this(loc1, loc2, 3, null);
     }
 
     @Override

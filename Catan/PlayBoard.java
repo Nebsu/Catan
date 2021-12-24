@@ -6,11 +6,12 @@ final class PlayBoard {
 
     ////////// Attributs ////////// 
 
-    protected final Box[][] boxes; // cases terrain
-    protected Location[][] locations; // intersections
-    protected final SeaBox[] seaBoxes; // cases maritimes
-    protected Path[][] horizontalPaths; // chemins horizontaux
-    protected Path[][] verticalPaths; // chemins verticaux
+    final Box[][] boxes; // cases terrain
+    Location[][] locations; // intersections
+    final SeaBox[] seaBoxes; // cases maritimes
+    Path[][] horizontalPaths; // chemins horizontaux
+    Path[][] verticalPaths; // chemins verticaux
+    Box thief; // case contenant le voleur 
 
     ////////// Constructeur et fonctions associées à ce dernier //////////
 
@@ -21,25 +22,26 @@ final class PlayBoard {
         this.seaBoxes = new SeaBox[16];
         this.constructSeaBoxes();
         this.constructPaths();
+        this.thief = this.boxes[2][1];
     }
     // Construction des cases :
     private final void constructBoxes() {
-        this.boxes[0][0] = new Box("Forêt", "Bois", 6, 0, 0, false);
-        this.boxes[0][1] = new Box("Pré", "Laine", 10, 0, 1, false);
-        this.boxes[0][2] = new Box("Champs", "Blé", 11, 0, 2, false);
-        this.boxes[0][3] = new Box("Pré", "Laine", 8, 0, 3, false);
-        this.boxes[1][0] = new Box("Champs", "Blé", 4, 1,0, false);
+        this.boxes[0][0] = new Box("Foret", "Bois", 6, 0, 0, false);
+        this.boxes[0][1] = new Box("Pre", "Laine", 10, 0, 1, false);
+        this.boxes[0][2] = new Box("Champs", "Ble", 11, 0, 2, false);
+        this.boxes[0][3] = new Box("Pre", "Laine", 8, 0, 3, false);
+        this.boxes[1][0] = new Box("Champs", "Ble", 4, 1,0, false);
         this.boxes[1][1] = new Box("Colline", "Argile", 9, 1, 1, false);
-        this.boxes[1][2] = new Box("Forêt", "Bois", 5, 1, 2, false);
+        this.boxes[1][2] = new Box("Foret", "Bois", 5, 1, 2, false);
         this.boxes[1][3] = new Box("Montagne", "Roche", 12, 1, 3, false);
         this.boxes[2][0] = new Box("Montagne", "Roche", 3, 2, 0, false);
-        this.boxes[2][1] = new Box("Désert", null, 7, 2, 1, true);
-        this.boxes[2][2] = new Box("Champs", "Blé", 10, 2, 2, false);
+        this.boxes[2][1] = new Box("Desert", null, 7, 2, 1, true);
+        this.boxes[2][2] = new Box("Champs", "Ble", 10, 2, 2, false);
         this.boxes[2][3] = new Box("Colline", "Argile", 6, 2, 3, false);
         this.boxes[3][0] = new Box("Colline", "Argile", 9, 3, 0, false);
         this.boxes[3][1] = new Box("Montagne", "Roche", 8, 3, 1, false);
-        this.boxes[3][2] = new Box("Pré", "Laine", 5, 3, 2, false);
-        this.boxes[3][3] = new Box("Forêt", "Bois", 2, 3, 3, false);
+        this.boxes[3][2] = new Box("Pre", "Laine", 5, 3, 2, false);
+        this.boxes[3][3] = new Box("Foret", "Bois", 2, 3, 3, false);
     }
     // Construction des intersections (nommées emplacements) :
     private final void constructLocations() throws IllegalArgumentException {
@@ -86,21 +88,21 @@ final class PlayBoard {
     // Construction des cases maritimes et des ports :
     private final void constructSeaBoxes() {
         this.seaBoxes[0] = new SeaBox(this.locations[0][0], this.locations[0][1]);
-        this.seaBoxes[1] = new Harbor(this.locations[0][1], this.locations[0][2], "Special", "Laine");
+        this.seaBoxes[1] = new Harbor(this.locations[0][1], this.locations[0][2], 2, "Laine");
         this.seaBoxes[2] = new SeaBox(this.locations[0][2], this.locations[0][3]);
-        this.seaBoxes[3] = new Harbor(this.locations[0][3], this.locations[0][4], "Simple");
+        this.seaBoxes[3] = new Harbor(this.locations[0][3], this.locations[0][4]);
         this.seaBoxes[4] = new SeaBox(this.locations[0][4], this.locations[1][4]);
-        this.seaBoxes[5] = new Harbor(this.locations[1][4], this.locations[2][4], "Special", "Bois");
+        this.seaBoxes[5] = new Harbor(this.locations[1][4], this.locations[2][4], 2, "Bois");
         this.seaBoxes[6] = new SeaBox(this.locations[2][4], this.locations[3][4]);
-        this.seaBoxes[7] = new Harbor(this.locations[3][4], this.locations[4][4], "Simple");
+        this.seaBoxes[7] = new Harbor(this.locations[3][4], this.locations[4][4]);
         this.seaBoxes[8] = new SeaBox(this.locations[4][4], this.locations[4][3]);
-        this.seaBoxes[9] = new Harbor(this.locations[4][3], this.locations[4][2], "Special", "Argile");
+        this.seaBoxes[9] = new Harbor(this.locations[4][3], this.locations[4][2], 2, "Argile");
         this.seaBoxes[10] = new SeaBox(this.locations[4][2], this.locations[4][1]);
-        this.seaBoxes[11] = new Harbor(this.locations[4][1], this.locations[4][0], "Special", "Roche");
+        this.seaBoxes[11] = new Harbor(this.locations[4][1], this.locations[4][0], 2, "Roche");
         this.seaBoxes[12] = new SeaBox(this.locations[4][0], this.locations[3][0]);
-        this.seaBoxes[13] = new Harbor(this.locations[3][0], this.locations[2][0], "Special", "Blé");
+        this.seaBoxes[13] = new Harbor(this.locations[3][0], this.locations[2][0], 2, "Ble");
         this.seaBoxes[14] = new SeaBox(this.locations[2][0], this.locations[1][0]);
-        this.seaBoxes[15] = new Harbor(this.locations[1][0], this.locations[0][0], "Simple");
+        this.seaBoxes[15] = new Harbor(this.locations[1][0], this.locations[0][0]);
     }
     // Construction des chemins :
     private final void constructPaths() {
@@ -148,6 +150,16 @@ final class PlayBoard {
                 this.verticalPaths[i][j].point2 = this.locations[i+1][j];
             }
         }
+    }
+
+    // Récupération du port qui possède l'id passé en argument :
+    final Harbor getHarbor(int id) {
+        for (int i=0; i<this.seaBoxes.length; i++) {
+            if (this.seaBoxes[i] instanceof Harbor) {
+                if (((Harbor) this.seaBoxes[i]).id==id) return ((Harbor) this.seaBoxes[i]);
+            }
+        }
+        return null;
     }
 
     ////////// Fonctions booléennes //////////
