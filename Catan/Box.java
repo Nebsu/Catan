@@ -3,6 +3,8 @@ package Catan;
 import java.util.ArrayList;
 
 final class Box {
+
+    ////////// Attributs ////////// 
     
     protected final String name;
     protected final String ressource;
@@ -10,6 +12,8 @@ final class Box {
     protected final int indexI;
     protected final int indexJ;
     protected boolean hasThief;
+
+    ////////// Constructeur et fonctions associées à ce dernier //////////
 
     Box(String name, String ressource, int number, int indexI, int indexJ, boolean hasThief) {
         this.name = name;
@@ -20,6 +24,9 @@ final class Box {
         this.hasThief = hasThief;
     }
 
+    ////////// Fonctions auxiliaires //////////
+
+    // Print :
     @Override
     public String toString() {
         String color = null;
@@ -35,7 +42,6 @@ final class Box {
         String s2 = (this.hasThief)? "^" : " ";
         return (color+s1+String.valueOf(this.number)+CatanTerminal.RESET+s2+color+this.name.substring(0, 2)+CatanTerminal.RESET);
     }
-
 
     // Récupération de toutes les intersections adjacentes à la case courante :
     final ArrayList<Location> getLocations() {

@@ -5,20 +5,32 @@ import java.util.Random;
 import Catan.Exceptions.*;
 
 final class IA extends Player {
+
+    ////////// Constructeur et fonctions associées à ce dernier //////////
     
     public IA(String name, int s) {
         super(name, s);
     }
 
+    ////////// Fonctions auxiliaires //////////
+
+    // Print :
     @Override
     public String toString() {
         return super.toString();
     }
 
+    // Renvoie le nombre de ressources total du joueur :
+    @Override
+    protected int nbRessources() {
+        return super.nbRessources();
+    }
+
 
     ////////// Fonctions booléennes //////////
+
     @Override
-    public boolean isWinner() {return super.isWinner();}
+    protected boolean isWinner() {return super.isWinner();}
 
     @Override
     protected boolean canConstructColony() {return super.canConstructColony();}
@@ -32,8 +44,16 @@ final class IA extends Player {
     @Override
     protected boolean hasEnoughToBuyACard() {return super.hasEnoughToBuyACard();}
 
+    @Override
+    protected boolean canUseHarbor() {return super.canUseHarbor();}
 
-    ////////// Fonction principale (tour de l'IA) //////////
+    @Override
+    protected boolean onlyContainsSimpleHarbour() {return super.onlyContainsSimpleHarbour();}
+
+
+    ////////// FONCTIONS DU JEU //////////
+
+    // Fonction principale (tour de l'IA) :
     @Override
     public void play() {
         System.out.println("Au tour de "+this.name+" :");
@@ -53,7 +73,7 @@ final class IA extends Player {
     }
 
 
-    ////////// Lancé des dés //////////
+    // Lancé des dés :
     protected static int throwDices() { 
         Random rd1 = new Random(), rd2 = new Random();
         int dice1 = rd1.nextInt(6)+1;
@@ -63,11 +83,12 @@ final class IA extends Player {
 
 
     ////////// Fonctions du voleur //////////
-    @Override
-    protected void thief() {
-        super.thief();
-    } 
 
+    // Fonction principale du voleur ;
+    @Override
+    protected void thief() {super.thief();} 
+
+    // Donner des ressources au voleur :
     @Override
     protected void giveRessources(int n) {
         System.out.println("Vous avez "+n+" ressources");
@@ -93,6 +114,7 @@ final class IA extends Player {
         }
     }
 
+    // Déplacer le voleur :
     @Override
     protected Box moveThief() {
         boolean notOk;
@@ -120,6 +142,7 @@ final class IA extends Player {
         return res;
     }
 
+    // Choix de la cible du joueur pour voler des ressources :
     @Override
     protected Player selectPlayerToStealFrom(Box b) {
         // On recupère les emplacement adjacents de la case :
@@ -164,13 +187,27 @@ final class IA extends Player {
         return selectedPlayer;
     }
 
+    // Voler une ressource au hasard au joueur choisi :
     @Override
-    protected void steal(Player victim) {
-        super.steal(victim);
+    protected void steal(Player victim) {super.steal(victim);}
+
+
+    ////////// Fonctions de proposition //////////
+
+    // Proposition d'échange de 4 ressources du joueur contre une de son choix,
+    // (échange réalisable du moment que le joueur a au moins 4 ressources,
+    //  même si ce dernier ne possède pas de port) :
+    @Override
+    protected void proposeToExchange41() {
+        // TODO Auto-generated method stub
     }
 
+    // Proposition d'utilisation d'un port pour faire un échange :
+    @Override
+    protected void proposeToUseHarbor() {
+        // TODO Auto-generated method stub
+    }
 
-    // Fonctions de proposition :
     // Proposition de construction d'une colonie : 
     @Override
     protected void proposeToConstructColony() {
@@ -242,7 +279,8 @@ final class IA extends Player {
     }
 
 
-    // Fonctions de construction :
+    ////////// Fonctions de construction //////////
+
     // Construction d'une colonie :
     @Override
     protected void buildColony(boolean isFree) {
@@ -273,9 +311,7 @@ final class IA extends Player {
         }
     }
 
-    // Construction d'une ville :
-
-    //Pas sur si ça marche
+    // Construction d'une ville : (Pas sur si ça marche)
     @Override
     protected void buildCity() {
         ArrayList<Integer> ids = new ArrayList<Integer>();
@@ -301,6 +337,7 @@ final class IA extends Player {
                 }
             } catch (Exception e) {}
         } while (notOk);
+        CatanTerminal.PLAYBOARD.updatePaths();
         CatanTerminal.PLAYBOARD.display();
     }
 
@@ -364,20 +401,40 @@ final class IA extends Player {
         CatanTerminal.PLAYBOARD.display();
     }
 
+    // Construction d'une route à côté d'une colonie :
     protected Road buildRoadNextToColony(char c, Path selectedPath) throws InexistantColonyException {
         return super.buildRoadNextToColony(c, selectedPath);
     }
 
+    // Construction d'une route à côté d'une autre route :
     protected Road buildRoadNextToRoad(char c, Path selectedPath) throws InexistantRoadException {
         return super.buildRoadNextToRoad(c, selectedPath);
     }
 
+    // Fonction pour récupérer les emplacements d'arrivée de toutes les routes
+    // construites par le joueur courant :
     protected ArrayList<Location> getEndPoints() {
         return super.getEndPoints();
     }
 
 
-    // Fonctions des cartes developpement :
+    ////////// Fonctions des ports et du commerce maritime //////////
+
+    // Fonction qui procède à un échange de ressources via le commerce maritime :
+    @Override
+    protected void exchange(int n, String ressource) {
+        // TODO Auto-generated method stub
+    }
+
+    // Fonction pour utiliser l'un des ports que possède le joueur :
+    @Override
+    protected void useHarbor() {
+        // TODO Auto-generated method stub
+    }
+
+
+    ////////// Fonctions des cartes developpement //////////
+
     // Utilisation d'une carte developpement :
     @Override
     protected void useSpecialCard() {
@@ -409,6 +466,7 @@ final class IA extends Player {
             }
         } while (notOk);
     }
+
     // Carte progrès invention :
     @Override
     protected void invention() {
@@ -432,12 +490,14 @@ final class IA extends Player {
             if(acc == 2)notOk = false;
         }while (notOk && acc != 2);
     }
+
     // Carte progrès route :
     @Override
     protected void carteRoute() {
         this.buildRoad(true);
         this.buildRoad(true);
     }
+    
     // Carte monopole :
     @Override
     protected void monopole() {
@@ -472,7 +532,9 @@ final class IA extends Player {
         super.buySpecialCard();
     }
 
-    // Route la plus longue du joueur courant :
+
+    ////////// Route la plus longue du joueur courant //////////
+    
     @Override
     protected int longestRoad() {
         return super.longestRoad();

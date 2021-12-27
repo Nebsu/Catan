@@ -52,12 +52,16 @@ class Player {
         this.inventory.put("Ble", 0); // blé
         this.inventory.put("Roche", 0); // minerai
     }
+
+    ////////// Fonctions auxiliaires //////////
     
+    // Print :
     @Override
     public String toString() {
         return (this.color+this.name+" possede "+this.victoryPoints+" points de victoire."+CatanTerminal.RESET);
     }
 
+    // Renvoie le nombre de ressources total du joueur :
     protected int nbRessources() {
         int nbRessources = 0;
         nbRessources += this.inventory.get("Bois");
@@ -120,8 +124,9 @@ class Player {
     }
 
 
-    ////////// Fonction principale (tour du joueur) //////////
+    ////////// FONCTIONS DU JEU //////////
 
+    // Fonction principale (tour du joueur) :
     protected void play() {
         System.out.println("Au tour de "+this.name+" :");
         this.proposeToUseSpecialCard();
@@ -145,8 +150,7 @@ class Player {
     }
 
 
-    ////////// Lancé des dés //////////
-
+    // Lancé des dés :
     protected static int throwDices() { 
         System.out.println("Tapez sur une touche, puis entree pour lancer les des :");
         Scanner sc = new Scanner(System.in);
@@ -158,9 +162,7 @@ class Player {
         return (dice1+dice2);
     }
 
-
-    ////////// Répartition des ressources selon le résultat du lancé des dés //////////
-
+    // Répartition des ressources selon le résultat du lancé des dés :
     protected final static void earnResources(int dice) {
         // On récupère la ou les cases designée(s) par les dés :
         ArrayList<Box> boxes = CatanTerminal.PLAYBOARD.getBoxes(dice);
@@ -653,6 +655,8 @@ class Player {
         } while (true);
         CatanTerminal.PLAYBOARD.display();
     }
+
+    // Construction d'une route à côté d'une colonie :
     protected Road buildRoadNextToColony(char c, Path selectedPath) throws InexistantColonyException {
         if (selectedPath.point1 instanceof Colony) {
             Colony col = (Colony) selectedPath.point1;
@@ -668,6 +672,8 @@ class Player {
         }
         throw new InexistantColonyException();
     }
+
+    // Construction d'une route à côté d'une autre route :
     protected Road buildRoadNextToRoad(char c, Path selectedPath) throws InexistantRoadException {
         ArrayList<Location> endPoints = this.getEndPoints();
         for (Location endPoint : endPoints) {
@@ -680,7 +686,8 @@ class Player {
         }
         throw new InexistantRoadException();
     }
-    // Fonction auxiliaire pour recuperer les emplacements d'arrivee de toutes les routes
+
+    // Fonction pour récupérer les emplacements d'arrivée de toutes les routes
     // construites par le joueur courant :
     protected ArrayList<Location> getEndPoints() {
         ArrayList<Location> endPoints = new ArrayList<Location>();
@@ -689,7 +696,8 @@ class Player {
         }
         return endPoints;
     }
-    // Fonction auxiliaire pour recuperer les coordonnees d'un(e) case/emplacement/chemin :
+
+    // Fonction auxiliaire pour récuperer les coordonnées d'un(e) case/emplacement/chemin :
     private final static int[] scanLocationOrPath(Scanner sc) throws Exception {
         try {
             String s = sc.nextLine();
@@ -706,8 +714,10 @@ class Player {
         }
     }
 
+
     ////////// Fonctions des ports et du commerce maritime //////////
 
+    // Fonction qui procède à un échange de ressources via le commerce maritime :
     protected void exchange(int n, String ressource) {
         if (ressource==null) {
             System.out.println("Veuillez donner "+n+" ressources de votre choix :");
@@ -760,6 +770,7 @@ class Player {
         } while (true);        
     }
 
+    // Fonction pour utiliser l'un des ports que possède le joueur :
     protected void useHarbor() {
         int[] ids = new int[this.harbors.size()];
         int a = 0;
@@ -836,6 +847,7 @@ class Player {
             }
         } while (true);
     }
+
     // Carte progrès invention :
     protected void invention() {
         int acc = 1;
@@ -860,6 +872,7 @@ class Player {
             }
         }while (true);
     }
+
     // Carte progrès route :
     protected void carteRoute() {
         System.out.println("Veuillez construire votre premiere route");
@@ -867,6 +880,7 @@ class Player {
         System.out.println("Veuillez construire votre seconde route");
         this.buildRoad(true);
     }
+
     // Carte monopole :
     protected void monopole() {
         int n = 0;

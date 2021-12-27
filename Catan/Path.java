@@ -3,10 +3,14 @@ package Catan;
 import java.util.ArrayList;
 
 class Path {
+
+    ////////// Attributs //////////
     
     protected final char position;
     protected Location point1;
     protected Location point2;
+
+    ////////// Constructeur et fonctions associées à ce dernier //////////
 
     Path(char position, Location point1, Location point2) {
         if (position!='H' && position!='V') throw new IllegalArgumentException();
@@ -15,6 +19,9 @@ class Path {
         this.point2 = point2;
     }
 
+    ////////// Fonctions auxiliaires //////////
+
+    // Print :
     @Override
     public String toString() {
         String pos = (this.position=='H')? "horizontal" : "vertical";
@@ -22,7 +29,7 @@ class Path {
                 " et "+this.point2.toString());
     }
 
-
+    // Renvoie les chemins "voisins" (qui sont à côté) du chemin courant :
     protected static final ArrayList<Path> getNeighborsPaths(Location point) {
         ArrayList<Path> neighbors = new ArrayList<Path>();
         // Route à gauche :

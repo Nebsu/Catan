@@ -120,81 +120,9 @@ final class PlayBoard {
         }
     }
 
-
     ////////// Fonctions auxiliaires //////////
 
-    // Récupération des cases désignées par les dés :
-    final ArrayList<Box> getBoxes(int dice) {
-        ArrayList<Box> res = new ArrayList<Box>();
-        for (int i=0; i<boxes.length; i++) {
-            for (int j=0; j<boxes[i].length; j++) {
-                if (this.boxes[i][j].number==dice) {
-                    res.add(this.boxes[i][j]);
-                }
-            }
-        }
-        return res;
-    }
-
-    // Mise à jour des chemins après la constructions de colonies/villes :
-    final void updatePaths() {
-        for (int i=0; i<this.horizontalPaths.length; i++) {
-            for (int j=0; j<this.horizontalPaths[i].length; j++) {
-                this.horizontalPaths[i][j].point1 = this.locations[i][j];
-                this.horizontalPaths[i][j].point2 = this.locations[i][j+1];
-            }
-        }
-        for (int i=0; i<this.verticalPaths.length; i++) {
-            for (int j=0; j<this.verticalPaths[i].length; j++) {
-                this.verticalPaths[i][j].point1 = this.locations[i][j];
-                this.verticalPaths[i][j].point2 = this.locations[i+1][j];
-            }
-        }
-    }
-
-    // Récupération du port qui possède l'id passé en argument :
-    final Harbor getHarbor(int id) {
-        for (int i=0; i<this.seaBoxes.length; i++) {
-            if (this.seaBoxes[i] instanceof Harbor) {
-                if (((Harbor) this.seaBoxes[i]).id==id) return ((Harbor) this.seaBoxes[i]);
-            }
-        }
-        return null;
-    }
-
-    ////////// Fonctions booléennes //////////
-
-    // Renvoie true si toutes les intersections sont occupées par une colonie/ville :
-    final boolean isFilledLocations() {
-        int numberOfColonies = 0;
-        for (int i=0; i<this.locations.length; i++) {
-            for (int j=0; j<this.locations[i].length; j++) {
-                if (this.locations[i][j] instanceof Colony) {
-                    numberOfColonies++;
-                }
-            }
-        }
-        return (numberOfColonies==25);
-    }
-    
-    // Renvoie true si tous les chemins ont été pris :
-    final boolean isFilledPaths() {
-        int numberOfRoads = 0;
-        for (int i=0; i<this.horizontalPaths.length; i++) {
-            for (int j=0; j<this.horizontalPaths[i].length; j++) {
-                if (this.horizontalPaths[i][j] instanceof Road) numberOfRoads++;
-            }
-        }
-        for (int i=0; i<this.verticalPaths.length; i++) {
-            for (int j=0; j<this.verticalPaths[i].length; j++) {
-                if (this.verticalPaths[i][j] instanceof Road) numberOfRoads++;
-            }
-        }
-        return (numberOfRoads==40);
-    }
-
-
-    ////////// Affichage du plateau //////////
+    // Affichage du plateau :
     final void display() {
         int seaAcc1 = 4;
         int seaAcc2 = 15;
@@ -261,6 +189,77 @@ final class PlayBoard {
             System.out.print("    "+this.seaBoxes[i]+"  ");
         System.out.println();
         System.out.println("\n");
+    }
+
+    // Récupération des cases désignées par les dés :
+    final ArrayList<Box> getBoxes(int dice) {
+        ArrayList<Box> res = new ArrayList<Box>();
+        for (int i=0; i<boxes.length; i++) {
+            for (int j=0; j<boxes[i].length; j++) {
+                if (this.boxes[i][j].number==dice) {
+                    res.add(this.boxes[i][j]);
+                }
+            }
+        }
+        return res;
+    }
+
+    // Mise à jour des chemins après la constructions de colonies/villes :
+    final void updatePaths() {
+        for (int i=0; i<this.horizontalPaths.length; i++) {
+            for (int j=0; j<this.horizontalPaths[i].length; j++) {
+                this.horizontalPaths[i][j].point1 = this.locations[i][j];
+                this.horizontalPaths[i][j].point2 = this.locations[i][j+1];
+            }
+        }
+        for (int i=0; i<this.verticalPaths.length; i++) {
+            for (int j=0; j<this.verticalPaths[i].length; j++) {
+                this.verticalPaths[i][j].point1 = this.locations[i][j];
+                this.verticalPaths[i][j].point2 = this.locations[i+1][j];
+            }
+        }
+    }
+
+    // Récupération du port qui possède l'id passé en argument :
+    final Harbor getHarbor(int id) {
+        for (int i=0; i<this.seaBoxes.length; i++) {
+            if (this.seaBoxes[i] instanceof Harbor) {
+                if (((Harbor) this.seaBoxes[i]).id==id) return ((Harbor) this.seaBoxes[i]);
+            }
+        }
+        return null;
+    }
+
+
+    ////////// Fonctions booléennes //////////
+
+    // Renvoie true si toutes les intersections sont occupées par une colonie/ville :
+    final boolean isFilledLocations() {
+        int numberOfColonies = 0;
+        for (int i=0; i<this.locations.length; i++) {
+            for (int j=0; j<this.locations[i].length; j++) {
+                if (this.locations[i][j] instanceof Colony) {
+                    numberOfColonies++;
+                }
+            }
+        }
+        return (numberOfColonies==25);
+    }
+    
+    // Renvoie true si tous les chemins ont été pris :
+    final boolean isFilledPaths() {
+        int numberOfRoads = 0;
+        for (int i=0; i<this.horizontalPaths.length; i++) {
+            for (int j=0; j<this.horizontalPaths[i].length; j++) {
+                if (this.horizontalPaths[i][j] instanceof Road) numberOfRoads++;
+            }
+        }
+        for (int i=0; i<this.verticalPaths.length; i++) {
+            for (int j=0; j<this.verticalPaths[i].length; j++) {
+                if (this.verticalPaths[i][j] instanceof Road) numberOfRoads++;
+            }
+        }
+        return (numberOfRoads==40);
     }
 
 }

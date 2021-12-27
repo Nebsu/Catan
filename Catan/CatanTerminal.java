@@ -42,6 +42,7 @@ public final class CatanTerminal {
                 PLAYERS[i].buildRoad(true);
             }
         }
+        // Route la plus longue au début :
         hasTheLongestRoad = longestRoad(hasTheLongestRoad);
         if (hasTheLongestRoad!=null)
             System.out.println(hasTheLongestRoad.name+" a la route la plus longue\n");
@@ -58,6 +59,7 @@ public final class CatanTerminal {
             turns++;
             System.out.println("TOUR "+turns);
             for (int i=0; i<PLAYERS.length; i++) {
+                // Tour du joueur :
                 PLAYERS[i].play();
                 System.out.println();
                 hasTheLongestRoad = longestRoad(hasTheLongestRoad);
@@ -94,6 +96,7 @@ public final class CatanTerminal {
         for (int i=1; i<PLAYERS.length; i++) PLAYERS[i] = createPlayer(i+1);
         return PLAYERS;
     }
+
     // Demande du nombre de joueurs :
     private static final byte requestNumPlayers() {
         byte nb = 0; // type byte pour économiser de la mémoire
@@ -112,6 +115,7 @@ public final class CatanTerminal {
         } while (nb!=3 && nb!=4);
         return nb;
     }
+
     // Créations des joueurs :
     private static final Player createPlayer(int i) {
         System.out.println("Joueur "+i+" : Humain ou IA ?");
@@ -135,6 +139,7 @@ public final class CatanTerminal {
         if (c=='I') res = new IA("IA"+String.valueOf(i), i);
         return res;
     }  
+
     // Création d'un "vrai" joueur (humain) :
     private static final Player createRealPlayer(int i) {
         // On définit cette fonction, car chaque joueur humain doit entrer
@@ -160,6 +165,7 @@ public final class CatanTerminal {
         return (new Player(name, i));
     }
 
+
     ////////// Route la plus longue //////////
 
     private static Player longestRoad(Player previous) {
@@ -183,7 +189,7 @@ public final class CatanTerminal {
         return PLAYERS[index];
     }
 
-    static int getMax(int[] t) {
+    public static int getMax(int[] t) {
         int max = t[0];
         for (int i=1; i<t.length; i++) {
             if (t[i]>max) max = t[i];

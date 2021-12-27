@@ -1,19 +1,27 @@
 package Catan;
 
 class Location {
+
+    ////////// Attributs ////////// 
     
     protected final Box[] boxes;
     protected final int indexI;
     protected final int indexJ;
 
+    ////////// Constructeur et fonctions associées à ce dernier //////////
+
     Location(Box[] boxes, int i, int j) {
-        if (boxes.length<=0 || boxes.length==3 || boxes.length>4) throw new IllegalArgumentException();
+        if (boxes.length<=0 || boxes.length==3 || boxes.length>4) 
+            throw new IllegalArgumentException();
         // boxes.length peut seulement être égal à 1, 2 et 4 
         this.boxes = boxes;
         this.indexI = i;
         this.indexJ = j;
     }
 
+    ////////// Fonctions auxiliaires //////////
+
+    // Print :
     @Override
     public String toString() {
         return ("L'emplacement "+(this.indexI+1)+(this.indexJ+1));
@@ -22,9 +30,12 @@ class Location {
 
     ////////// Fonctions des ports ////////// 
 
+    // Renvoie true si l'intersection est à côté d'un port :
     protected boolean hasAnHarbor() {
         return (this.getHarbor()!=null);
     }
+
+    // Si ce dernier existe, cette fonction renvoie le port en question :
     protected Harbor getHarbor() {
         for (int i=0; i<CatanTerminal.PLAYBOARD.seaBoxes.length; i++) {
             if (CatanTerminal.PLAYBOARD.seaBoxes[i] instanceof Harbor) {

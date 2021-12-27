@@ -3,7 +3,9 @@ package Catan;
 import java.util.Collections;
 import java.util.Stack;
 
-class Deck {
+final class Deck {
+
+    ////////// Attributs //////////
 
     private Stack<Card> deck = new Stack<Card>();
 
@@ -18,6 +20,8 @@ class Deck {
        3 = Invention
        4 = Monopole
     */
+
+    ////////// Constructeur et fonctions associées à ce dernier //////////
 
     Deck() {
         for(int i = 0; i < 5; i++)
@@ -37,6 +41,6 @@ class Deck {
         Collections.shuffle(deck);
     }
 
-    public Stack<Card> getDeck() {return deck;}
+    final Stack<Card> getDeck() {return deck;}
 
 }
