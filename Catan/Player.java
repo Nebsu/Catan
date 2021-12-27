@@ -1,6 +1,5 @@
 package Catan;
 
-import java.nio.channels.IllegalSelectorException;
 import java.util.*;
 import Catan.Exceptions.*;
 

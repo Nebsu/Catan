@@ -42,7 +42,7 @@ final class IA extends Player {
     protected boolean canConstructRoad() {return super.canConstructRoad();}
 
     @Override
-    protected boolean hasEnoughToBuyACard() {return super.hasEnoughToBuyACard();}
+    protected boolean canBuyACard() {return super.canBuyACard();}
 
     @Override
     protected boolean canUseHarbor() {return super.canUseHarbor();}
