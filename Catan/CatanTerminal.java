@@ -36,11 +36,19 @@ public final class CatanTerminal {
     public static final void catan() {
         PLAYBOARD.display(); // affichage du plateau vide
         // Placement des colonies et routes de base :
-        for (int k=0; k<2; k++) {
-            for (int i=0; i<PLAYERS.length; i++) {
-                PLAYERS[i].buildColony(true);
-                PLAYERS[i].buildRoad(true);
-            }
+        for (int i=0; i<PLAYERS.length; i++) {
+            PLAYERS[i].buildColony(true);
+            PLAYERS[i].buildRoad(true, true);
+            // buildRoad(true, true) = route construite sans frais pendant la phase initiale
+            // buildRoad(true, false) = route construite sans frais pendant le jeu grâce à la carte progrès route
+            // buildRoad(false, false) = route construite normalement pendant le jeu
+            // buildRoad(false, true) = IMPOSSIBLE, les routes construites pendant la phase initial sont forcément gratuites
+        }
+        for (int i=PLAYERS.length-1; i>=0; i--) {
+            PLAYERS[i].buildColony(true);
+            PLAYERS[i].buildRoad(true, true);
+            // Le joueur gagne ces premières ressources (une unité par terrain adjacent à sa deuxième colonie) :
+            PLAYERS[i].gainInitialResources();
         }
         // Route la plus longue au début :
         hasTheLongestRoad = longestRoad(hasTheLongestRoad);

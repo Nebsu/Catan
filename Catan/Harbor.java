@@ -34,5 +34,10 @@ final class Harbor extends SeaBox {
         ((this.type=="Simple")? "S?" : this.ressource.substring(0, 2))+
         CatanTerminal.RESET);
     }
+    public String toStringWithId() {
+        return (CatanTerminal.CYAN_BOLD_BRIGHT+"P"+
+        ((this.type=="Simple")? "S?" : this.ressource.substring(0, 2))+
+        " "+this.id+CatanTerminal.RESET);
+    }
     
 }

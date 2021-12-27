@@ -22,8 +22,8 @@ final class IA extends Player {
 
     // Renvoie le nombre de ressources total du joueur :
     @Override
-    protected int nbRessources() {
-        return super.nbRessources();
+    protected int nbRessources(String ressource) {
+        return super.nbRessources(ressource);
     }
 
 
@@ -74,7 +74,7 @@ final class IA extends Player {
 
 
     // Lancé des dés :
-    protected static int throwDices() { 
+    private static int throwDices() { 
         Random rd1 = new Random(), rd2 = new Random();
         int dice1 = rd1.nextInt(6)+1;
         int dice2 = rd2.nextInt(6)+1;
@@ -243,7 +243,7 @@ final class IA extends Player {
             Random r = new Random();
             int n = r.nextInt(2);
             if(n==0){
-                this.buildRoad(false);
+                this.buildRoad(false, false);
             }else{
                 return;
             }
@@ -343,7 +343,7 @@ final class IA extends Player {
 
     // Construction d'une route :
     @Override
-    protected void buildRoad(boolean isFree) {
+    protected void buildRoad(boolean isFree, boolean beginning) {
         boolean notOk = true;
         char c;
         do {
@@ -368,7 +368,7 @@ final class IA extends Player {
                     notOk = true;
                 } else {
                     try {
-                        Road r = this.buildRoadNextToColony(c, (c=='H')? CatanTerminal.PLAYBOARD.horizontalPaths[k][l] : CatanTerminal.PLAYBOARD.verticalPaths[k][l]);
+                        Road r = this.buildRoadNextToColony(c, (c=='H')? CatanTerminal.PLAYBOARD.horizontalPaths[k][l] : CatanTerminal.PLAYBOARD.verticalPaths[k][l], beginning);
                         if (c=='H') CatanTerminal.PLAYBOARD.horizontalPaths[k][l] = r;
                         else CatanTerminal.PLAYBOARD.verticalPaths[k][l] = r;
                         this.roads.add(r);
@@ -380,6 +380,7 @@ final class IA extends Player {
                     } catch (InexistantColonyException ice) {
                         notOk = true;
                         try {
+                            if (beginning) throw new IllegalStateException();
                             Road r = this.buildRoadNextToRoad(c, (c=='H')? CatanTerminal.PLAYBOARD.horizontalPaths[k][l] : CatanTerminal.PLAYBOARD.verticalPaths[k][l]);
                             if (c=='H') CatanTerminal.PLAYBOARD.horizontalPaths[k][l] = r;
                             else CatanTerminal.PLAYBOARD.verticalPaths[k][l] = r;
@@ -389,6 +390,8 @@ final class IA extends Player {
                                 this.inventory.replace("Argile", this.inventory.get("Argile")-1); 
                             }
                             notOk = false;
+                        } catch (IllegalStateException e) {
+                            notOk = true;
                         } catch (InexistantRoadException ire) {
                             notOk = true;
                         }
@@ -402,17 +405,20 @@ final class IA extends Player {
     }
 
     // Construction d'une route à côté d'une colonie :
-    protected Road buildRoadNextToColony(char c, Path selectedPath) throws InexistantColonyException {
-        return super.buildRoadNextToColony(c, selectedPath);
+    @Override
+    protected Road buildRoadNextToColony(char c, Path selectedPath, boolean beginning) throws InexistantColonyException {
+        return super.buildRoadNextToColony(c, selectedPath, beginning);
     }
 
     // Construction d'une route à côté d'une autre route :
+    @Override
     protected Road buildRoadNextToRoad(char c, Path selectedPath) throws InexistantRoadException {
         return super.buildRoadNextToRoad(c, selectedPath);
     }
 
     // Fonction pour récupérer les emplacements d'arrivée de toutes les routes
     // construites par le joueur courant :
+    @Override
     protected ArrayList<Location> getEndPoints() {
         return super.getEndPoints();
     }
@@ -494,8 +500,8 @@ final class IA extends Player {
     // Carte progrès route :
     @Override
     protected void carteRoute() {
-        this.buildRoad(true);
-        this.buildRoad(true);
+        this.buildRoad(true, false);
+        this.buildRoad(true, false);
     }
     
     // Carte monopole :

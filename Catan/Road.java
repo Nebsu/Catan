@@ -55,13 +55,16 @@ final class Road extends Path {
 
     // Renvoie true si la route courante est liée à d'autres routes du même joueur :
     final boolean hasLinkedRoads() {
-        return (!this.getLinkedRoads().isEmpty());
+        return (!this.getLinkedRoads().isEmpty() || this.getLinkedRoads()!=null);
     }
 
     // Renvoie la liste des routes d'un même joueur qui sont liées à this :
     final ArrayList<Road> getLinkedRoads() {
+        Location mainPoint = this.mainPoint();
+        if (mainPoint instanceof Colony 
+        && ((Colony) mainPoint).player!=this.player) return null;
         ArrayList<Path> neighbors = new ArrayList<Path>();
-        neighbors.addAll(getNeighborsPaths(this.mainPoint()));
+        neighbors.addAll(getNeighborsPaths(mainPoint));
         ArrayList<Road> yourRoads = new ArrayList<Road>();
         for (Path path : neighbors) {
             if (path instanceof Road && ((Road)path).player==this.player 
