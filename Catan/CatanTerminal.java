@@ -28,13 +28,17 @@ public final class CatanTerminal {
     static final Deck DECK = new Deck(); // pile de cartes développement 
     static boolean army = false; // devient true quand un joueur utilise 3 chevaliers
     static Player hasTheStrongestArmy = null; // joueur qui a l'armée la plus puissante
+    static boolean longestRoad = false; // indique si un joueur possède la route la plus longue
     static Player hasTheLongestRoad = null; // joueur qui a la route la plus longue
 
 
     ////////// FONCTION PRINCIPALE DU JEU //////////
 
     public static final void catan() {
+        ////////// PHASE INITIALE //////////
+
         PLAYBOARD.display(); // affichage du plateau vide
+        // Début de la partie :
         // Placement des colonies et routes de base :
         for (int i=0; i<PLAYERS.length; i++) {
             PLAYERS[i].buildColony(true);
@@ -42,7 +46,7 @@ public final class CatanTerminal {
             // buildRoad(true, true) = route construite sans frais pendant la phase initiale
             // buildRoad(true, false) = route construite sans frais pendant le jeu grâce à la carte progrès route
             // buildRoad(false, false) = route construite normalement pendant le jeu
-            // buildRoad(false, true) = IMPOSSIBLE, les routes construites pendant la phase initial sont forcément gratuites
+            // buildRoad(false, true) = IMPOSSIBLE, les routes construites pendant la phase initiale sont forcément gratuites
         }
         for (int i=PLAYERS.length-1; i>=0; i--) {
             PLAYERS[i].buildColony(true);
@@ -52,17 +56,20 @@ public final class CatanTerminal {
         }
         // Route la plus longue au début :
         hasTheLongestRoad = longestRoad(hasTheLongestRoad);
-        if (hasTheLongestRoad!=null)
+        if (longestRoad)
             System.out.println(hasTheLongestRoad.name+" a la route la plus longue\n");
         else 
             System.out.println("Aucun joueur a une route plus longue que les autres : Egalite\n");
         // Affichage des joueurs au commencement du jeu :
         for (int i=0; i<PLAYERS.length; i++) System.out.println(PLAYERS[i]);
         System.out.println();
-        // Début de la partie :
+
+        ////////// PHASE DU JEU //////////
+        
         boolean end = false; // devient true quand un joueur a 10 points de victoire
         Player winner = null; // gagnant de la partie
         int turns = 0; // nombre de tours
+        // Boucle du jeu :
         while (!end) {
             turns++;
             System.out.println("TOUR "+turns);
@@ -75,22 +82,48 @@ public final class CatanTerminal {
                     winner = PLAYERS[i];
                     break;
                 } 
+                // Route la plus longue :
                 hasTheLongestRoad = longestRoad(hasTheLongestRoad);
-                if (hasTheLongestRoad!=null)
+                if (longestRoad)
                     System.out.println(hasTheLongestRoad.name+" a la route la plus longue\n");
                 else 
                     System.out.println("Aucun joueur ne possede la route plus longue : Egalite\n");
-                System.out.println(hasTheStrongestArmy.name+" possede l'armee la plus puissnate");
-            }
-            if (!end) {
-                System.out.println();
-                for (int i=0; i<PLAYERS.length; i++) 
-                    System.out.println(PLAYERS[i]);
-                System.out.println();
+                // Armée la plus puissante :
+                if (hasTheStrongestArmy!=null)
+                    System.out.println(hasTheStrongestArmy.name+" possede l'armee la plus puissante");
+                if (!end) {
+                    System.out.println();
+                    for (int j=0; j<PLAYERS.length; j++) 
+                        System.out.println(PLAYERS[j]);
+                    System.out.println();
+                }
             }
         }
+
+        ////////// Fin du jeu //////////
+
         System.out.println("Felicitations "+winner.name+" ! Vous avez gagne la partie !");
-        System.out.println("Nombre de tours total de la partie : "+turns);
+        System.out.println("Classement :");
+        System.out.println("1er : "+winner.name);
+        ArrayList<Player> players = new ArrayList<Player>();
+        for (int i=0; i<PLAYERS.length; i++) {
+            if (PLAYERS[i]!=winner) players.add(PLAYERS[i]);
+        }
+        int index = 2;
+        while (!players.isEmpty()) {
+            Player best = null;
+            int max = 0;
+            for (Player play : players) {
+                if (play.victoryPoints>max) {
+                    max = play.victoryPoints;
+                    best = play;
+                } 
+            }
+            players.remove(best);
+            System.out.println(index+"eme : "+best.name);
+            index++;
+        }
+        System.out.println("\nNombre de tours total de la partie : "+turns+"\n");
     }
 
 
@@ -180,6 +213,7 @@ public final class CatanTerminal {
     ////////// Route la plus longue //////////
 
     private static Player longestRoad(Player previous) {
+        boolean b = true;
         int[] sizes = new int[PLAYERS.length];
         for (int i=0; i<PLAYERS.length; i++) {
             sizes[i] = PLAYERS[i].longestRoad();
@@ -188,15 +222,16 @@ public final class CatanTerminal {
         System.out.println();
         int max = sizes[0];
         int index = 0;
-        for (int i=1; i<sizes.length; i++) {
-            if (sizes[i]==max) return null;
+        for (int i=1; i<sizes.length; i++) { 
             if (sizes[i]>max) {
                 max = sizes[i];
                 index = i;
             }
+            if (sizes[i]==max) b = false;
         }
-        PLAYERS[index].victoryPoints += 2;
-        if (previous!=null) previous.victoryPoints -= 2;
+        if (previous!=PLAYERS[index] && b) PLAYERS[index].victoryPoints += 2;
+        if (previous!=null && !b) previous.victoryPoints -= 2;
+        longestRoad = b;
         return PLAYERS[index];
     }
 

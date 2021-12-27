@@ -3,7 +3,6 @@ package Catan;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.Set;
-
 import Catan.Exceptions.*;
 
 final class IA extends Player {
@@ -49,19 +48,9 @@ final class IA extends Player {
 
     @Override
     protected boolean canBuyACard() {return super.canBuyACard();}
-<<<<<<< HEAD
-=======
-
-    @Override
-    protected boolean canExchange(int price, String ressource) {return super.canExchange(price, ressource);}
->>>>>>> dcc022e53d1c206b506080559bd63b91297b8dd7
 
     @Override
     protected boolean canUseHarbor() {return super.canUseHarbor();}
-
-    @Override
-    protected boolean onlyContainsSimpleHarbour() {return super.onlyContainsSimpleHarbour();}
-
 
 
     ////////// FONCTIONS DU JEU //////////
