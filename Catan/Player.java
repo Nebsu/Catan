@@ -75,12 +75,24 @@ class Player {
     }
 
     // Gain de ressources pendant la phase initiale :
+    // Comme dans notre version du Catan, une colonie peut être collée jusqu'à 4 terrains différents (tuiles carrées), 
+    // on décide de donner 3 ressources au lieu de 4 pour les colonies collées à 4 tuiles de terrains, dans le but 
+    // d'améliorer la jouabilité (4 ressources dès le début c'est un peu de la triche) :
     protected void gainInitialResources() {
         Colony lastConstructedColony = this.coloniesOnPlayBoard.get(this.coloniesOnPlayBoard.size()-1);
         Box[] boxes = lastConstructedColony.boxes;
-        for (int i=0; i<boxes.length; i++) {
-            if (boxes[i].ressource!=null)
-                this.inventory.replace(boxes[i].ressource, this.inventory.get(boxes[i].ressource)+1);
+        if (boxes.length==4) {
+            Random rd = new Random();
+            int exclude = rd.nextInt(4);
+            for (int i=0; i<boxes.length; i++) {
+                if (boxes[i].ressource!=null && i!=exclude)
+                    this.inventory.replace(boxes[i].ressource, this.inventory.get(boxes[i].ressource)+1);
+            }
+        } else {
+            for (int i=0; i<boxes.length; i++) {
+                if (boxes[i].ressource!=null)
+                    this.inventory.replace(boxes[i].ressource, this.inventory.get(boxes[i].ressource)+1);
+            }
         }
         System.out.println("Votre inventaire : "+this.inventory);
     }
@@ -114,9 +126,9 @@ class Player {
                 (this.inventory.get("Bois")>=1 && this.inventory.get("Argile")>=1));
     }
 
-    protected boolean hasEnoughToBuyACard() {
-        return (this.inventory.get("Roche")>=1 && this.inventory.get("Laine")>=1 &&
-                this.inventory.get("Ble")>=1);
+    protected boolean canBuyACard() {
+        return (!CatanTerminal.DECK.getDeck().isEmpty() && this.inventory.get("Roche")>=1 
+                && this.inventory.get("Laine")>=1 && this.inventory.get("Ble")>=1);
     }
 
     protected boolean canExchange(int price, String ressource) {
@@ -187,6 +199,11 @@ class Player {
         this.proposeToConstructRoad();
         // Proposition d'achat d'une carte développement quand cela est possible :
         this.proposeToBuySpecialCard();
+        if (this.specialCards.get(this.specialCards.size()-1).id==0
+            && this.victoryPoints==9) {
+                this.specialCards.remove(this.specialCards.size()-1);
+                this.victoryPoints++;
+            }
     }
 
 
@@ -561,7 +578,7 @@ class Player {
 
     // Proposition d'achat d'une carte developpement :
     protected void proposeToBuySpecialCard() {
-        if (this.hasEnoughToBuyACard()) {
+        if (this.canBuyACard()) {
             do {
                 System.out.println("Voulez-vous acheter une carte developpement ?");
                 System.out.println("Cout : 1 roche, 1 laine et 1 ble");

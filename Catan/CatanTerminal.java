@@ -70,21 +70,24 @@ public final class CatanTerminal {
                 // Tour du joueur :
                 PLAYERS[i].play();
                 System.out.println();
-                hasTheLongestRoad = longestRoad(hasTheLongestRoad);
-                if (hasTheLongestRoad!=null)
-                    System.out.println(hasTheLongestRoad.name+" a la route la plus longue\n");
-                else 
-                    System.out.println("Aucun joueur ne possede la route plus longue : Egalite\n");
                 if (PLAYERS[i].isWinner()) {
                     end = true;
                     winner = PLAYERS[i];
                     break;
                 } 
+                hasTheLongestRoad = longestRoad(hasTheLongestRoad);
+                if (hasTheLongestRoad!=null)
+                    System.out.println(hasTheLongestRoad.name+" a la route la plus longue\n");
+                else 
+                    System.out.println("Aucun joueur ne possede la route plus longue : Egalite\n");
+                System.out.println(hasTheStrongestArmy.name+" possede l'armee la plus puissnate");
             }
-            System.out.println();
-            for (int i=0; i<PLAYERS.length; i++) 
-                System.out.println(PLAYERS[i]);
-            System.out.println();
+            if (!end) {
+                System.out.println();
+                for (int i=0; i<PLAYERS.length; i++) 
+                    System.out.println(PLAYERS[i]);
+                System.out.println();
+            }
         }
         System.out.println("Felicitations "+winner.name+" ! Vous avez gagne la partie !");
         System.out.println("Nombre de tours total de la partie : "+turns);
