@@ -2,6 +2,8 @@ package Catan;
 
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.Set;
+
 import Catan.Exceptions.*;
 
 final class IA extends Player {
@@ -26,6 +28,10 @@ final class IA extends Player {
         return super.nbRessources(ressource);
     }
 
+    protected void gainInitialResources() {
+        super.gainInitialResources();
+    }
+
 
     ////////// Fonctions booléennes //////////
 
@@ -43,12 +49,19 @@ final class IA extends Player {
 
     @Override
     protected boolean canBuyACard() {return super.canBuyACard();}
+<<<<<<< HEAD
+=======
+
+    @Override
+    protected boolean canExchange(int price, String ressource) {return super.canExchange(price, ressource);}
+>>>>>>> dcc022e53d1c206b506080559bd63b91297b8dd7
 
     @Override
     protected boolean canUseHarbor() {return super.canUseHarbor();}
 
     @Override
     protected boolean onlyContainsSimpleHarbour() {return super.onlyContainsSimpleHarbour();}
+
 
 
     ////////// FONCTIONS DU JEU //////////
@@ -199,13 +212,39 @@ final class IA extends Player {
     //  même si ce dernier ne possède pas de port) :
     @Override
     protected void proposeToExchange41() {
-        // TODO Auto-generated method stub
+        if (canExchange(4, null)) {
+            Random random = new Random();
+            int r = random.nextInt(2);
+            do {
+                try {
+                    if (r == 0){
+                        this.exchange(4, null);
+                        System.out.println("Votre inventaire :"+this.inventory);
+                    }break;
+                } catch (Exception e) {
+                    System.out.println(WrongInputException.MESSAGE);
+                }
+            } while (true);
+        }
     }
 
     // Proposition d'utilisation d'un port pour faire un échange :
     @Override
     protected void proposeToUseHarbor() {
-        // TODO Auto-generated method stub
+        if (this.canUseHarbor()) {
+            Random random = new Random();
+            int r = random.nextInt(2);
+            do {
+                try {
+                    if (r == 0){
+                        this.useHarbor();
+                        System.out.println("Votre inventaire :"+this.inventory);
+                    }break;
+                } catch (Exception e) {
+                    System.out.println(WrongInputException.MESSAGE);
+                }
+            } while (true);
+        }
     }
 
     // Proposition de construction d'une colonie : 
@@ -429,13 +468,105 @@ final class IA extends Player {
     // Fonction qui procède à un échange de ressources via le commerce maritime :
     @Override
     protected void exchange(int n, String ressource) {
-        // TODO Auto-generated method stub
+        if (ressource==null) {
+            System.out.println("Choisissez la ressource dont vous voulez donner 4 unites :");
+            Set<String> keys = this.inventory.keySet();
+            ArrayList<String> selectables = new ArrayList<String>();
+            for (String key : keys) {
+                if (this.inventory.get(key)>=4) selectables.add(key);
+            }
+            String s = "";
+            int r = 0;
+            do {
+                try {
+                    Random random = new Random();
+                    r = random.nextInt(5);
+                    if(r == 0){
+                        s = "Roche";
+                    }else if(r == 1){
+                        s = "Laine";
+                    }else if(r == 2){
+                        s = "Ble";
+                    }else if(r == 3){
+                        s = "Argile";
+                    }else s = "Bois";
+                    for (String sel : selectables) 
+                        System.out.print(sel+"   ");
+                    System.out.println();
+                    String line = s;
+                    if (!selectables.contains(line)) throw new WrongInputException();
+                    this.exchange(4, line);
+                } catch (Exception e) {
+                    System.out.println(WrongInputException.MESSAGE);
+                }
+            } while (true);
+        } else {
+            Integer a = this.inventory.get(ressource);
+            this.inventory.put(ressource, a-Integer.valueOf(n));
+            do {
+                try {
+                    String s = "";
+                    Random random = new Random();
+                    int r = random.nextInt(5);
+                    if(r == 0){
+                        s = "Roche";
+                    }else if(r == 1){
+                        s = "Laine";
+                    }else if(r == 2){
+                        s = "Ble";
+                    }else if(r == 3){
+                        s = "Argile";
+                    }else s = "Bois";
+                    String line = s;
+                    System.out.println();
+                    if (!line.equals("Bois") && !line.equals("Argile") && !line.equals("Laine") && 
+                        !line.equals("Ble") && !line.equals("Roche")) throw new WrongInputException();
+                    Integer b = this.inventory.get(line);
+                    this.inventory.put(line, b+Integer.valueOf(1));
+                    System.out.println("Vous avez gagne 1 "+line);
+                    break;
+                } catch (Exception e) {
+                    System.out.println(WrongInputException.MESSAGE);
+                }
+            } while (true); 
+        }   
     }
 
     // Fonction pour utiliser l'un des ports que possède le joueur :
     @Override
     protected void useHarbor() {
-        // TODO Auto-generated method stub
+        Random r = new Random();
+        int random = r.nextInt(2);
+        if(random==0){
+            int[] ids = new int[this.harbors.size()];
+            int a = 0;
+            for (Harbor h : this.harbors) {
+                ids[a] = h.id;
+                a++;
+                System.out.print(h.toStringWithId()+"   ");
+            }
+            do {
+                try {
+                    Random r2 = new Random();
+                    int random2 = r2.nextInt(ids.length);
+                    int selectedId = ids[random2];
+                    int b = 0;
+                    for (int i=0; i<ids.length; i++) {
+                        if (ids[i]!=selectedId) b++;
+                    }
+                    if (b==ids.length) throw new WrongInputException();
+                    Harbor selectedHarbor = CatanTerminal.PLAYBOARD.getHarbor(selectedId);
+                    if (selectedHarbor.type.equals("Simple")) 
+                        if (!this.canExchange(3, null)) throw new NotEnoughRessourcesException();
+                    else 
+                        if (!this.canExchange(2, selectedHarbor.ressource)) throw new NotEnoughRessourcesException();
+                    this.exchange(selectedHarbor.price, selectedHarbor.ressource);
+                    break;
+                } catch (Exception e) {}
+            } while (true);
+        }else{
+            return;
+        }
     }
 
 
