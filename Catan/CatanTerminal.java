@@ -42,6 +42,11 @@ public final class CatanTerminal {
                 PLAYERS[i].buildRoad(true);
             }
         }
+        hasTheLongestRoad = longestRoad(hasTheLongestRoad);
+        if (hasTheLongestRoad!=null)
+            System.out.println(hasTheLongestRoad.name+" a la route la plus longue\n");
+        else 
+            System.out.println("Aucun joueur a une route plus longue que les autres : Egalite\n");
         // Affichage des joueurs au commencement du jeu :
         for (int i=0; i<PLAYERS.length; i++) System.out.println(PLAYERS[i]);
         System.out.println();
@@ -55,7 +60,11 @@ public final class CatanTerminal {
             for (int i=0; i<PLAYERS.length; i++) {
                 PLAYERS[i].play();
                 System.out.println();
-                hasTheLongestRoad = longestRoad();
+                hasTheLongestRoad = longestRoad(hasTheLongestRoad);
+                if (hasTheLongestRoad!=null)
+                    System.out.println(hasTheLongestRoad.name+" a la route la plus longue\n");
+                else 
+                    System.out.println("Aucun joueur ne possede la route plus longue : Egalite\n");
                 if (PLAYERS[i].isWinner()) {
                     end = true;
                     winner = PLAYERS[i];
@@ -153,21 +162,33 @@ public final class CatanTerminal {
 
     ////////// Route la plus longue //////////
 
-    private static Player longestRoad() {
+    private static Player longestRoad(Player previous) {
         int[] sizes = new int[PLAYERS.length];
         for (int i=0; i<PLAYERS.length; i++) {
             sizes[i] = PLAYERS[i].longestRoad();
+            System.out.println(PLAYERS[i].name+" : "+sizes[i]);
         }
-        int max = 0;
+        System.out.println();
+        int max = sizes[0];
         int index = 0;
-        for (int i=0; i<sizes.length; i++) {
+        for (int i=1; i<sizes.length; i++) {
+            if (sizes[i]==max) return null;
             if (sizes[i]>max) {
                 max = sizes[i];
                 index = i;
             }
-            if (sizes[i]==max) return null;
         }
+        PLAYERS[index].victoryPoints += 2;
+        if (previous!=null) previous.victoryPoints -= 2;
         return PLAYERS[index];
+    }
+
+    static int getMax(int[] t) {
+        int max = t[0];
+        for (int i=1; i<t.length; i++) {
+            if (t[i]>max) max = t[i];
+        }
+        return max;
     }
 
 }

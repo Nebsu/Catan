@@ -7,8 +7,8 @@ class Location {
     protected final int indexJ;
 
     Location(Box[] boxes, int i, int j) {
-        if (boxes.length<=0 || boxes.length==3) throw new IllegalArgumentException();
-        // boxes.length ne peut pas être négatif, nul, ou égal à 3
+        if (boxes.length<=0 || boxes.length==3 || boxes.length>4) throw new IllegalArgumentException();
+        // boxes.length peut seulement être égal à 1, 2 et 4 
         this.boxes = boxes;
         this.indexI = i;
         this.indexJ = j;

@@ -1,5 +1,6 @@
 package Catan;
 
+import java.nio.channels.IllegalSelectorException;
 import java.util.*;
 import Catan.Exceptions.*;
 
@@ -548,7 +549,7 @@ class Player {
             } catch (IndexOutOfBoundsException ind) {
                 System.out.println("Erreur : cet emplacement n'existe pas");
             } catch (WrongInputException w) {
-                System.out.print("Erreur : cet emplacement est occupe");
+                System.out.println("Erreur : cet emplacement est occupe");
             } catch (Exception e) {
                 System.out.println(WrongInputException.MESSAGE);
             }
@@ -588,6 +589,7 @@ class Player {
                 System.out.println(WrongInputException.MESSAGE);
             }
         } while (true);
+        CatanTerminal.PLAYBOARD.updatePaths();
         CatanTerminal.PLAYBOARD.display();
     }
 
@@ -626,7 +628,6 @@ class Player {
                         }
                         break;
                     } catch (InexistantColonyException ice) {
-                        System.out.println(ice);
                         try {
                             Road r = this.buildRoadNextToRoad(c, (c=='H')? CatanTerminal.PLAYBOARD.horizontalPaths[k][l] :
                             CatanTerminal.PLAYBOARD.verticalPaths[k][l]);
@@ -639,6 +640,7 @@ class Player {
                             }
                             break;
                         } catch (InexistantRoadException ire) {
+                            System.out.println(ice);
                             System.out.println(ire);
                         }
                     }
@@ -904,8 +906,41 @@ class Player {
     ////////// Route la plus longue du joueur courant //////////
 
     protected int longestRoad() {
-        // TODO
-        return -1;
+        ArrayList<Road> startRoads = new ArrayList<Road>();
+        for (Road r : this.roads)  {
+            if (r.isAStartRoad()) startRoads.add(r);
+        }
+        int[] distances = new int[startRoads.size()];
+        for (int i=0; i<startRoads.size(); i++) 
+            distances[i] = this.calculateLongestRoad(startRoads.get(i), new ArrayList<Road>(), 1);
+        return CatanTerminal.getMax(distances);
+    }
+    
+    private final int calculateLongestRoad(Road road, ArrayList<Road> crossedRoads, int acc) {
+        if (!road.hasLinkedRoads() || crossedRoads.contains(road)) return acc; 
+        if (!crossedRoads.contains(road)) crossedRoads.add(road);
+        if (road.getLinkedRoads().size()==1) {
+            crossedRoads.add(road.getLinkedRoads().get(0));
+            return this.calculateLongestRoad(road.getLinkedRoads().get(0), crossedRoads, acc+1);
+        }
+        if (road.getLinkedRoads().size()==2) {
+            crossedRoads.add(road.getLinkedRoads().get(0));
+            int a = this.calculateLongestRoad(road.getLinkedRoads().get(0), crossedRoads, acc+1);
+            crossedRoads.add(road.getLinkedRoads().get(1));
+            int b = this.calculateLongestRoad(road.getLinkedRoads().get(1), crossedRoads, acc+1);
+            return Math.max(a,b);
+        }
+        if (road.getLinkedRoads().size()==3) {
+            crossedRoads.add(road.getLinkedRoads().get(0));
+            int a = this.calculateLongestRoad(road.getLinkedRoads().get(0), crossedRoads, acc+1);
+            crossedRoads.add(road.getLinkedRoads().get(1));
+            int b = this.calculateLongestRoad(road.getLinkedRoads().get(1), crossedRoads, acc+1);
+            crossedRoads.add(road.getLinkedRoads().get(2));
+            int c = this.calculateLongestRoad(road.getLinkedRoads().get(2), crossedRoads, acc+1);
+            int[] tab = {a,b,c};
+            return CatanTerminal.getMax(tab);
+        }
+        return acc;
     }
 
 }
