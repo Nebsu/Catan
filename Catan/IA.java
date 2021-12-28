@@ -49,12 +49,9 @@ final class IA extends Player {
 
     @Override
     protected boolean canBuyACard() {return super.canBuyACard();}
-<<<<<<< HEAD
-=======
 
     @Override
     protected boolean canExchange(int price, String ressource) {return super.canExchange(price, ressource);}
->>>>>>> dcc022e53d1c206b506080559bd63b91297b8dd7
 
     @Override
     protected boolean canUseHarbor() {return super.canUseHarbor();}
@@ -77,6 +74,7 @@ final class IA extends Player {
             System.out.println("Voleur active");
             this.thief();
         }
+        System.out.println("Inventaire de " + this.name + " " + this.inventory);
         CatanTerminal.PLAYBOARD.display();
         this.proposeToUseSpecialCard();
         this.proposeToConstructColony();
@@ -146,6 +144,7 @@ final class IA extends Player {
                 CatanTerminal.PLAYBOARD.thief.hasThief = false;
                 CatanTerminal.PLAYBOARD.thief = CatanTerminal.PLAYBOARD.boxes[k][l];
                 res = CatanTerminal.PLAYBOARD.boxes[k][l];
+                System.out.println("Le bot a été placé en " + n1 + n2);
             } catch (Exception e) {
                 notOk = true;
             }
@@ -184,6 +183,9 @@ final class IA extends Player {
                 int r = random.nextInt(nearPlayers.size());
                 String name = nearPlayers.get(r).name;
                 System.out.println(name + " a ete vole");
+                if (nearPlayers.size()==1){
+                    if (nearPlayers.contains(this))return null;
+                }
                 if (!playersNames.contains(name)) throw new WrongInputException();
                 if (name.equals(this.name)) throw new WrongInputException();
                 notOk = false;
@@ -575,33 +577,32 @@ final class IA extends Player {
     // Utilisation d'une carte developpement :
     @Override
     protected void useSpecialCard() {
-        boolean notOk = true;
-        do {
-            Random random = new Random();
-            int n = random.nextInt(5)+1;
-            notOk = false;
-            for(Card c : this.specialCards){
-                if(c.id==1 && n==1){
-                    // Bouge le voleur
-                    this.specialCards.remove(c);
-                    this.knights++;
-                    if (this.knights==3 && !CatanTerminal.army) {
-                        CatanTerminal.army = true;
-                        this.victoryPoints += 2;
-                        CatanTerminal.hasTheStrongestArmy = this;
-                    }
-                }else if(c.id==3 && n==3){
-                    this.specialCards.remove(c);
-                    invention();
-                }else if(c.id==2 && n==2){
-                    this.specialCards.remove(c);
-                    carteRoute();
-                }else if(c.id==4 && n==4){
-                    this.specialCards.remove(c);
-                    monopole();
+        Random random = new Random();
+        int n = random.nextInt(5)+1;
+        for(Card c : this.specialCards){
+            if(c.id==1 && n==1){
+                this.specialCards.remove(c);
+                this.knights++;
+                if (this.knights==3 && !CatanTerminal.army) {
+                    CatanTerminal.army = true;
+                    this.victoryPoints += 2;
+                    CatanTerminal.hasTheStrongestArmy = this;
                 }
+                System.out.println("La carte: " + c.cardname + " a été utilisé");
+            }else if(c.id==3 && n==3){
+                this.specialCards.remove(c);
+                invention();
+                System.out.println("La carte: " + c.cardname + " a été utilisé");
+            }else if(c.id==2 && n==2){
+                this.specialCards.remove(c);
+                carteRoute();
+                System.out.println("La carte: " + c.cardname + " a été utilisé");
+            }else if(c.id==4 && n==4){
+                this.specialCards.remove(c);
+                monopole();
+                System.out.println("La carte: " + c.cardname + " a été utilisé");
             }
-        } while (notOk);
+        }
     }
 
     // Carte progrès invention :
@@ -652,10 +653,11 @@ final class IA extends Player {
             }else if(n == 3){
                 s = "Argile";
             }else s = "Bois";
-            for(Player PLAYBOARD : CatanTerminal.PLAYERS){
-                if(PLAYBOARD!=this){
-                    acc += PLAYBOARD.inventory.get(s);
-                    PLAYBOARD.inventory.replace(s, 0);
+            for(Player p : CatanTerminal.PLAYERS){
+                if(p!=this){
+                    acc += p.inventory.get(s);
+                    p.inventory.replace(s, 0);
+                    System.out.println("La ressource:" + " " + s + " a été monopolisée par " + this.name);
                 }
             }
             this.inventory.replace(s, this.inventory.get(s) + acc);
