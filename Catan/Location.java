@@ -23,9 +23,7 @@ class Location {
 
     // Print :
     @Override
-    public String toString() {
-        return ("L'emplacement "+(this.indexI+1)+(this.indexJ+1));
-    }
+    public String toString() {return ("OO");}
 
 
     ////////// Fonctions des ports ////////// 

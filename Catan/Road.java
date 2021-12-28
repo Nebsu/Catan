@@ -25,6 +25,17 @@ final class Road extends Path {
         }
     }
 
+    ////////// Fonctions auxiliaires //////////
+
+    // Print :
+    @Override
+    public String toString() {
+        if (this.position=='H')
+            return (this.player.color+"RRRRRRR"+CatanTerminal.RESET);
+        else 
+            return (this.player.color+"RR"+CatanTerminal.RESET);
+    }
+
 
     ////////// Route la plus longue du joueur courant //////////
 
@@ -55,7 +66,8 @@ final class Road extends Path {
 
     // Renvoie true si la route courante est liée à d'autres routes du même joueur :
     final boolean hasLinkedRoads() {
-        return (!this.getLinkedRoads().isEmpty() || this.getLinkedRoads()!=null);
+        if (this.getLinkedRoads()==null) return false;
+        return (!this.getLinkedRoads().isEmpty());
     }
 
     // Renvoie la liste des routes d'un même joueur qui sont liées à this :
