@@ -133,55 +133,30 @@ final class PlayBoard {
         System.out.println();
         System.out.print("                  ");
         for (int i=0; i<5; i++) {
-            if (this.locations[0][i] instanceof Colony) {
-                Colony col = (Colony) this.locations[0][i];
-                if (col.isCity) System.out.print(col.player.color+"V"+col.player.symbol+CatanTerminal.RESET);
-                else System.out.print(col.player.color+"C"+col.player.symbol+CatanTerminal.RESET);
-            } else System.out.print("OO");
+            System.out.print(this.locations[0][i]);
             if (i==4) {
                 System.out.println();
                 break;
             }
-            if (this.horizontalPaths[0][i] instanceof Road) {
-                for (int j=1; j<=7; j++) 
-                    System.out.print(((Road) this.horizontalPaths[0][i]).player.color+
-                    ((Road) this.horizontalPaths[0][i]).player.symbol+CatanTerminal.RESET);
-            } else System.out.print("-------");
+            System.out.print(this.horizontalPaths[0][i]);
         }
         for (int i=0; i<4; i++) {
             System.out.print("             ");
-            System.out.print(this.seaBoxes[seaAcc2]+"  ");seaAcc2--;
-            if (this.verticalPaths[i][0] instanceof Road) {
-                for (int j=1; j<=2; j++) 
-                    System.out.print(((Road) this.verticalPaths[i][0]).player.color+
-                    ((Road) this.verticalPaths[i][0]).player.symbol+CatanTerminal.RESET);
-            } else System.out.print("||");
+            System.out.print(this.seaBoxes[seaAcc2]+"  "); seaAcc2--;
+            System.out.print(this.verticalPaths[i][0]);
             for (int j=0; j<4; j++) {
                 System.out.print(" "+this.boxes[i][j]);
-                if (this.verticalPaths[i][j+1] instanceof Road) {
-                    System.out.print(" ");
-                    for (int k=1; k<=2; k++) 
-                        System.out.print(((Road) this.verticalPaths[i][j+1]).player.color+
-                        ((Road) this.verticalPaths[i][j+1]).player.symbol+CatanTerminal.RESET);
-                } else System.out.print(" ||");
+                System.out.print(" "+this.verticalPaths[i][j+1]);
             }
             System.out.println("  "+this.seaBoxes[seaAcc1]); seaAcc1++;
             System.out.print("                  ");
             for (int j=0; j<5; j++) {
-                if (this.locations[i+1][j] instanceof Colony) {
-                    Colony col = (Colony) this.locations[i+1][j];
-                    if (col.isCity) System.out.print(col.player.color+"V"+col.player.symbol+CatanTerminal.RESET);
-                    else System.out.print(col.player.color+"C"+col.player.symbol+CatanTerminal.RESET);
-                } else System.out.print("OO");
+                System.out.print(this.locations[i+1][j]);
                 if (j==4) {
                     System.out.println();
                     break;
                 }
-                if (this.horizontalPaths[i+1][j] instanceof Road) {
-                    for (int k=1; k<=7; k++) 
-                        System.out.print(((Road) this.horizontalPaths[i+1][j]).player.color+
-                        ((Road) this.horizontalPaths[i+1][j]).player.symbol+CatanTerminal.RESET);
-                } else System.out.print("-------");
+                System.out.print(this.horizontalPaths[i+1][j]);
             }
         }
         System.out.print("                  ");

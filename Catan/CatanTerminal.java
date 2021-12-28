@@ -215,6 +215,7 @@ public final class CatanTerminal {
     private static Player longestRoad(Player previous) {
         boolean b = true;
         int[] sizes = new int[PLAYERS.length];
+        System.out.println();
         for (int i=0; i<PLAYERS.length; i++) {
             sizes[i] = PLAYERS[i].longestRoad();
             System.out.println(PLAYERS[i].name+" : "+sizes[i]);
@@ -223,14 +224,15 @@ public final class CatanTerminal {
         int max = sizes[0];
         int index = 0;
         for (int i=1; i<sizes.length; i++) { 
+            if (sizes[i]==max) b = false;
             if (sizes[i]>max) {
                 max = sizes[i];
                 index = i;
             }
-            if (sizes[i]==max) b = false;
         }
         if (previous!=PLAYERS[index] && b) PLAYERS[index].victoryPoints += 2;
-        if (previous!=null && !b) previous.victoryPoints -= 2;
+        if (previous!=null && previous!=PLAYERS[index] && !b) 
+            previous.victoryPoints -= 2;
         longestRoad = b;
         return PLAYERS[index];
     }

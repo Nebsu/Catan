@@ -23,8 +23,8 @@ final class Colony extends Location {
     // Print :
     @Override
     public String toString() {
-        String type = (this.isCity)? "La ville" : "La colonie";
-        return (type+" numero "+this.id+" appartenant a "+this.player.name);
+        String type = (this.isCity)? "V" : "C";
+        return (this.player.color+type+this.id+CatanTerminal.RESET);
     }
 
 

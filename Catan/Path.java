@@ -24,9 +24,7 @@ class Path {
     // Print :
     @Override
     public String toString() {
-        String pos = (this.position=='H')? "horizontal" : "vertical";
-        return ("Chemin "+pos+" qui relie "+this.point1.toString()+
-                " et "+this.point2.toString());
+        return ((this.position=='H')? "-------" : "||");
     }
 
     // Renvoie les chemins "voisins" (qui sont à côté) du chemin courant :

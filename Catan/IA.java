@@ -58,20 +58,42 @@ final class IA extends Player {
     // Fonction principale (tour de l'IA) :
     @Override
     public void play() {
-        System.out.println("Au tour de "+this.name+" :");
+        System.out.println(this.color+"Au tour de "+this.name+" :"+CatanTerminal.RESET);
+        // Proposition d'utilisation d'une carte développement quand cela est possible :
+        if (!this.specialCards.isEmpty()) {
+            System.out.println(this.color+"Votre inventaire : "+this.inventory);
+            System.out.println("Vos cartes developpement :\n"+this.specialCards+CatanTerminal.RESET);
+        }
+        this.proposeToUseSpecialCard();
         int dice = throwDices();
-        System.out.println("Resultat du lancer des des : " + dice);
+        System.out.println(this.color+"Resultat du lancer : " + dice+CatanTerminal.RESET);
         if (dice!=7) earnResources(dice);
         else {
-            System.out.println("Voleur active");
+            System.out.println(this.color+"Voleur active"+CatanTerminal.RESET);
             this.thief();
         }
         CatanTerminal.PLAYBOARD.display();
+        System.out.println(this.color+"Votre inventaire : "+this.inventory+CatanTerminal.RESET);
+        // Proposition d'utilisation d'une carte développement quand cela est possible :
+        if (!this.specialCards.isEmpty()) 
+            System.out.println(this.color+"Vos cartes developpement :\n"+this.specialCards+CatanTerminal.RESET);
         this.proposeToUseSpecialCard();
+        // Phase de commerce :
+        this.proposeToExchange41();
+        this.proposeToUseHarbor();
+        // Phase de construction :
         this.proposeToConstructColony();
         this.proposeToConstructCity();
         this.proposeToConstructRoad();
+        // Proposition d'achat d'une carte développement quand cela est possible :
         this.proposeToBuySpecialCard();
+        if (!this.specialCards.isEmpty()) {
+            if (this.specialCards.get(this.specialCards.size()-1).id==0
+                && this.victoryPoints==9) {
+                    this.specialCards.remove(this.specialCards.size()-1);
+                    this.victoryPoints++;
+            }
+        }
     }
 
 
@@ -93,9 +115,7 @@ final class IA extends Player {
     // Donner des ressources au voleur :
     @Override
     protected void giveRessources(int n) {
-        System.out.println("Vous avez "+n+" ressources");
         n /= 2;
-        System.out.println("Veuillez donner "+n+" ressources au voleur");
         boolean notOk = true;
         Random random = new Random();
         String line;
@@ -154,13 +174,10 @@ final class IA extends Player {
         for (Location l : locations) {
             if (l instanceof Colony) colonies.add((Colony) l);
         }
-        if (colonies.isEmpty()) {
-            System.out.println("Aucune colonie a proximite de cette case");
+        if (colonies.isEmpty()) 
             return null;
-        }
         ArrayList<Player> nearPlayers = new ArrayList<Player>();
         for (Colony c : colonies) {
-            System.out.println(c);
             if (!nearPlayers.contains(c.player)) nearPlayers.add(c.player);
         }
         ArrayList<String> playersNames = new ArrayList<String>();
@@ -172,13 +189,13 @@ final class IA extends Player {
                 Random random = new Random();
                 int r = random.nextInt(nearPlayers.size());
                 String name = nearPlayers.get(r).name;
-                System.out.println(name + " a ete vole");
                 if (!playersNames.contains(name)) throw new WrongInputException();
                 if (name.equals(this.name)) throw new WrongInputException();
                 notOk = false;
-                for (Player PLAYBOARD : nearPlayers) {
-                    if (PLAYBOARD.name.equals(name)) {
-                        selectedPlayer = PLAYBOARD;
+                System.out.println(nearPlayers.get(r).color+name + " a ete vole"+CatanTerminal.RESET);
+                for (Player p : nearPlayers) {
+                    if (p.name.equals(name)) {
+                        selectedPlayer = p;
                         break;
                     }
                 }
@@ -204,16 +221,10 @@ final class IA extends Player {
         if (canExchange(4, null)) {
             Random random = new Random();
             int r = random.nextInt(2);
-            do {
-                try {
-                    if (r == 0){
-                        this.exchange(4, null);
-                        System.out.println("Votre inventaire :"+this.inventory);
-                    }break;
-                } catch (Exception e) {
-                    System.out.println(WrongInputException.MESSAGE);
-                }
-            } while (true);
+            if (r == 0){
+                this.exchange(4, null);
+                System.out.println(this.color+"Votre inventaire :"+this.inventory+CatanTerminal.RESET);
+            }
         }
     }
 
@@ -227,11 +238,9 @@ final class IA extends Player {
                 try {
                     if (r == 0){
                         this.useHarbor();
-                        System.out.println("Votre inventaire :"+this.inventory);
+                        System.out.println(this.color+"Votre inventaire :"+this.inventory+CatanTerminal.RESET);
                     }break;
-                } catch (Exception e) {
-                    System.out.println(WrongInputException.MESSAGE);
-                }
+                } catch (Exception e) {}
             } while (true);
         }
     }
@@ -458,7 +467,6 @@ final class IA extends Player {
     @Override
     protected void exchange(int n, String ressource) {
         if (ressource==null) {
-            System.out.println("Choisissez la ressource dont vous voulez donner 4 unites :");
             Set<String> keys = this.inventory.keySet();
             ArrayList<String> selectables = new ArrayList<String>();
             for (String key : keys) {
@@ -479,15 +487,11 @@ final class IA extends Player {
                     }else if(r == 3){
                         s = "Argile";
                     }else s = "Bois";
-                    for (String sel : selectables) 
-                        System.out.print(sel+"   ");
-                    System.out.println();
                     String line = s;
                     if (!selectables.contains(line)) throw new WrongInputException();
-                    this.exchange(4, line);
-                } catch (Exception e) {
-                    System.out.println(WrongInputException.MESSAGE);
-                }
+                    this.exchange(n, line);
+                    return;
+                } catch (Exception e) {}
             } while (true);
         } else {
             Integer a = this.inventory.get(ressource);
@@ -507,16 +511,12 @@ final class IA extends Player {
                         s = "Argile";
                     }else s = "Bois";
                     String line = s;
-                    System.out.println();
                     if (!line.equals("Bois") && !line.equals("Argile") && !line.equals("Laine") && 
                         !line.equals("Ble") && !line.equals("Roche")) throw new WrongInputException();
                     Integer b = this.inventory.get(line);
                     this.inventory.put(line, b+Integer.valueOf(1));
-                    System.out.println("Vous avez gagne 1 "+line);
                     break;
-                } catch (Exception e) {
-                    System.out.println(WrongInputException.MESSAGE);
-                }
+                } catch (Exception e) {}
             } while (true); 
         }   
     }
@@ -532,7 +532,6 @@ final class IA extends Player {
             for (Harbor h : this.harbors) {
                 ids[a] = h.id;
                 a++;
-                System.out.print(h.toStringWithId()+"   ");
             }
             do {
                 try {
