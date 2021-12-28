@@ -1,4 +1,4 @@
-package CatanUI;
+package Catan.CatanUI;
 
 class CardIG {
 

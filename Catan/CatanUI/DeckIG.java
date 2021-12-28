@@ -1,4 +1,4 @@
-package CatanUI;
+package Catan.CatanUI;
 
 import java.util.Collections;
 import java.util.Stack;

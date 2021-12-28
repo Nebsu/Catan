@@ -1,6 +1,6 @@
 import java.util.Scanner;
-import Catan.CatanTerminal;
-import Catan.CatanUI;
+import Catan.CatanTerminal.CatanTerminal;
+import Catan.CatanUI.CatanUI;
 import Catan.Exceptions.WrongInputException;
 
 public final class Launcher {

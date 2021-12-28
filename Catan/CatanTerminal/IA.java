@@ -1,4 +1,4 @@
-package Catan;
+package Catan.CatanTerminal;
 
 import java.util.ArrayList;
 import java.util.Random;
