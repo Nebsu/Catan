@@ -189,6 +189,9 @@ final class IA extends Player {
                 Random random = new Random();
                 int r = random.nextInt(nearPlayers.size());
                 String name = nearPlayers.get(r).name;
+                if (nearPlayers.size()==1){
+                    if (nearPlayers.contains(this))return null;
+                }
                 if (!playersNames.contains(name)) throw new WrongInputException();
                 if (name.equals(this.name)) throw new WrongInputException();
                 notOk = false;
