@@ -3,7 +3,6 @@ package Catan;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.Set;
-
 import Catan.Exceptions.*;
 
 final class IA extends Player {
@@ -55,10 +54,6 @@ final class IA extends Player {
 
     @Override
     protected boolean canUseHarbor() {return super.canUseHarbor();}
-
-    @Override
-    protected boolean onlyContainsSimpleHarbour() {return super.onlyContainsSimpleHarbour();}
-
 
 
     ////////// FONCTIONS DU JEU //////////
