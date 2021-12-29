@@ -426,6 +426,7 @@ final class IA extends Player {
                     String line = s;
                     if (!line.equals("Bois") && !line.equals("Argile") && !line.equals("Laine") && 
                         !line.equals("Ble") && !line.equals("Roche")) throw new WrongInputException();
+                    if (line.equals(ressource)) throw new WrongInputException();
                     Integer b = this.inventory.get(line);
                     this.inventory.put(line, b+Integer.valueOf(1));
                     return;
