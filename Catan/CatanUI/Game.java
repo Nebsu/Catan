@@ -4,6 +4,7 @@ import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.Choice;
+import Catan.CatanTerminal.Deck;
 
 public class Game extends JFrame implements ActionListener {
 
@@ -20,8 +21,8 @@ public class Game extends JFrame implements ActionListener {
 
     // Données de base de la partie :
     static PlayerIG[] PLAYERS; // joueurs 
-    //static PlayBoardIG PLAYBOARD = new PlayBoardIG(); // plateau
-    static DeckIG DECK = new DeckIG(); // pile de cartes développement 
+    static PlayBoardIG PLAYBOARD = new PlayBoardIG(); // plateau
+    static Deck DECK = new Deck(); // pile de cartes développement 
     static boolean army = false; // devient true quand un joueur utilise 3 chevaliers
     static PlayerIG hasTheStrongestArmy = null; // joueur qui a l'armée la plus puissante
     static boolean longestRoad = false; // indique si un joueur possède la route la plus longue
@@ -103,6 +104,8 @@ public class Game extends JFrame implements ActionListener {
                                     contentPane.remove(button);
                                     contentPane.remove(textField);      
                                     repaint(); 
+                                    PLAYBOARD = new PlayBoardIG();
+                                    PLAYBOARD.setVisible(true);
                                 }                               
                         }});
                 }});

@@ -3,7 +3,7 @@ package Catan.CatanTerminal;
 import java.util.Collections;
 import java.util.Stack;
 
-final class Deck {
+public final class Deck {
 
     ////////// Attributs //////////
 
@@ -23,7 +23,7 @@ final class Deck {
 
     ////////// Constructeur et fonctions associées à ce dernier //////////
 
-    Deck() {
+    public Deck() {
         for(int i = 0; i < 5; i++)
             deck.add(new Card("Point de Victoire", 0));
         //Contruction de route (peut contruire 2 routes)

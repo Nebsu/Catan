@@ -1,6 +1,6 @@
 package Catan.CatanTerminal;
 
-class Card {
+public class Card {
 
     ////////// Attributs ////////// 
 
@@ -9,7 +9,7 @@ class Card {
 
     ////////// Constructeur et fonctions associées à ce dernier //////////
 
-    Card(String cardname, int id){
+    public Card(String cardname, int id){
         this.cardname = cardname;
         this.id = id;
     }

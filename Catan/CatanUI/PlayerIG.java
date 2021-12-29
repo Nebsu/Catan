@@ -10,27 +10,27 @@ class PlayerIG {
     protected final String name; // nom du joueur
     protected final char symbol; // symbole du pion du joueur (son numéro)
     // protected final String color; // couleur du pion du joueur
-    // protected int victoryPoints; // points de victoire du joueur
-    // protected final Map<String, Integer> inventory; // ressources du joueur
+    protected int victoryPoints; // points de victoire du joueur
+    protected final Map<String, Integer> inventory; // ressources du joueur
     // protected final ArrayList<RoadIG> roads; // routes construites par le joueur sur le plateau
     // protected final ArrayList<CardIG> specialCards; // cartes développement piochées par le joueur
     // protected final ArrayList<ColonyIG> coloniesOnPlayBoard; // colonies construites par le joueur sur le plateau
     // protected final ArrayList<HarborIG> harbors; // ports possédés par le joueur
-    // protected int knights; // nombre de cartes chevalier jouées par le joueur
+    protected int knights; // nombre de cartes chevalier jouées par le joueur
 
     ////////// Constructeur et fonctions associées à ce dernier ////////// 
 
     PlayerIG(String name, int s) {
         this.name = name;
         this.symbol = String.valueOf(s).charAt(0);
-        // this.victoryPoints = 0;
-        // this.inventory = new HashMap<String, Integer>();
-        // this.inventorySetup();
+        this.victoryPoints = 0;
+        this.inventory = new HashMap<String, Integer>();
+        this.inventorySetup();
         // this.roads = new ArrayList<RoadIG>();
         // this.specialCards = new ArrayList<CardIG>();
         // this.coloniesOnPlayBoard = new ArrayList<ColonyIG>();
         // this.harbors = new ArrayList<HarborIG>();
-        // this.knights = 0;
+        this.knights = 0;
     }
     
     // Initialisation des ressources du joueur :
