@@ -101,7 +101,7 @@ class Player {
 
     ////////// Fonctions booléennes //////////
 
-    protected boolean isWinner() {return (this.victoryPoints==10);}
+    protected boolean isWinner() {return (this.victoryPoints>=10);}
     
     protected boolean canConstructColony() {
         int numberOfColonies = 0;
@@ -182,7 +182,7 @@ class Player {
         System.out.println(this.color+"Resultat du lancer : " + dice+CatanTerminal.RESET+"\n");
         if (dice!=7) earnResources(dice);
         else {
-            System.out.println(this.color+"Voleur active"+CatanTerminal.RESET);
+            System.out.println(this.color+"Voleur active"+CatanTerminal.RESET+"\n");
             this.thief();
         }
         CatanTerminal.PLAYBOARD.display();
@@ -190,10 +190,9 @@ class Player {
         this.specialCards.addAll(this.notUsableCards);
         this.notUsableCards.clear();
         if (!this.specialCards.isEmpty())
-            System.out.println("Vos cartes developpement :\n"+this.specialCards+CatanTerminal.RESET);
+            System.out.println(this.color+"Vos cartes developpement :\n"+this.specialCards+CatanTerminal.RESET);
         if (this.hasAVictoryPointCard() && this.victoryPoints==9) this.victoryPoints = 10;
     }
-
 
     // Lancé des dés :
     private static int throwDices() { 
@@ -304,13 +303,15 @@ class Player {
                 System.out.println(this.color+this.name+", placez le voleur sur la case de votre choix :"+CatanTerminal.RESET);
                 int[] indexs = scanLocationOrPath(sc);
                 int k = indexs[0]-1; int l = indexs[1]-1;
-                if (k<0 || k>4 || l<0 || l>4) throw new WrongInputException();
+                if (k<0 || k>4 || l<0 || l>4) throw new IndexOutOfBoundsException();
                 if (CatanTerminal.PLAYBOARD.boxes[k][l]==CatanTerminal.PLAYBOARD.thief) throw new IllegalStateException();
                 CatanTerminal.PLAYBOARD.boxes[k][l].hasThief = true;
                 CatanTerminal.PLAYBOARD.thief.hasThief = false;
                 CatanTerminal.PLAYBOARD.thief = CatanTerminal.PLAYBOARD.boxes[k][l];
                 res = CatanTerminal.PLAYBOARD.boxes[k][l];
                 break;
+            } catch (IndexOutOfBoundsException ind) {
+                System.out.println(this.color+"Erreur : cette case n'existe pas"+CatanTerminal.RESET);
             } catch (IllegalArgumentException ill) {
                 System.out.println(this.color+"Erreur : Vous etes oblige de deplacer le voleur sur une nouvelle case"+CatanTerminal.RESET);
             } catch (Exception e) {
@@ -329,7 +330,8 @@ class Player {
         // On va verifier si le joueur possède une colonie sur l'un des ces emplacements :
         ArrayList<Colony> colonies = new ArrayList<Colony>();
         for (Location l : locations) {
-            if (l instanceof Colony) colonies.add((Colony) l);
+            if (l instanceof Colony && ((Colony) l).player!=this) 
+                colonies.add((Colony) l);
         }
         if (colonies.isEmpty()) {
             System.out.println(this.color+"Aucune colonie à proximite de cette case"+CatanTerminal.RESET);
@@ -352,7 +354,6 @@ class Player {
                 System.out.println();
                 String name = sc.nextLine();
                 if (!playersNames.contains(name)) throw new WrongInputException();
-                if (name.equals(this.name)) throw new WrongInputException();
                 for (Player p : nearPlayers) {
                     if (p.name.equals(name)) {
                         selectedPlayer = p;
@@ -430,7 +431,7 @@ class Player {
         if (!this.specialCards.isEmpty()) actions.add("UTILISER CARTE");
         if (this.canBuyACard()) actions.add("ACHETER CARTE");
         if (actions.isEmpty()) {
-            System.out.println(this.color+"Vous ne pouvez rien faire pour le moment"+CatanTerminal.RESET);
+            System.out.println(this.color+"Vous ne pouvez rien faire"+CatanTerminal.RESET);
             return;
         }
         System.out.println(this.color+"Vous avez la possibilite d'effectuer l'une des actions suivantes :"+CatanTerminal.RESET);
@@ -470,7 +471,7 @@ class Player {
     // Proposition d'échange de 4 ressources du joueur contre une de son choix,
     // (échange réalisable du moment que le joueur a au moins 4 ressources,
     //  même si ce dernier ne possède pas de port) :
-    protected void proposeToExchange41() {
+    private final void proposeToExchange41() {
         if (this.canExchange(4, null)) {
             System.out.println(this.color+"Voulez-vous echanger 4 ressources contre une de votre choix ?"+CatanTerminal.RESET);
             Scanner sc = new Scanner(System.in);
@@ -492,7 +493,7 @@ class Player {
     }
 
     // Proposition d'utilisation d'un port pour faire un échange :
-    protected void proposeToUseHarbor() {
+    private final void proposeToUseHarbor() {
         if (this.canUseHarbor()) {
             System.out.println(this.color+"Vous possedez un ou plusieurs port(s).");
             System.out.println("Voulez vous faire un echange base sur l'un de vos ports ?"+CatanTerminal.RESET);
@@ -517,7 +518,7 @@ class Player {
     // Proposition de construction d'une colonie : 
     // on demande au joueur s'il veut construire une colonie/ville/route
     // ou utiliser/acheter une carte developpement quand c'est possible :
-    protected void proposeToConstructColony() {
+    private final void proposeToConstructColony() {
         if (this.canConstructColony()) {
             System.out.println(this.color+"Voulez-vous construire une colonie ?");
             System.out.println("Cout : 1 bois, 1 argile, 1 laine et 1 ble"+CatanTerminal.RESET);
@@ -540,7 +541,7 @@ class Player {
     }
 
     // Proposition de construction d'une ville :
-    protected void proposeToConstructCity() {
+    private final void proposeToConstructCity() {
         if (this.canConstructCity()) {
             System.out.println(this.color+"Voulez-vous construire une ville ?");
             System.out.println("Cout : 3 roches et 2 bles"+CatanTerminal.RESET);
@@ -563,7 +564,7 @@ class Player {
     }
 
     // Proposition de construction d'une route :
-    protected void proposeToConstructRoad() {
+    private final void proposeToConstructRoad() {
         if (this.canConstructRoad()) {
             System.out.println(this.color+"Voulez-vous construire une route ?");
             System.out.println("Cout : 1 bois et 1 argile"+CatanTerminal.RESET);
@@ -610,7 +611,7 @@ class Player {
     }
 
     // Proposition d'achat d'une carte developpement :
-    protected void proposeToBuySpecialCard() {
+    private final void proposeToBuySpecialCard() {
         if (this.canBuyACard()) {
             do {
                 System.out.println(this.color+"Voulez-vous acheter une carte developpement ?");
@@ -638,27 +639,27 @@ class Player {
     // Construction d'une colonie :
     // Remarque : on a décidé de ne pas implémenter le fait que toute colonie doit être distante d’au moins 2 intersections
     // En effet, le plateau est trop petit pour pouvoir appliquer cette règle de distance
-    protected void buildColony(boolean isFree) {
+    protected void buildColony(boolean beginning) {
         Scanner sc = new Scanner(System.in);
         do {
             try {
                 System.out.println(this.color+this.name+", placez votre colonie :"+CatanTerminal.RESET);
                 int[] indexs = scanLocationOrPath(sc);
-                int k = indexs[0]; int l = indexs[1];
-                if (k-1<0 || k-1>4 || l-1<0 || l-1>4) throw new IndexOutOfBoundsException();
-                if (CatanTerminal.PLAYBOARD.locations[k-1][l-1] instanceof Colony) throw new WrongInputException();
-                if (isFree) {
-                    if (CatanTerminal.PLAYBOARD.locations[k-1][l-1].hasAnHarbor())
-                        this.harbors.add(CatanTerminal.PLAYBOARD.locations[k-1][l-1].getHarbor());
-                    CatanTerminal.PLAYBOARD.locations[k-1][l-1] = new Colony(CatanTerminal.PLAYBOARD.locations[k-1][l-1].boxes, k-1, l-1, this);
-                    this.coloniesOnPlayBoard.add((Colony) CatanTerminal.PLAYBOARD.locations[k-1][l-1]);
+                int k = indexs[0]-1, l = indexs[1]-1;
+                if (k<0 || k>4 || l<0 || l>4) throw new IndexOutOfBoundsException();
+                if (CatanTerminal.PLAYBOARD.locations[k][l] instanceof Colony) throw new WrongInputException();
+                if (beginning) {
+                    if (CatanTerminal.PLAYBOARD.locations[k][l].hasAnHarbor())
+                        this.harbors.add(CatanTerminal.PLAYBOARD.locations[k][l].getHarbor());
+                    CatanTerminal.PLAYBOARD.locations[k][l] = new Colony(CatanTerminal.PLAYBOARD.locations[k][l].boxes, k, l, this);
+                    this.coloniesOnPlayBoard.add((Colony) CatanTerminal.PLAYBOARD.locations[k][l]);
                 } else {
                     ArrayList<Location> endPoints = this.getEndPoints();
-                    if (!endPoints.contains(CatanTerminal.PLAYBOARD.locations[k-1][l-1])) throw new InexistantRoadException();
-                    if (CatanTerminal.PLAYBOARD.locations[k-1][l-1].hasAnHarbor())
-                        this.harbors.add(CatanTerminal.PLAYBOARD.locations[k-1][l-1].getHarbor());
-                    CatanTerminal.PLAYBOARD.locations[k-1][l-1] = new Colony(CatanTerminal.PLAYBOARD.locations[k-1][l-1].boxes, k-1, l-1, this);
-                    this.coloniesOnPlayBoard.add((Colony) CatanTerminal.PLAYBOARD.locations[k-1][l-1]);
+                    if (!endPoints.contains(CatanTerminal.PLAYBOARD.locations[k][l])) throw new InexistantRoadException();
+                    if (CatanTerminal.PLAYBOARD.locations[k][l].hasAnHarbor())
+                        this.harbors.add(CatanTerminal.PLAYBOARD.locations[k][l].getHarbor());
+                    CatanTerminal.PLAYBOARD.locations[k][l] = new Colony(CatanTerminal.PLAYBOARD.locations[k][l].boxes, k, l, this);
+                    this.coloniesOnPlayBoard.add((Colony) CatanTerminal.PLAYBOARD.locations[k][l]);
                     this.inventory.replace("Bois", this.inventory.get("Bois")-1); 
                     this.inventory.replace("Laine", this.inventory.get("Laine")-1); 
                     this.inventory.replace("Ble", this.inventory.get("Ble")-1); 
@@ -683,30 +684,29 @@ class Player {
     // Construction d'une ville :
     protected void buildCity() {
         CatanTerminal.PLAYBOARD.display();
-        ArrayList<Integer> ids = new ArrayList<Integer>();
-        for (Colony col : this.coloniesOnPlayBoard) {
-            if (!col.isCity) ids.add(col.id);
-        }
         do {   
             try {
                 Scanner sc = new Scanner(System.in);
-                System.out.println(this.color+"Pour choisir la colonie a transformer en ville,");
-                System.out.println("veuillez tapez le numero de la colonie en question :"+CatanTerminal.RESET);
-                int selectedId = sc.nextInt();
-                if (!ids.contains(selectedId)) throw new WrongInputException();
-                for (Colony col : this.coloniesOnPlayBoard) {
-                    if (col.id==selectedId) {
-                        col.isCity = true;
-                        ((Colony) CatanTerminal.PLAYBOARD.locations[col.indexI][col.indexJ]).isCity = true;
-                        this.inventory.replace("Roche", this.inventory.get("Roche")-3); 
-                        this.inventory.replace("Ble", this.inventory.get("Ble")-2); 
-                        this.victoryPoints++;
-                        break;
-                    }
-                }
+                System.out.println(this.color+this.name+", choisissez la colonie a transformer en ville :"+CatanTerminal.RESET);
+                int[] index = scanLocationOrPath(sc);
+                int k = index[0]-1, l = index[1]-1;
+                if (k<0 || k>4 || l<0 || l>4) throw new IndexOutOfBoundsException();
+                if (!(CatanTerminal.PLAYBOARD.locations[k][l] instanceof Colony)) throw new InexistantColonyException();
+                if (((Colony) CatanTerminal.PLAYBOARD.locations[k][l]).player!=this) throw new IllegalStateException();
+                if (((Colony) CatanTerminal.PLAYBOARD.locations[k][l]).isCity) throw new WrongInputException();
+                ((Colony) CatanTerminal.PLAYBOARD.locations[k][l]).isCity = true;
+                this.inventory.replace("Roche", this.inventory.get("Roche")-3); 
+                this.inventory.replace("Ble", this.inventory.get("Ble")-2); 
+                this.victoryPoints++;
                 break;
+            } catch (IndexOutOfBoundsException ind) {
+                System.out.println(this.color+"Erreur : cet emplacement n'existe pas"+CatanTerminal.RESET);
+            } catch (InexistantColonyException ice) {
+                System.out.println(this.color+"Erreur : cet emplacement ne contient pas de colonie"+CatanTerminal.RESET);
+            } catch (IllegalStateException ise) {
+                System.out.println(this.color+"Erreur : cette colonie ne vous appartient pas"+CatanTerminal.RESET);
             } catch (WrongInputException w) {
-                System.out.println(this.color+"Erreur : Cette colonie n'existe pas ou ne vous appartient pas"+CatanTerminal.RESET);
+                System.out.println(this.color+"Erreur : vous avez selectionne une ville"+CatanTerminal.RESET);
             } catch (Exception e) {
                 System.out.println(this.color+WrongInputException.MESSAGE+CatanTerminal.RESET);
             }
@@ -736,12 +736,24 @@ class Player {
                     if (k<0 || k>3 || l<0 || l>4) throw new IndexOutOfBoundsException();
                 }
                 if ((c=='H' && CatanTerminal.PLAYBOARD.horizontalPaths[k][l] instanceof Road) || 
-                    (c=='V' && CatanTerminal.PLAYBOARD.verticalPaths[k][l] instanceof Road)) {
-                    System.out.println(this.color+"Erreur : cet emplacement est occupe"+CatanTerminal.RESET);
-                } else {
+                    (c=='V' && CatanTerminal.PLAYBOARD.verticalPaths[k][l] instanceof Road)) 
+                    throw new IllegalStateException();
+                try {
+                    Road r = this.buildRoadNextToColony(c, (c=='H')? CatanTerminal.PLAYBOARD.horizontalPaths[k][l] : 
+                    CatanTerminal.PLAYBOARD.verticalPaths[k][l], beginning);
+                    if (c=='H') CatanTerminal.PLAYBOARD.horizontalPaths[k][l] = r;
+                    else CatanTerminal.PLAYBOARD.verticalPaths[k][l] = r;
+                    this.roads.add(r);
+                    if (!isFree) {
+                        this.inventory.replace("Bois", this.inventory.get("Bois")-1); 
+                        this.inventory.replace("Argile", this.inventory.get("Argile")-1); 
+                    }
+                    break;
+                } catch (InexistantColonyException ice) {
                     try {
-                        Road r = this.buildRoadNextToColony(c, (c=='H')? CatanTerminal.PLAYBOARD.horizontalPaths[k][l] : 
-                        CatanTerminal.PLAYBOARD.verticalPaths[k][l], beginning);
+                        if (beginning) throw new IllegalStateException();
+                        Road r = this.buildRoadNextToRoad(c, (c=='H')? CatanTerminal.PLAYBOARD.horizontalPaths[k][l] :
+                        CatanTerminal.PLAYBOARD.verticalPaths[k][l]);
                         if (c=='H') CatanTerminal.PLAYBOARD.horizontalPaths[k][l] = r;
                         else CatanTerminal.PLAYBOARD.verticalPaths[k][l] = r;
                         this.roads.add(r);
@@ -750,30 +762,18 @@ class Player {
                             this.inventory.replace("Argile", this.inventory.get("Argile")-1); 
                         }
                         break;
-                    } catch (InexistantColonyException ice) {
-                        try {
-                            if (beginning) throw new IllegalStateException();
-                            Road r = this.buildRoadNextToRoad(c, (c=='H')? CatanTerminal.PLAYBOARD.horizontalPaths[k][l] :
-                            CatanTerminal.PLAYBOARD.verticalPaths[k][l]);
-                            if (c=='H') CatanTerminal.PLAYBOARD.horizontalPaths[k][l] = r;
-                            else CatanTerminal.PLAYBOARD.verticalPaths[k][l] = r;
-                            this.roads.add(r);
-                            if (!isFree) {
-                                this.inventory.replace("Bois", this.inventory.get("Bois")-1); 
-                                this.inventory.replace("Argile", this.inventory.get("Argile")-1); 
-                            }
-                            break;
-                        } catch (IllegalStateException e) {
-                            System.out.println(this.color+
-                            "Erreur : Vous devez construire votre route a cote de la colonie que vous venez de construire"+CatanTerminal.RESET);
-                        } catch (InexistantRoadException ire) {
-                            System.out.println(this.color+ice);
-                            System.out.println(ire+CatanTerminal.RESET);
-                        }
+                    } catch (IllegalStateException e) {
+                        System.out.println(this.color+
+                        "Erreur : Vous devez construire votre route a cote de la colonie que vous venez de construire"+CatanTerminal.RESET);
+                    } catch (InexistantRoadException ire) {
+                        System.out.println(this.color+ice);
+                        System.out.println(ire+CatanTerminal.RESET);
                     }
                 }
-            } catch (InexistantRoadException ind) {
+            } catch (IndexOutOfBoundsException ind) {
                 System.out.println(this.color+"Erreur : ce chemin n'existe pas"+CatanTerminal.RESET);
+            } catch (IllegalStateException ill) {
+                System.out.println(this.color+"Erreur : cet emplacement est occupe"+CatanTerminal.RESET);
             } catch (Exception e) {
                 System.out.println(this.color+WrongInputException.MESSAGE+CatanTerminal.RESET);
             }
@@ -942,50 +942,35 @@ class Player {
                 int n = sc.nextInt();
                 if (n!=0 && n!=1 && n!=2 && n!=3 && n!=4) throw new WrongInputException();
                 for(Card c : this.specialCards){
+                    // Carte point de victoire :
                     if (c.id==0 && n==0) {
                         this.specialCards.remove(c);
                         this.victoryPoints++; 
                         System.out.println(this.color+"Vous avez gagne un point de victoire"+CatanTerminal.RESET);
                         break;
                     }
+                    // Carte chevalier :
                     if(c.id==1 && n==1){
-                        Box b = this.moveThief();
-                        // Ensuite, le joueur courant choisi le joueur a qui il veut voler une ressource :
-                        Player victim = this.selectPlayerToStealFrom(b);
-                        // Si le joueur courant a choisi une case avec des colonies adjacentes, 
-                        // alors le joueur designe par le joueur courant subit le vol : 
-                        if (victim!=null) this.steal(victim);
                         this.specialCards.remove(c);
-                        this.knights++;
-                        if (this.knights==3 && !CatanTerminal.army) {
-                            CatanTerminal.army = true;
-                            this.victoryPoints += 2;
-                            CatanTerminal.hasTheStrongestArmy = this;
-                            System.out.println(this.color+"Vous avez gagne 2 points de victoire"+CatanTerminal.RESET);
-                        } else if (CatanTerminal.army && CatanTerminal.hasTheStrongestArmy!=this
-                                && this.knights>CatanTerminal.hasTheStrongestArmy.knights) {
-                            CatanTerminal.hasTheStrongestArmy.victoryPoints -= 2;
-                            System.out.println(CatanTerminal.hasTheStrongestArmy.color+
-                            CatanTerminal.hasTheStrongestArmy.name+" a perdu deux points de victoire"+CatanTerminal.RESET);
-                            this.victoryPoints += 2;
-                            System.out.println(this.color+"Vous avez gagne 2 points de victoire"+CatanTerminal.RESET);
-                            CatanTerminal.hasTheStrongestArmy = this;
-                        }
+                        this.knight();
                         break;
                     }
+                    // Carte progrès invention :
                     if(c.id==3 && n==3){
                         this.specialCards.remove(c);
-                        invention();
+                        this.invention();
                         break;
                     }
+                    // Carte progrès route :
                     if(c.id==2 && n==2){
                         this.specialCards.remove(c);
-                        carteRoute();
+                        this.carteRoute();
                         break;
                     }
+                    // Carte progrès monopole :
                     if(c.id==4 && n==4){
                         this.specialCards.remove(c);
-                        monopole();
+                        this.monopole();
                         break;
                     }
                     throw new WrongInputException();
@@ -995,6 +980,31 @@ class Player {
                 System.out.println(this.color+WrongInputException.MESSAGE+CatanTerminal.RESET);
             }
         } while (true);
+    }
+
+    // Carte chevalier :
+    protected void knight() {
+        Box b = this.moveThief();
+        // Ensuite, le joueur courant choisi le joueur a qui il veut voler une ressource :
+        Player victim = this.selectPlayerToStealFrom(b);
+        // Si le joueur courant a choisi une case avec des colonies adjacentes, 
+        // alors le joueur designe par le joueur courant subit le vol : 
+        if (victim!=null) this.steal(victim);
+        this.knights++;
+        if (this.knights==3 && !CatanTerminal.army) {
+            CatanTerminal.army = true;
+            this.victoryPoints += 2;
+            CatanTerminal.hasTheStrongestArmy = this;
+            System.out.println(this.color+"Vous avez gagne 2 points de victoire"+CatanTerminal.RESET);
+        } else if (CatanTerminal.army && CatanTerminal.hasTheStrongestArmy!=this
+                && this.knights>CatanTerminal.hasTheStrongestArmy.knights) {
+            CatanTerminal.hasTheStrongestArmy.victoryPoints -= 2;
+            System.out.println(CatanTerminal.hasTheStrongestArmy.color+
+            CatanTerminal.hasTheStrongestArmy.name+" a perdu deux points de victoire"+CatanTerminal.RESET);
+            this.victoryPoints += 2;
+            System.out.println(this.color+"Vous avez gagne 2 points de victoire"+CatanTerminal.RESET);
+            CatanTerminal.hasTheStrongestArmy = this;
+        }
     }
 
     // Carte progrès invention :
@@ -1030,7 +1040,7 @@ class Player {
         this.buildRoad(true, false);
     }
 
-    // Carte monopole :
+    // Carte progrès monopole :
     protected void monopole() {
         int n = 0;
         Scanner sc = new Scanner(System.in);

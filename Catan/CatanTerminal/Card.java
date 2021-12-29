@@ -19,7 +19,7 @@ class Card {
     // Print :
     @Override
     public String toString() {
-        return this.cardname + " " + this.id;
+        return this.cardname;
     }
 
 }

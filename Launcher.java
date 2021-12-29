@@ -1,13 +1,13 @@
 import java.util.Scanner;
 import Catan.CatanTerminal.CatanTerminal;
-import Catan.CatanUI.CatanUI;
+import Catan.CatanUI.Game;
 import Catan.Exceptions.WrongInputException;
 
 public final class Launcher {
     
     public static final void main(String[] args) {
         boolean UI = chooseCatan();
-        if (UI) CatanUI.catan();
+        if (UI) Game.catan();
         else CatanTerminal.catan();
     }
     private static final boolean chooseCatan() {

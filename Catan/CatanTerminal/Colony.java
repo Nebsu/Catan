@@ -6,8 +6,6 @@ final class Colony extends Location {
     
     final Player player;
     boolean isCity;
-    final int id;
-    private static int acc = 1;
 
     ////////// Constructeur et fonctions associées à ce dernier //////////
 
@@ -15,7 +13,6 @@ final class Colony extends Location {
         super(boxes, i, j);
         this.player = player;
         this.isCity = false;
-        this.id = acc++;
     }
 
     ////////// Fonctions auxiliaires //////////
@@ -24,7 +21,7 @@ final class Colony extends Location {
     @Override
     public String toString() {
         String type = (this.isCity)? "V" : "C";
-        return (this.player.color+type+this.id+CatanTerminal.RESET);
+        return (this.player.color+type+this.player.symbol+CatanTerminal.RESET);
     }
 
 
@@ -32,14 +29,10 @@ final class Colony extends Location {
 
     // Renvoie true si la colonie est à côté d'un port :
     @Override
-    protected final boolean hasAnHarbor() {
-        return super.hasAnHarbor();
-    }
+    protected final boolean hasAnHarbor() {return super.hasAnHarbor();}
 
     // Si ce dernier existe, cette fonction renvoie le port en question :
     @Override
-    protected Harbor getHarbor() {
-        return super.getHarbor();   
-    }
+    protected Harbor getHarbor() {return super.getHarbor();}
 
 }
