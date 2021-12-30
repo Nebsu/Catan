@@ -2,6 +2,8 @@ package Catan.CatanUI;
 
 import java.util.*;
 import Catan.Exceptions.*;
+import Catan.CatanTerminal.Card;
+import Catan.CatanTerminal.Deck;
 
 class PlayerIG {
     
@@ -9,13 +11,13 @@ class PlayerIG {
 
     protected final String name; // nom du joueur
     protected final char symbol; // symbole du pion du joueur (son numéro)
-    // protected final String color; // couleur du pion du joueur
     protected int victoryPoints; // points de victoire du joueur
     protected final Map<String, Integer> inventory; // ressources du joueur
-    // protected final ArrayList<RoadIG> roads; // routes construites par le joueur sur le plateau
-    // protected final ArrayList<CardIG> specialCards; // cartes développement piochées par le joueur
-    // protected final ArrayList<ColonyIG> coloniesOnPlayBoard; // colonies construites par le joueur sur le plateau
-    // protected final ArrayList<HarborIG> harbors; // ports possédés par le joueur
+    protected final ArrayList<RoadIG> roads; // routes construites par le joueur sur le plateau
+    protected final ArrayList<Card> specialCards; // cartes développement que le joueur peut utiliser
+    protected final ArrayList<Card> notUsableCards; // cartes développement piochées par le joueur, qui ne peut pas encore utiliser
+    protected final ArrayList<ColonyIG> coloniesOnPlayBoard; // colonies construites par le joueur sur le plateau
+    protected final ArrayList<HarborIG> harbors; // ports possédés par le joueur
     protected int knights; // nombre de cartes chevalier jouées par le joueur
 
     ////////// Constructeur et fonctions associées à ce dernier ////////// 
@@ -26,13 +28,14 @@ class PlayerIG {
         this.victoryPoints = 0;
         this.inventory = new HashMap<String, Integer>();
         this.inventorySetup();
-        // this.roads = new ArrayList<RoadIG>();
-        // this.specialCards = new ArrayList<CardIG>();
-        // this.coloniesOnPlayBoard = new ArrayList<ColonyIG>();
-        // this.harbors = new ArrayList<HarborIG>();
+        this.roads = new ArrayList<RoadIG>();
+        this.specialCards = new ArrayList<Card>();
+        this.notUsableCards = new ArrayList<Card>();
+        this.coloniesOnPlayBoard = new ArrayList<ColonyIG>();
+        this.harbors = new ArrayList<HarborIG>();
         this.knights = 0;
     }
-    
+
     // Initialisation des ressources du joueur :
     private final void inventorySetup() { 
         this.inventory.put("Bois", 0); // bois
@@ -43,11 +46,13 @@ class PlayerIG {
     }
 
     ////////// Fonctions auxiliaires //////////
-
+    
+    // Print :
+    @Override
     public String toString() {
         return (this.name+" possede "+this.victoryPoints+" points de victoire.");
     }
-    
+
     // Renvoie le nombre de ressources total du joueur :
     protected int nbRessources(String ressource) {
         int nbRessources = 0;
@@ -81,13 +86,12 @@ class PlayerIG {
                     this.inventory.replace(boxes[i].ressource, this.inventory.get(boxes[i].ressource)+1);
             }
         }
-        System.out.println("Votre inventaire : "+this.inventory);
     }
 
 
     ////////// Fonctions booléennes //////////
 
-    protected boolean isWinner() {return (this.victoryPoints==10);}
+    protected boolean isWinner() {return (this.victoryPoints>=10);}
     
     protected boolean canConstructColony() {
         int numberOfColonies = 0;
@@ -135,71 +139,52 @@ class PlayerIG {
 
     protected boolean canUseHarbor() {
         if (this.harbors.isEmpty()) return false;
-        if (this.onlyContainsSimpleHarbour()) 
-            return canExchange(3, null);
-        else {
-            for (HarborIG h : this.harbors) {
-                if (h.type.equals("Special")) {
-                    if (canExchange(2, h.ressource)) return true;
-                }
+        for (HarborIG h : this.harbors) {
+            if (h.type.equals("Special")) {
+                if (canExchange(2, h.ressource)) return true;
             }
-            return false;
+            if (h.type.equals("Simple")) {
+                if (canExchange(3, null)) return true;
+            }
         }
+        return false;
     }
 
-    protected boolean onlyContainsSimpleHarbour() {
-        for (Harbor h : this.harbors) {
-            if (h.type.equals("Special")) return false;
+    protected boolean hasAVictoryPointCard() {
+        if (this.specialCards.isEmpty()) return false;
+        for (Card c : this.specialCards) {
+            if (c.id==0) return true;
         }
-        return true;
+        return false;
     }
-
+    
 
     ////////// FONCTIONS DU JEU //////////
 
     // Fonction principale (tour du joueur) :
     protected void play() {
+        System.out.println("-------------------------------------------------------------------------------------------------");
         System.out.println("Au tour de "+this.name+" :");
-        // Proposition d'utilisation d'une carte développement quand cela est possible :
-        if (!this.specialCards.isEmpty()) 
-            System.out.println("Vos cartes developpement :\n"+this.specialCards);
+        // Proposition d'utilisation d'une carte développement (si le joueur en a) :
         this.proposeToUseSpecialCard();
+        System.out.println("Tapez sur entree pour lancer les des :");
         int dice = throwDices();
-        System.out.println("Resultat du lancer : " + dice);
+        System.out.println("Resultat du lancer : " + dice+"\n");
         if (dice!=7) earnResources(dice);
         else {
-            System.out.println("Voleur active");
+            System.out.println("Voleur active"+"\n");
             this.thief();
         }
-        Game.PLAYBOARD.display();
-        System.out.println("Votre inventaire : "+this.inventory);
-        // Proposition d'utilisation d'une carte développement quand cela est possible :
-        if (!this.specialCards.isEmpty()) 
+        this.playerMenu();
+        this.specialCards.addAll(this.notUsableCards);
+        this.notUsableCards.clear();
+        if (!this.specialCards.isEmpty())
             System.out.println("Vos cartes developpement :\n"+this.specialCards);
-        this.proposeToUseSpecialCard();
-        // Phase de commerce :
-        this.proposeToExchange41();
-        this.proposeToUseHarbor();
-        // Phase de construction :
-        this.proposeToConstructColony();
-        this.proposeToConstructCity();
-        this.proposeToConstructRoad();
-        // Proposition d'achat d'une carte développement quand cela est possible :
-        this.proposeToBuySpecialCard();
-        if (this.specialCards.get(this.specialCards.size()-1).id==0
-            && this.victoryPoints==9) {
-                this.specialCards.remove(this.specialCards.size()-1);
-                this.victoryPoints++;
-            }
+        if (this.hasAVictoryPointCard() && this.victoryPoints==9) this.victoryPoints = 10;
     }
 
-
     // Lancé des dés :
-    private static int throwDices() { 
-        System.out.println("Tapez sur une touche, puis entree pour lancer les des :");
-        Scanner sc = new Scanner(System.in);
-        sc.next();
-        System.out.println();
+    public int throwDices() { 
         Random rd1 = new Random(), rd2 = new Random();
         int dice1 = rd1.nextInt(6)+1;
         int dice2 = rd2.nextInt(6)+1;
@@ -209,18 +194,18 @@ class PlayerIG {
     // Répartition des ressources selon le résultat du lancé des dés :
     protected final static void earnResources(int dice) {
         // On récupère la ou les cases designée(s) par les dés :
-        ArrayList<Box> boxes = Game.PLAYBOARD.getBoxes(dice);
+        ArrayList<BoxIG> boxes = Game.PLAYBOARD.getBoxes(dice);
         // On récupère les emplacement adjacents de ces cases :
-        ArrayList<Location> locations = new ArrayList<Location>();
-        for (Box b : boxes) {
-            ArrayList<Location> loc = b.getLocations();
+        ArrayList<LocationIG> locations = new ArrayList<LocationIG>();
+        for (BoxIG b : boxes) {
+            ArrayList<LocationIG> loc = b.getLocations();
             for (int i=0; i<loc.size(); i++) locations.add(loc.get(i));
         }
         // On va verifier si les joueurs possèdent une colonie sur l'un des ces emplacements :
-        ArrayList<Colony> colonies = new ArrayList<Colony>();
-        for (Location l : locations) {
-            if (l instanceof Colony) {
-                colonies.add((Colony) l);
+        ArrayList<ColonyIG> colonies = new ArrayList<ColonyIG>();
+        for (LocationIG l : locations) {
+            if (l instanceof ColonyIG) {
+                colonies.add((ColonyIG) l);
             }
         }
         // Cas où aucune colonie est adjacentes aux cases designees par les des :
@@ -228,9 +213,9 @@ class PlayerIG {
             System.out.println("Pas de chance, personne n'a rien gagne");
             return;
         }
-        for (Colony c : colonies) System.out.println(c);
+        for (ColonyIG c : colonies) System.out.println(c);
         // Les joueurs concernes gagnent une ressource de chaque case designee par les des :
-        for (Colony c : colonies) {
+        for (ColonyIG c : colonies) {
             for (int i=0; i<c.boxes.length; i++) {
                 if (c.boxes[i].number==dice && !c.boxes[i].hasThief) {
                     Integer a = c.player.inventory.get(c.boxes[i].ressource);
@@ -259,9 +244,9 @@ class PlayerIG {
             if (nbRessources[i]>=8) Game.PLAYERS[i].giveRessources(nbRessources[i]);
         }
         // Ensuite, le joueur qui a lance les des deplace le voleur :
-        Box b = this.moveThief();
+        BoxIG b = this.moveThief();
         // Ensuite, le joueur courant choisi le joueur a qui il veut voler une ressource :
-        Player victim = this.selectPlayerToStealFrom(b);
+        PlayerIG victim = this.selectPlayerToStealFrom(b);
         // Si le joueur courant a choisi une case avec des colonies adjacentes, 
         // alors le joueur designe par le joueur courant subit le vol : 
         if (victim!=null) this.steal(victim);
@@ -269,9 +254,9 @@ class PlayerIG {
 
     // Donner des ressources au voleur :
     protected void giveRessources(int n) {
-        System.out.println("Vous avez "+n+" ressources");
+        System.out.println(this.name+" possède "+n+" ressources");
         n /= 2;
-        System.out.println("Veuillez donner "+n+" ressources au voleur");
+        System.out.println(this.name+" : Veuillez donner "+n+" ressources au voleur");
         Scanner sc = new Scanner(System.in);
         for (int i=0; i<n; i++) {
             System.out.println("Votre inventaire : "+this.inventory);
@@ -285,7 +270,6 @@ class PlayerIG {
                     Integer a = this.inventory.get(line);
                     if (a==0) throw new IllegalStateException(line);
                     this.inventory.put(line, a-Integer.valueOf(1));
-                    System.out.println("Vous avez perdu 1 "+line);
                     break;
                 } catch (IllegalStateException ill) {
                     System.out.println("Erreur : Vous n'avez plus aucun "+ill.getMessage());
@@ -297,21 +281,23 @@ class PlayerIG {
     }
 
     // Déplacer le voleur :
-    protected Box moveThief() {
-        Box res = null;
+    protected BoxIG moveThief() {
+        BoxIG res = null;
         Scanner sc = new Scanner(System.in);
         do {
             try {
                 System.out.println(this.name+", placez le voleur sur la case de votre choix :");
                 int[] indexs = scanLocationOrPath(sc);
                 int k = indexs[0]-1; int l = indexs[1]-1;
-                if (k<0 || k>4 || l<0 || l>4) throw new WrongInputException();
+                if (k<0 || k>4 || l<0 || l>4) throw new IndexOutOfBoundsException();
                 if (Game.PLAYBOARD.boxes[k][l]==Game.PLAYBOARD.thief) throw new IllegalStateException();
                 Game.PLAYBOARD.boxes[k][l].hasThief = true;
                 Game.PLAYBOARD.thief.hasThief = false;
                 Game.PLAYBOARD.thief = Game.PLAYBOARD.boxes[k][l];
                 res = Game.PLAYBOARD.boxes[k][l];
                 break;
+            } catch (IndexOutOfBoundsException ind) {
+                System.out.println("Erreur : cette case n'existe pas");
             } catch (IllegalArgumentException ill) {
                 System.out.println("Erreur : Vous etes oblige de deplacer le voleur sur une nouvelle case");
             } catch (Exception e) {
@@ -319,46 +305,43 @@ class PlayerIG {
             }
         } while (true);
         Game.PLAYBOARD.updatePaths();
-        Game.PLAYBOARD.display();
         return res;
     }
 
     // Choix de la cible du joueur pour voler des ressources : 
-    protected Player selectPlayerToStealFrom(Box b) {
+    protected PlayerIG selectPlayerToStealFrom(BoxIG b) {
         // On recupère les emplacement adjacents de la case :
-        ArrayList<Location> locations = b.getLocations();
+        ArrayList<LocationIG> locations = b.getLocations();
         // On va verifier si le joueur possède une colonie sur l'un des ces emplacements :
-        ArrayList<Colony> colonies = new ArrayList<Colony>();
-        for (Location l : locations) {
-            if (l instanceof Colony) colonies.add((Colony) l);
+        ArrayList<ColonyIG> colonies = new ArrayList<ColonyIG>();
+        for (LocationIG l : locations) {
+            if (l instanceof ColonyIG && ((ColonyIG) l).player!=this) 
+                colonies.add((ColonyIG) l);
         }
         if (colonies.isEmpty()) {
             System.out.println("Aucune colonie à proximite de cette case");
             return null;
         }
-        ArrayList<Player> nearPlayers = new ArrayList<Player>();
-        for (Colony c : colonies) {
-            System.out.println(c);
+        ArrayList<PlayerIG> nearPlayers = new ArrayList<PlayerIG>();
+        for (ColonyIG c : colonies) {
             if (!nearPlayers.contains(c.player)) nearPlayers.add(c.player);
         }
         ArrayList<String> playersNames = new ArrayList<String>();
-        for (Player p : nearPlayers) playersNames.add(p.name);
+        for (PlayerIG p : nearPlayers) playersNames.add(p.name);
         System.out.println("Choisissez le joueur que vous voulez racketter :");
-        Player selectedPlayer = null;
+        PlayerIG selectedPlayer = null;
         Scanner sc = new Scanner(System.in);
         do {
             try {
                 System.out.println("Tapez l'un des noms ci-dessous :");
-                for (Player p : nearPlayers) 
+                for (PlayerIG p : nearPlayers) 
                     System.out.print(p.name+"  ");
                 System.out.println();
                 String name = sc.nextLine();
                 if (!playersNames.contains(name)) throw new WrongInputException();
-                if (name.equals(this.name)) throw new WrongInputException();
-                for (Player p : nearPlayers) {
+                for (PlayerIG p : nearPlayers) {
                     if (p.name.equals(name)) {
                         selectedPlayer = p;
-                        System.out.println("Vous avez decide de voler une carte a "+selectedPlayer.name);
                         break;
                     }
                 }
@@ -371,7 +354,7 @@ class PlayerIG {
     }
 
     // Voler une ressource au hasard au joueur choisi :
-    protected void steal(Player victim) {
+    protected void steal(PlayerIG victim) {
         ArrayList<Integer> codes = new ArrayList<Integer>();
         Random rd = new Random();
         if (victim.inventory.get("Bois")>0) codes.add(1);
@@ -389,45 +372,98 @@ class PlayerIG {
                     victim.inventory.put("Bois", a-Integer.valueOf(1));
                     a = this.inventory.get("Bois");
                     this.inventory.put("Bois", a+Integer.valueOf(1)); 
-                    System.out.println("Vous avez pris 1 bois a "+victim.name); break;
+                    System.out.println("Vous avez pris 1 bois a "+victim.name);
+                    break;
             case 2: Integer b = victim.inventory.get("Argile");
                     victim.inventory.put("Argile", b-Integer.valueOf(1));
                     b = this.inventory.get("Argile");
                     this.inventory.put("Argile", b+Integer.valueOf(1));
-                    System.out.println("Vous avez pris 1 argile a "+victim.name); break;
+                    System.out.println("Vous avez pris 1 argile a "+victim.name);
+                    break;
             case 3: Integer c = victim.inventory.get("Laine");
                     victim.inventory.put("Laine", c-Integer.valueOf(1));
                     c = this.inventory.get("Laine");
                     this.inventory.put("Laine", c+Integer.valueOf(1));
-                    System.out.println("Vous avez pris 1 laine a "+victim.name); break;
+                    System.out.println("Vous avez pris 1 laine a "+victim.name);
+                    break;
             case 4: Integer d = victim.inventory.get("Ble");
                     victim.inventory.put("Ble", d-Integer.valueOf(1));
                     d = this.inventory.get("Ble");
                     this.inventory.put("Ble", d+Integer.valueOf(1));
-                    System.out.println("Vous avez pris 1 blé a "+victim.name); break;
+                    System.out.println("Vous avez pris 1 blé a "+victim.name);
+                    break;
             case 5: Integer e = victim.inventory.get("Roche");
                     victim.inventory.put("Roche", e-Integer.valueOf(1));
                     e = this.inventory.get("Roche");
                     this.inventory.put("Roche", e+Integer.valueOf(1));
-                    System.out.println("Vous avez pris 1 roche a "+victim.name); break;
+                    System.out.println("Vous avez pris 1 roche a "+victim.name);
+                    break;
         }
     }
 
 
     ////////// Fonctions de proposition //////////
 
+    // Menu principal du joueur :
+    protected void playerMenu() {
+        System.out.println("Votre inventaire : "+this.inventory+"\n");
+        ArrayList<String> actions = new ArrayList<String>();
+        if (this.canExchange(4, null)) actions.add("ECHANGE BANQUE");
+        if (this.canUseHarbor()) actions.add("ECHANGE PORT");
+        if (this.canConstructColony()) actions.add("CONSTRUIRE COLONIE");
+        if (this.canConstructCity()) actions.add("CONSTRUIRE VILLE");
+        if (this.canConstructRoad()) actions.add("CONSTRUIRE ROUTE");
+        if (!this.specialCards.isEmpty()) actions.add("UTILISER CARTE");
+        if (this.canBuyACard()) actions.add("ACHETER CARTE");
+        if (actions.isEmpty()) {
+            System.out.println("Vous ne pouvez rien faire");
+            return;
+        }
+        System.out.println("Vous avez la possibilite d'effectuer l'une des actions suivantes :");
+        for (String a : actions) {
+            if (a==actions.get(actions.size()-1)) {
+                System.out.println(a);
+                break;
+            }
+            System.out.print(a+" | ");
+        }
+        Scanner sc = new Scanner(System.in);
+        do {
+            try {
+                System.out.println("Tapez l'une des actions ci-dessus ou entree pour passer votre tour :");
+                String line = sc.nextLine();
+                if (line.length()==0) return;
+                if (!line.equals("ECHANGE BANQUE") && !line.equals("ECHANGE PORT") && !line.equals("CONSTRUIRE COLONIE")
+                &&  !line.equals("CONSTRUIRE VILLE") && !line.equals("CONSTRUIRE COLONIE") && !line.equals("CONSTRUIRE ROUTE")
+                &&  !line.equals("UTILISER CARTE") && !line.equals("ACHETER CARTE")) throw new WrongInputException();
+                switch (line) {
+                    case "ECHANGE BANQUE": this.proposeToExchange41(); break;
+                    case "ECHANGE PORT": this.proposeToUseHarbor(); break;
+                    case "CONSTRUIRE COLONIE": this.proposeToConstructColony(); break;
+                    case "CONSTRUIRE VILLE": this.proposeToConstructCity(); break;
+                    case "CONSTRUIRE ROUTE": this.proposeToConstructRoad(); break;
+                    case "UTILISER CARTE": this.proposeToUseSpecialCard(); break;
+                    case "ACHETER CARTE": this.proposeToBuySpecialCard(); break;
+                }
+                this.playerMenu();
+                break;
+            } catch (Exception e) {
+                System.out.println(WrongInputException.MESSAGE);
+            }
+        } while (true);
+    }
+
     // Proposition d'échange de 4 ressources du joueur contre une de son choix,
     // (échange réalisable du moment que le joueur a au moins 4 ressources,
     //  même si ce dernier ne possède pas de port) :
-    protected void proposeToExchange41() {
-        if (canExchange(4, null)) {
+    private final void proposeToExchange41() {
+        if (this.canExchange(4, null)) {
             System.out.println("Voulez-vous echanger 4 ressources contre une de votre choix ?");
             Scanner sc = new Scanner(System.in);
             do {
                 try {
                     System.out.println("Tapez OUI ou NON :");
                     String line = sc.nextLine();
-                    System.out.println();
                     if (!line.equals("OUI") && !line.equals("NON")) throw new WrongInputException();
                     if (line.equals("OUI")) {
                         this.exchange(4, null);
@@ -442,7 +478,7 @@ class PlayerIG {
     }
 
     // Proposition d'utilisation d'un port pour faire un échange :
-    protected void proposeToUseHarbor() {
+    private final void proposeToUseHarbor() {
         if (this.canUseHarbor()) {
             System.out.println("Vous possedez un ou plusieurs port(s).");
             System.out.println("Voulez vous faire un echange base sur l'un de vos ports ?");
@@ -451,7 +487,6 @@ class PlayerIG {
                 try {
                     System.out.println("Tapez OUI ou NON :");
                     String line = sc.nextLine();
-                    System.out.println();
                     if (!line.equals("OUI") && !line.equals("NON")) throw new WrongInputException();
                     if (line.equals("OUI")) {
                         this.useHarbor();
@@ -468,7 +503,7 @@ class PlayerIG {
     // Proposition de construction d'une colonie : 
     // on demande au joueur s'il veut construire une colonie/ville/route
     // ou utiliser/acheter une carte developpement quand c'est possible :
-    protected void proposeToConstructColony() {
+    private final void proposeToConstructColony() {
         if (this.canConstructColony()) {
             System.out.println("Voulez-vous construire une colonie ?");
             System.out.println("Cout : 1 bois, 1 argile, 1 laine et 1 ble");
@@ -477,7 +512,6 @@ class PlayerIG {
                 try {
                     System.out.println("Tapez OUI ou NON :");
                     String line = sc.nextLine();
-                    System.out.println();
                     if (!line.equals("OUI") && !line.equals("NON")) throw new WrongInputException();
                     if (line.equals("OUI")) {
                         this.buildColony(false);
@@ -492,7 +526,7 @@ class PlayerIG {
     }
 
     // Proposition de construction d'une ville :
-    protected void proposeToConstructCity() {
+    private final void proposeToConstructCity() {
         if (this.canConstructCity()) {
             System.out.println("Voulez-vous construire une ville ?");
             System.out.println("Cout : 3 roches et 2 bles");
@@ -501,7 +535,6 @@ class PlayerIG {
                 try {
                     System.out.println("Tapez OUI ou NON :");
                     String line = sc.nextLine();
-                    System.out.println();
                     if (!line.equals("OUI") && !line.equals("NON")) throw new WrongInputException();
                     if (line.equals("OUI")) {
                         this.buildCity();
@@ -516,7 +549,7 @@ class PlayerIG {
     }
 
     // Proposition de construction d'une route :
-    protected void proposeToConstructRoad() {
+    private final void proposeToConstructRoad() {
         if (this.canConstructRoad()) {
             System.out.println("Voulez-vous construire une route ?");
             System.out.println("Cout : 1 bois et 1 argile");
@@ -525,7 +558,6 @@ class PlayerIG {
                 try {
                     System.out.println("Tapez OUI ou NON :");
                     String line = sc.nextLine();
-                    System.out.println();
                     if (!line.equals("OUI") && !line.equals("NON")) throw new WrongInputException();
                     if (line.equals("OUI")) {
                         this.buildRoad(false, false);
@@ -542,14 +574,14 @@ class PlayerIG {
     // Proposition d'utilisation d'une carte developpement :
     protected void proposeToUseSpecialCard() {
         if (!this.specialCards.isEmpty()) {
+            System.out.println("Votre inventaire : "+this.inventory);
+            System.out.println("Vos cartes developpement :\n"+this.specialCards);
             System.out.println("Voulez vous utiliser une carte ?");
-            System.out.println("Cout : 1 roche, 1 laine et 1 ble");
             Scanner sc = new Scanner(System.in);
             do {
                 try {
                     System.out.println("Tapez OUI ou NON :");
                     String line = sc.nextLine();
-                    System.out.println();
                     if (!line.equals("OUI") && !line.equals("NON")) throw new WrongInputException();
                     if (line.equals("OUI")) {
                         this.useSpecialCard();
@@ -564,7 +596,7 @@ class PlayerIG {
     }
 
     // Proposition d'achat d'une carte developpement :
-    protected void proposeToBuySpecialCard() {
+    private final void proposeToBuySpecialCard() {
         if (this.canBuyACard()) {
             do {
                 System.out.println("Voulez-vous acheter une carte developpement ?");
@@ -573,12 +605,10 @@ class PlayerIG {
                 try {
                     System.out.println("Tapez OUI ou NON :");
                     String line = sc.nextLine();
-                    System.out.println();
                     if (!line.equals("OUI") && !line.equals("NON")) throw new WrongInputException();
                     if (line.equals("OUI")) {
                         this.buySpecialCard();
                         System.out.println("Votre inventaire :"+this.inventory);
-                        System.out.println("Vos cartes developpement :\n"+this.specialCards);
                     }
                     break;
                 } catch (Exception e) {
@@ -594,23 +624,27 @@ class PlayerIG {
     // Construction d'une colonie :
     // Remarque : on a décidé de ne pas implémenter le fait que toute colonie doit être distante d’au moins 2 intersections
     // En effet, le plateau est trop petit pour pouvoir appliquer cette règle de distance
-    protected void buildColony(boolean isFree) {
+    protected void buildColony(boolean beginning) {
         Scanner sc = new Scanner(System.in);
         do {
             try {
                 System.out.println(this.name+", placez votre colonie :");
                 int[] indexs = scanLocationOrPath(sc);
-                int k = indexs[0]; int l = indexs[1];
-                if (k-1<0 || k-1>4 || l-1<0 || l-1>4) throw new IndexOutOfBoundsException();
-                if (Game.PLAYBOARD.locations[k-1][l-1] instanceof Colony) throw new WrongInputException();
-                if (isFree) {
-                if (Game.PLAYBOARD.locations[k-1][l-1].hasAnHarbor())
-                        this.harbors.add(Game.PLAYBOARD.locations[k-1][l-1].getHarbor());
-                    Game.PLAYBOARD.locations[k-1][l-1] = new Colony(Game.PLAYBOARD.locations[k-1][l-1].boxes, k-1, l-1, this);
-                    this.coloniesOnPlayBoard.add((Colony) Game.PLAYBOARD.locations[k-1][l-1]);
+                int k = indexs[0]-1, l = indexs[1]-1;
+                if (k<0 || k>4 || l<0 || l>4) throw new IndexOutOfBoundsException();
+                if (Game.PLAYBOARD.locations[k][l] instanceof ColonyIG) throw new WrongInputException();
+                if (beginning) {
+                    if (Game.PLAYBOARD.locations[k][l].hasAnHarbor())
+                        this.harbors.add(Game.PLAYBOARD.locations[k][l].getHarbor());
+                    Game.PLAYBOARD.locations[k][l] = new ColonyIG(Game.PLAYBOARD.locations[k][l].boxes, k, l, this);
+                    this.coloniesOnPlayBoard.add((ColonyIG) Game.PLAYBOARD.locations[k][l]);
                 } else {
-                    ArrayList<Location> endPoints = this.getEndPoints();
-                    if (!endPoints.contains(Game.PLAYBOARD.locations[k-1][l-1])) throw new InexistantRoadException();
+                    ArrayList<LocationIG> endPoints = this.getEndPoints();
+                    if (!endPoints.contains(Game.PLAYBOARD.locations[k][l])) throw new InexistantRoadException();
+                    if (Game.PLAYBOARD.locations[k][l].hasAnHarbor())
+                        this.harbors.add(Game.PLAYBOARD.locations[k][l].getHarbor());
+                    Game.PLAYBOARD.locations[k][l] = new ColonyIG(Game.PLAYBOARD.locations[k][l].boxes, k, l, this);
+                    this.coloniesOnPlayBoard.add((ColonyIG) Game.PLAYBOARD.locations[k][l]);
                     this.inventory.replace("Bois", this.inventory.get("Bois")-1); 
                     this.inventory.replace("Laine", this.inventory.get("Laine")-1); 
                     this.inventory.replace("Ble", this.inventory.get("Ble")-1); 
@@ -629,42 +663,38 @@ class PlayerIG {
             }
         } while (true);
         Game.PLAYBOARD.updatePaths();
-        Game.PLAYBOARD.display();
     }
 
     // Construction d'une ville :
     protected void buildCity() {
-        ArrayList<Integer> ids = new ArrayList<Integer>();
-        for (Colony col : this.coloniesOnPlayBoard) {
-            System.out.println(col);
-            ids.add(col.id);
-        }
         do {   
             try {
                 Scanner sc = new Scanner(System.in);
-                System.out.println("Pour choisir la colonie a transformer en ville,");
-                System.out.println("veuillez tapez le numero de la colonie en question :");
-                int selectedId = sc.nextInt();
-                if (!ids.contains(selectedId)) throw new WrongInputException();
-                for (Colony col : this.coloniesOnPlayBoard) {
-                    if (col.id==selectedId) {
-                        col.isCity = true;
-                        ((Colony) Game.PLAYBOARD.locations[col.indexI][col.indexJ]).isCity = true;
-                        this.inventory.replace("Roche", this.inventory.get("Roche")-3); 
-                        this.inventory.replace("Ble", this.inventory.get("Ble")-2); 
-                        this.victoryPoints++;
-                        break;
-                    }
-                }
+                System.out.println(this.name+", choisissez la colonie a transformer en ville :");
+                int[] index = scanLocationOrPath(sc);
+                int k = index[0]-1, l = index[1]-1;
+                if (k<0 || k>4 || l<0 || l>4) throw new IndexOutOfBoundsException();
+                if (!(Game.PLAYBOARD.locations[k][l] instanceof ColonyIG)) throw new InexistantColonyException();
+                if (((ColonyIG) Game.PLAYBOARD.locations[k][l]).player!=this) throw new IllegalStateException();
+                if (((ColonyIG) Game.PLAYBOARD.locations[k][l]).isCity) throw new WrongInputException();
+                ((ColonyIG) Game.PLAYBOARD.locations[k][l]).isCity = true;
+                this.inventory.replace("Roche", this.inventory.get("Roche")-3); 
+                this.inventory.replace("Ble", this.inventory.get("Ble")-2); 
+                this.victoryPoints++;
                 break;
+            } catch (IndexOutOfBoundsException ind) {
+                System.out.println("Erreur : cet emplacement n'existe pas");
+            } catch (InexistantColonyException ice) {
+                System.out.println("Erreur : cet emplacement ne contient pas de colonie");
+            } catch (IllegalStateException ise) {
+                System.out.println("Erreur : cette colonie ne vous appartient pas");
             } catch (WrongInputException w) {
-                System.out.println("Erreur : Cette colonie n'existe pas ou ne vous appartient pas");
+                System.out.println("Erreur : vous avez selectionne une ville");
             } catch (Exception e) {
                 System.out.println(WrongInputException.MESSAGE);
             }
         } while (true);
         Game.PLAYBOARD.updatePaths();
-        Game.PLAYBOARD.display();
     }
 
     // Construction d'une route :
@@ -686,13 +716,25 @@ class PlayerIG {
                 } else {
                     if (k<0 || k>3 || l<0 || l>4) throw new IndexOutOfBoundsException();
                 }
-                if ((c=='H' && Game.PLAYBOARD.horizontalPaths[k][l] instanceof Road) || 
-                    (c=='V' && Game.PLAYBOARD.verticalPaths[k][l] instanceof Road)) {
-                    System.out.println("Erreur : cet emplacement est occupe");
-                } else {
+                if ((c=='H' && Game.PLAYBOARD.horizontalPaths[k][l] instanceof RoadIG) || 
+                    (c=='V' && Game.PLAYBOARD.verticalPaths[k][l] instanceof RoadIG)) 
+                    throw new IllegalStateException();
+                try {
+                    RoadIG r = this.buildRoadNextToColony(c, (c=='H')? Game.PLAYBOARD.horizontalPaths[k][l] : 
+                    Game.PLAYBOARD.verticalPaths[k][l], beginning);
+                    if (c=='H') Game.PLAYBOARD.horizontalPaths[k][l] = r;
+                    else Game.PLAYBOARD.verticalPaths[k][l] = r;
+                    this.roads.add(r);
+                    if (!isFree) {
+                        this.inventory.replace("Bois", this.inventory.get("Bois")-1); 
+                        this.inventory.replace("Argile", this.inventory.get("Argile")-1); 
+                    }
+                    break;
+                } catch (InexistantColonyException ice) {
                     try {
-                        Road r = this.buildRoadNextToColony(c, (c=='H')? Game.PLAYBOARD.horizontalPaths[k][l] : 
-                        Game.PLAYBOARD.verticalPaths[k][l], beginning);
+                        if (beginning) throw new IllegalStateException();
+                        RoadIG r = this.buildRoadNextToRoad(c, (c=='H')? Game.PLAYBOARD.horizontalPaths[k][l] :
+                        Game.PLAYBOARD.verticalPaths[k][l]);
                         if (c=='H') Game.PLAYBOARD.horizontalPaths[k][l] = r;
                         else Game.PLAYBOARD.verticalPaths[k][l] = r;
                         this.roads.add(r);
@@ -701,64 +743,52 @@ class PlayerIG {
                             this.inventory.replace("Argile", this.inventory.get("Argile")-1); 
                         }
                         break;
-                    } catch (InexistantColonyException ice) {
-                        try {
-                            if (beginning) throw new IllegalStateException();
-                            Road r = this.buildRoadNextToRoad(c, (c=='H')? Game.PLAYBOARD.horizontalPaths[k][l] :
-                            Game.PLAYBOARD.verticalPaths[k][l]);
-                            if (c=='H') Game.PLAYBOARD.horizontalPaths[k][l] = r;
-                            else Game.PLAYBOARD.verticalPaths[k][l] = r;
-                            this.roads.add(r);
-                            if (!isFree) {
-                                this.inventory.replace("Bois", this.inventory.get("Bois")-1); 
-                                this.inventory.replace("Argile", this.inventory.get("Argile")-1); 
-                            }
-                            break;
-                        } catch (IllegalStateException e) {
-                            System.out.println("Erreur : Vous devez construire votre route a cote de la colonie que vous venez de construire");
-                        } catch (InexistantRoadException ire) {
-                            System.out.println(ice);
-                            System.out.println(ire);
-                        }
+                    } catch (IllegalStateException e) {
+                        System.out.println(
+                        "Erreur : Vous devez construire votre route a cote de la colonie que vous venez de construire");
+                    } catch (InexistantRoadException ire) {
+                        System.out.println(ice);
+                        System.out.println(ire);
                     }
                 }
-            } catch (InexistantRoadException ind) {
+            } catch (IndexOutOfBoundsException ind) {
                 System.out.println("Erreur : ce chemin n'existe pas");
+            } catch (IllegalStateException ill) {
+                System.out.println("Erreur : cet emplacement est occupe");
             } catch (Exception e) {
                 System.out.println(WrongInputException.MESSAGE);
             }
         } while (true);
-        Game.PLAYBOARD.display();
     }
 
     // Construction d'une route à côté d'une colonie :
-    protected Road buildRoadNextToColony(char c, Path selectedPath, boolean beginning) throws InexistantColonyException {
-        if (selectedPath.point1 instanceof Colony) {
-            Colony col = (Colony) selectedPath.point1;
+    protected RoadIG buildRoadNextToColony(char c, PathIG selectedPath, boolean beginning) throws InexistantColonyException {
+        if (selectedPath.point1 instanceof ColonyIG) {
+            ColonyIG col = (ColonyIG) selectedPath.point1;
             if (col.player==this && !beginning)
-                return new Road(this, c, selectedPath.point1, selectedPath.point2, 1);
+                return new RoadIG(this, c, selectedPath.point1, selectedPath.point2, 1);
             if (col==this.coloniesOnPlayBoard.get(this.coloniesOnPlayBoard.size()-1) && beginning)
-                return new Road(this, c, selectedPath.point1, selectedPath.point2, 1);
+                return new RoadIG(this, c, selectedPath.point1, selectedPath.point2, 1);
         }
-        if (selectedPath.point2 instanceof Colony) {
-            Colony col = (Colony) selectedPath.point2;
+        if (selectedPath.point2 instanceof ColonyIG) {
+            ColonyIG col = (ColonyIG) selectedPath.point2;
             if (col.player==this && !beginning) 
-                return new Road(this, c, selectedPath.point1, selectedPath.point2, 2);
+                return new RoadIG(this, c, selectedPath.point1, selectedPath.point2, 2);
             if (col==this.coloniesOnPlayBoard.get(this.coloniesOnPlayBoard.size()-1) && beginning)
-                return new Road(this, c, selectedPath.point1, selectedPath.point2, 2);
+                return new RoadIG(this, c, selectedPath.point1, selectedPath.point2, 2);
         }
         throw new InexistantColonyException();
     }
 
     // Construction d'une route à côté d'une autre route :
-    protected Road buildRoadNextToRoad(char c, Path selectedPath) throws InexistantRoadException {
-        ArrayList<Location> endPoints = this.getEndPoints();
-        for (Location endPoint : endPoints) {
+    protected RoadIG buildRoadNextToRoad(char c, PathIG selectedPath) throws InexistantRoadException {
+        ArrayList<LocationIG> endPoints = this.getEndPoints();
+        for (LocationIG endPoint : endPoints) {
             if (selectedPath.point1==endPoint) {
-                return new Road(this, c, selectedPath.point1, selectedPath.point2, 1);
+                return new RoadIG(this, c, selectedPath.point1, selectedPath.point2, 1);
             }
             if (selectedPath.point2==endPoint) {
-                return new Road(this, c, selectedPath.point1, selectedPath.point2, 2);
+                return new RoadIG(this, c, selectedPath.point1, selectedPath.point2, 2);
             }
         }
         throw new InexistantRoadException();
@@ -766,9 +796,9 @@ class PlayerIG {
 
     // Fonction pour récupérer les emplacements d'arrivée de toutes les routes
     // construites par le joueur courant :
-    protected ArrayList<Location> getEndPoints() {
-        ArrayList<Location> endPoints = new ArrayList<Location>();
-        for (Road PLAYBOARD : this.roads) {
+    protected ArrayList<LocationIG> getEndPoints() {
+        ArrayList<LocationIG> endPoints = new ArrayList<LocationIG>();
+        for (RoadIG PLAYBOARD : this.roads) {
             endPoints.add(PLAYBOARD.endPoint);
         }
         return endPoints;
@@ -779,7 +809,6 @@ class PlayerIG {
         try {
             String s = sc.nextLine();
             if (s.length()>2 || s.length()<=0) throw new RuntimeException();
-            System.out.println();
             String i = String.valueOf(s.charAt(0));
             String j = String.valueOf(s.charAt(1));
             int k = Integer.valueOf(i);
@@ -797,11 +826,11 @@ class PlayerIG {
     // Fonction qui procède à un échange de ressources via le commerce maritime :
     protected void exchange(int n, String ressource) {
         if (ressource==null) {
-            System.out.println("Choisissez la ressource dont vous voulez donner 4 unites :");
+            System.out.println("Choisissez la ressource dont vous voulez donner "+n+" unites :");
             Set<String> keys = this.inventory.keySet();
             ArrayList<String> selectables = new ArrayList<String>();
             for (String key : keys) {
-                if (this.inventory.get(key)>=4) selectables.add(key);
+                if (this.inventory.get(key)>=n) selectables.add(key);
             }
             Scanner sc = new Scanner(System.in);
             do {
@@ -812,7 +841,8 @@ class PlayerIG {
                     System.out.println();
                     String line = sc.nextLine();
                     if (!selectables.contains(line)) throw new WrongInputException();
-                    this.exchange(4, line);
+                    this.exchange(n, line);
+                    return;
                 } catch (Exception e) {
                     System.out.println(WrongInputException.MESSAGE);
                 }
@@ -820,7 +850,6 @@ class PlayerIG {
         } else {
             Integer a = this.inventory.get(ressource);
             this.inventory.put(ressource, a-Integer.valueOf(n));
-            System.out.println("Vous avez donne "+n+" "+ressource);
             System.out.println("Veuillez maintenant prendre une ressource de votre choix :");
             System.out.println("Votre inventaire : "+this.inventory);
             System.out.println("Choisissez une ressource :");
@@ -829,12 +858,11 @@ class PlayerIG {
                 try {
                     System.out.println("Tapez Bois, Argile, Laine, Ble ou Roche :");
                     String line = sc.nextLine();
-                    System.out.println();
                     if (!line.equals("Bois") && !line.equals("Argile") && !line.equals("Laine") && 
                         !line.equals("Ble") && !line.equals("Roche")) throw new WrongInputException();
+                    if (line.equals(ressource)) throw new WrongInputException();
                     Integer b = this.inventory.get(line);
                     this.inventory.put(line, b+Integer.valueOf(1));
-                    System.out.println("Vous avez gagne 1 "+line);
                     break;
                 } catch (Exception e) {
                     System.out.println(WrongInputException.MESSAGE);
@@ -848,10 +876,9 @@ class PlayerIG {
         int[] ids = new int[this.harbors.size()];
         int a = 0;
         System.out.println("Vos ports :");
-        for (Harbor h : this.harbors) {
+        for (HarborIG h : this.harbors) {
             ids[a] = h.id;
             a++;
-            System.out.print(h.toStringWithId()+"   ");
         }
         System.out.println();
         System.out.println("Choisissez l'un de vos ports :");
@@ -865,7 +892,7 @@ class PlayerIG {
                     if (ids[i]!=selectedId) b++;
                 }
                 if (b==ids.length) throw new WrongInputException();
-                Harbor selectedHarbor = Game.PLAYBOARD.getHarbor(selectedId);
+                HarborIG selectedHarbor = Game.PLAYBOARD.getHarbor(selectedId);
                 if (selectedHarbor.type.equals("Simple")) 
                     if (!this.canExchange(3, null)) throw new NotEnoughRessourcesException();
                 else 
@@ -893,45 +920,69 @@ class PlayerIG {
             try {
                 Scanner sc = new Scanner(System.in);
                 int n = sc.nextInt();
-                if (n!=1 && n!=2 && n!=3 && n!=4) throw new WrongInputException();
+                if (n!=0 && n!=1 && n!=2 && n!=3 && n!=4) throw new WrongInputException();
                 for(Card c : this.specialCards){
+                    // Carte point de victoire :
                     if (c.id==0 && n==0) {
                         this.specialCards.remove(c);
                         this.victoryPoints++; 
                         System.out.println("Vous avez gagne un point de victoire");
-                    } else if(c.id==1 && n==1){
-                        this.moveThief();
-                        this.specialCards.remove(c);
-                        this.knights++;
-                        if (this.knights==3 && !Game.army) {
-                            Game.army = true;
-                            this.victoryPoints += 2;
-                            Game.hasTheStrongestArmy = this;
-                            System.out.println("Vous avez gagne 2 points de victoire");
-                        } else if (Game.army && Game.hasTheStrongestArmy!=this
-                                && this.knights>Game.hasTheStrongestArmy.knights) {
-                            Game.hasTheStrongestArmy.victoryPoints -= 2;
-                            System.out.println(Game.hasTheStrongestArmy.name+" a perdu deux points de victoire");
-                            this.victoryPoints += 2;
-                            System.out.println("Vous avez gagne 2 points de victoire");
-                            Game.hasTheStrongestArmy = this;
-                        }
-                    }else if(c.id==3 && n==3){
-                        this.specialCards.remove(c);
-                        invention();
-                    }else if(c.id==2 && n==2){
-                        this.specialCards.remove(c);
-                        carteRoute();
-                    }else if(c.id==4 && n==4){
-                        this.specialCards.remove(c);
-                        monopole();
+                        break;
                     }
+                    // Carte chevalier :
+                    if(c.id==1 && n==1){
+                        this.specialCards.remove(c);
+                        this.knight();
+                        break;
+                    }
+                    // Carte progrès invention :
+                    if(c.id==3 && n==3){
+                        this.specialCards.remove(c);
+                        this.invention();
+                        break;
+                    }
+                    // Carte progrès route :
+                    if(c.id==2 && n==2){
+                        this.specialCards.remove(c);
+                        this.carteRoute();
+                        break;
+                    }
+                    // Carte progrès monopole :
+                    if(c.id==4 && n==4){
+                        this.specialCards.remove(c);
+                        this.monopole();
+                        break;
+                    }
+                    throw new WrongInputException();
                 }
                 break;
             } catch (Exception e) {
                 System.out.println(WrongInputException.MESSAGE);
             }
         } while (true);
+    }
+
+    // Carte chevalier :
+    protected void knight() {
+        BoxIG b = this.moveThief();
+        // Ensuite, le joueur courant choisi le joueur a qui il veut voler une ressource :
+        PlayerIG victim = this.selectPlayerToStealFrom(b);
+        // Si le joueur courant a choisi une case avec des colonies adjacentes, 
+        // alors le joueur designe par le joueur courant subit le vol : 
+        if (victim!=null) this.steal(victim);
+        this.knights++;
+        if (this.knights==3 && !Game.army) {
+            Game.army = true;
+            this.victoryPoints += 2;
+            Game.hasTheStrongestArmy = this;
+            System.out.println("Vous avez gagne 2 points de victoire");
+        } else if (Game.army && Game.hasTheStrongestArmy!=this
+                && this.knights>Game.hasTheStrongestArmy.knights) {
+            Game.hasTheStrongestArmy.victoryPoints -= 2;
+            this.victoryPoints += 2;
+            System.out.println("Vous avez gagne 2 points de victoire");
+            Game.hasTheStrongestArmy = this;
+        }
     }
 
     // Carte progrès invention :
@@ -949,13 +1000,12 @@ class PlayerIG {
                 if(s.equals("Roche") || s.equals("Laine") || s.equals("Ble") || s.equals("Argile") || s.equals("Bois")){
                     this.inventory.replace(s, this.inventory.get(s)+1);
                     acc = 2;
-                    
                     if(acc == 2) break;
                 }else{
                     throw new WrongInputException();
                 }
-            }catch(WrongInputException e){
-                System.out.println(e);
+            }catch(Exception e){
+                System.out.println(WrongInputException.MESSAGE);
             }
         }while (true);
     }
@@ -968,17 +1018,18 @@ class PlayerIG {
         this.buildRoad(true, false);
     }
 
-    // Carte monopole :
+    // Carte progrès monopole :
     protected void monopole() {
         int n = 0;
         Scanner sc = new Scanner(System.in);
+        System.out.println("Votre inventaire : "+this.inventory);
         while(true){
             try{
-                String s = sc.nextLine();
                 System.out.println("Veuillez choisir une ressource a monopoliser");
                 System.out.println("Roche | Laine | Argile | Ble | Bois");
+                String s = sc.nextLine();
                 if(s.equals("Roche") || s.equals("Laine") || s.equals("Ble") || s.equals("Bois") || s.equals("Argile")){
-                    for(Player p: Game.PLAYERS){
+                    for(PlayerIG p: Game.PLAYERS){
                         if(p!=this){
                             n += p.inventory.get(s);
                             p.inventory.replace(s, 0);
@@ -989,8 +1040,8 @@ class PlayerIG {
                 }else{
                     throw new WrongInputException();
                 }
-            }catch(WrongInputException e){
-                System.out.println(e);
+            }catch(Exception e){
+                System.out.println(WrongInputException.MESSAGE);
             }
         }
     }
@@ -1000,31 +1051,36 @@ class PlayerIG {
         this.inventory.replace("Roche", this.inventory.get("Roche")-1); 
         this.inventory.replace("Laine", this.inventory.get("Laine")-1); 
         this.inventory.replace("Ble", this.inventory.get("Ble")-1); 
-        this.specialCards.add(Game.DECK.getDeck().pop());
+        this.notUsableCards.add(Game.DECK.getDeck().pop());
     }
     
 
     ////////// Route la plus longue du joueur courant //////////
 
     protected int longestRoad() {
-        ArrayList<Road> startRoads = new ArrayList<Road>();
-        for (Road r : this.roads)  {
+        ArrayList<RoadIG> startRoads = new ArrayList<RoadIG>();
+        for (RoadIG r : this.roads)  {
             if (r.isAStartRoad()) startRoads.add(r);
         }
         int[] distances = new int[startRoads.size()];
-        for (int i=0; i<startRoads.size(); i++) 
-            distances[i] = this.calculateLongestRoad(startRoads.get(i), new ArrayList<Road>(), 1);
+        for (int i=0; i<startRoads.size(); i++) {
+            ArrayList<RoadIG> crossedRoads = new ArrayList<RoadIG>();
+            crossedRoads.add(startRoads.get(i));
+            distances[i] = this.calculateLongestRoad(startRoads.get(i), crossedRoads, 1);
+        }
         return Game.getMax(distances);
     }
     
-    private final int calculateLongestRoad(Road road, ArrayList<Road> crossedRoads, int acc) {
-        if (!road.hasLinkedRoads() || crossedRoads.contains(road)) return acc; 
-        if (!crossedRoads.contains(road)) crossedRoads.add(road);
+    private final int calculateLongestRoad(RoadIG road, ArrayList<RoadIG> crossedRoads, int acc) {
+        if (!road.hasLinkedRoads()) return acc;
         if (road.getLinkedRoads().size()==1) {
+            if (crossedRoads.contains(road.getLinkedRoads().get(0))) return acc;
             crossedRoads.add(road.getLinkedRoads().get(0));
             return this.calculateLongestRoad(road.getLinkedRoads().get(0), crossedRoads, acc+1);
         }
         if (road.getLinkedRoads().size()==2) {
+            if (crossedRoads.contains(road.getLinkedRoads().get(0))
+            || crossedRoads.contains(road.getLinkedRoads().get(1))) return acc;
             crossedRoads.add(road.getLinkedRoads().get(0));
             int a = this.calculateLongestRoad(road.getLinkedRoads().get(0), crossedRoads, acc+1);
             crossedRoads.add(road.getLinkedRoads().get(1));
@@ -1032,6 +1088,9 @@ class PlayerIG {
             return Math.max(a,b);
         }
         if (road.getLinkedRoads().size()==3) {
+            if (crossedRoads.contains(road.getLinkedRoads().get(0))
+            || crossedRoads.contains(road.getLinkedRoads().get(1))
+            || crossedRoads.contains(road.getLinkedRoads().get(2))) return acc;
             crossedRoads.add(road.getLinkedRoads().get(0));
             int a = this.calculateLongestRoad(road.getLinkedRoads().get(0), crossedRoads, acc+1);
             crossedRoads.add(road.getLinkedRoads().get(1));

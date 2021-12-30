@@ -27,6 +27,7 @@ public class Game extends JFrame implements ActionListener {
     static JButton cbutton = new JButton("Confirmer");
     static int action = 0;
     static int acc = 0;
+    static int player = 0;
 
     // Données de base de la partie :
     static PlayerIG[] PLAYERS; // joueurs 
@@ -58,6 +59,7 @@ public class Game extends JFrame implements ActionListener {
 		contentPane.add(choice);
         cbutton.setBounds(230, 360, 100, 55);
         contentPane.add(cbutton);
+
         cbutton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {   
@@ -70,9 +72,11 @@ public class Game extends JFrame implements ActionListener {
                     choice2.setBounds(230, 200, 100, 20);
                     contentPane.add(choice2);
                     if(number == 3){
+                        choice2.add("0");
                         choice2.add("1");
                         choice2.add("2");
                     }else{
+                        choice2.add("0");
                         choice2.add("1");
                         choice2.add("2");
                         choice2.add("3");
@@ -113,14 +117,73 @@ public class Game extends JFrame implements ActionListener {
                     return;
                 }
                 if(action == 2 && acc == number-botnumber){
-                    contentPane.remove(cbutton);
-                    PLAYBOARD = new PlayBoardIG();
+                    PLAYBOARD.playername.setText(PLAYERS[player].name);
+                    player++;
                     PLAYBOARD.setVisible(true);
                     stop();
                     return;
                 }
             }
         });
+
+        PLAYBOARD.lancerDe.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.out.println(PLAYERS[player].throwDices());
+                PLAYBOARD.contentPane.remove(PLAYBOARD.lancerDe);
+                PLAYBOARD.contentPane.add(PLAYBOARD.passeTour);
+                PLAYBOARD.repaint();
+                return;
+            }
+        });
+
+        PLAYBOARD.passeTour.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if(player == number-botnumber-1){
+                    PLAYBOARD.playername.setText(PLAYERS[player].name);
+                    PLAYBOARD.contentPane.remove(PLAYBOARD.passeTour);
+                    PLAYBOARD.contentPane.add(PLAYBOARD.lancerDe);
+                    PLAYBOARD.repaint();
+                    player = 0;
+                    return;
+                }
+                if(player == 0){
+                    PLAYBOARD.playername.setText(PLAYERS[player].name);
+                    PLAYBOARD.contentPane.remove(PLAYBOARD.passeTour);
+                    PLAYBOARD.contentPane.add(PLAYBOARD.lancerDe);
+                    PLAYBOARD.repaint();
+                    player++;
+                    return;
+                }
+                if(player == 1){
+                    PLAYBOARD.playername.setText(PLAYERS[player].name);
+                    PLAYBOARD.contentPane.remove(PLAYBOARD.passeTour);
+                    PLAYBOARD.contentPane.add(PLAYBOARD.lancerDe);
+                    PLAYBOARD.repaint();
+                    player++;
+                    return;
+                }
+                if(player == 2){
+                    PLAYBOARD.playername.setText(PLAYERS[player].name);
+                    PLAYBOARD.contentPane.remove(PLAYBOARD.passeTour);
+                    PLAYBOARD.contentPane.add(PLAYBOARD.lancerDe);
+                    PLAYBOARD.repaint();
+                    player++;
+                    return;
+                }
+                if(player == 3){
+                    PLAYBOARD.playername.setText(PLAYERS[player].name);
+                    PLAYBOARD.contentPane.remove(PLAYBOARD.passeTour);
+                    PLAYBOARD.contentPane.add(PLAYBOARD.lancerDe);
+                    PLAYBOARD.repaint();
+                    player = 0;
+                    return;
+                }
+            }
+        });
+
+
     }
 
     public final static void catan() {
@@ -134,6 +197,40 @@ public class Game extends JFrame implements ActionListener {
 
     public void stop(){
         this.dispose();
+    }
+    
+
+    private static PlayerIG longestRoad(PlayerIG previous) {
+        boolean b = true;
+        int[] sizes = new int[PLAYERS.length];
+        System.out.println();
+        for (int i=0; i<PLAYERS.length; i++) {
+            sizes[i] = PLAYERS[i].longestRoad();
+            System.out.println(PLAYERS[i].name+" : "+sizes[i]);
+        }
+        System.out.println();
+        int max = sizes[0];
+        int index = 0;
+        for (int i=1; i<sizes.length; i++) { 
+            if (sizes[i]==max) b = false;
+            if (sizes[i]>max) {
+                max = sizes[i];
+                index = i;
+            }
+        }
+        if (previous!=PLAYERS[index] && b) PLAYERS[index].victoryPoints += 2;
+        if (previous!=null && previous!=PLAYERS[index] && !b) 
+            previous.victoryPoints -= 2;
+        longestRoad = b;
+        return PLAYERS[index];
+    }
+
+    public static int getMax(int[] t) {
+        int max = t[0];
+        for (int i=1; i<t.length; i++) {
+            if (t[i]>max) max = t[i];
+        }
+        return max;
     }
 
     public static void main(String[] args) {

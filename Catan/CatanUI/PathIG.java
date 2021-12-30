@@ -1,10 +1,12 @@
 package Catan.CatanUI;
 
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 
 import javax.swing.JPanel;
+import javax.swing.event.MouseInputListener;
 
-class PathIG {
+class PathIG extends JPanel implements MouseInputListener{
 
     ////////// Attributs //////////
     
@@ -45,6 +47,48 @@ class PathIG {
             neighbors.add(Game.PLAYBOARD.verticalPaths[point.indexI][point.indexJ]);
         } catch (Exception e) {}
         return neighbors;
+    }
+
+    @Override
+    public void mouseClicked(MouseEvent e) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void mousePressed(MouseEvent e) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void mouseReleased(MouseEvent e) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void mouseEntered(MouseEvent e) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void mouseExited(MouseEvent e) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void mouseDragged(MouseEvent e) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void mouseMoved(MouseEvent e) {
+        // TODO Auto-generated method stub
+        
     }
 
 }

@@ -41,6 +41,6 @@ public final class Deck {
         Collections.shuffle(deck);
     }
 
-    final Stack<Card> getDeck() {return deck;}
+    public final Stack<Card> getDeck() {return deck;}
 
 }

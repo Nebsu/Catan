@@ -5,7 +5,7 @@ public class Card {
     ////////// Attributs ////////// 
 
     protected final String cardname;
-    protected final int id;
+    public final int id;
 
     ////////// Constructeur et fonctions associées à ce dernier //////////
 

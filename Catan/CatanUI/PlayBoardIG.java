@@ -16,6 +16,9 @@ public class PlayBoardIG extends JFrame{
 	PathIG[][] verticalPaths; // chemins verticaux
 	BoxIG thief; // case contenant le voleur 
 	JPanel contentPane;
+    JButton passeTour = new JButton("<html><body>Passer<div>Tour</body></html>");
+    JButton lancerDe = new JButton("<html><body>Lancer<div>Dé</body></html>");
+    JLabel playername  = new JLabel();
 
 	////////// Constructeur et fonctions associées à ce dernier //////////
     
@@ -26,6 +29,13 @@ public class PlayBoardIG extends JFrame{
 		contentPane.setBorder(null);
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
+        passeTour.setBounds(475, 430, 85, 65);
+        lancerDe.setBounds(475, 430, 85, 65);
+        JPanel playerpanel = new JPanel();
+        playerpanel.setBounds(10, 335, 115, 25);
+        playerpanel.add(playername);
+        contentPane.add(lancerDe);
+        contentPane.add(playerpanel);
 
         this.boxes = new BoxIG[4][4];
         this.constructBoxes();
@@ -411,4 +421,20 @@ public class PlayBoardIG extends JFrame{
         this.seaBoxes[14] = new SeaBoxIG(this.locations[2][0], this.locations[1][0], seabox15);
         this.seaBoxes[15] = new HarborIG(this.locations[1][0], this.locations[0][0], seabox16);
     }
+ 
+    final void updatePaths() {
+        for (int i=0; i<this.horizontalPaths.length; i++) {
+            for (int j=0; j<this.horizontalPaths[i].length; j++) {
+                this.horizontalPaths[i][j].point1 = this.locations[i][j];
+                this.horizontalPaths[i][j].point2 = this.locations[i][j+1];
+            }
+        }
+        for (int i=0; i<this.verticalPaths.length; i++) {
+            for (int j=0; j<this.verticalPaths[i].length; j++) {
+                this.verticalPaths[i][j].point1 = this.locations[i][j];
+                this.verticalPaths[i][j].point2 = this.locations[i+1][j];
+            }
+        }
+    }
 }
+
