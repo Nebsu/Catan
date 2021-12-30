@@ -43,6 +43,10 @@ class PlayerIG {
     }
 
     ////////// Fonctions auxiliaires //////////
+
+    public String toString() {
+        return (this.name+" possede "+this.victoryPoints+" points de victoire.");
+    }
     
     // Renvoie le nombre de ressources total du joueur :
     protected int nbRessources(String ressource) {
@@ -92,7 +96,7 @@ class PlayerIG {
         }
         return ((this.inventory.get("Bois")>=1 && this.inventory.get("Argile")>=1 &&
                 this.inventory.get("Laine")>=1 && this.inventory.get("Ble")>=1) &&
-                (numberOfColonies<5) && (!CatanTerminal.PLAYBOARD.isFilledLocations()));
+                (numberOfColonies<5) && (!Game.PLAYBOARD.isFilledLocations()));
     }
 
     protected boolean canConstructCity() {
@@ -105,12 +109,12 @@ class PlayerIG {
     }
 
     protected boolean canConstructRoad() {
-        return ((this.roads.size()<15) && (!CatanTerminal.PLAYBOARD.isFilledPaths()) &&
+        return ((this.roads.size()<15) && (!Game.PLAYBOARD.isFilledPaths()) &&
                 (this.inventory.get("Bois")>=1 && this.inventory.get("Argile")>=1));
     }
 
     protected boolean canBuyACard() {
-        return (!CatanTerminal.DECK.getDeck().isEmpty() && this.inventory.get("Roche")>=1 
+        return (!Game.DECK.getDeck().isEmpty() && this.inventory.get("Roche")>=1 
                 && this.inventory.get("Laine")>=1 && this.inventory.get("Ble")>=1);
     }
 
@@ -167,7 +171,7 @@ class PlayerIG {
             System.out.println("Voleur active");
             this.thief();
         }
-        CatanTerminal.PLAYBOARD.display();
+        Game.PLAYBOARD.display();
         System.out.println("Votre inventaire : "+this.inventory);
         // Proposition d'utilisation d'une carte développement quand cela est possible :
         if (!this.specialCards.isEmpty()) 
@@ -205,7 +209,7 @@ class PlayerIG {
     // Répartition des ressources selon le résultat du lancé des dés :
     protected final static void earnResources(int dice) {
         // On récupère la ou les cases designée(s) par les dés :
-        ArrayList<Box> boxes = CatanTerminal.PLAYBOARD.getBoxes(dice);
+        ArrayList<Box> boxes = Game.PLAYBOARD.getBoxes(dice);
         // On récupère les emplacement adjacents de ces cases :
         ArrayList<Location> locations = new ArrayList<Location>();
         for (Box b : boxes) {
@@ -245,14 +249,14 @@ class PlayerIG {
     // Fonction principale du voleur :
     protected void thief() {
         // On compte les ressources de chaque joueur :
-        int[] nbRessources = new int[CatanTerminal.PLAYERS.length];
-        for (int i=0; i<CatanTerminal.PLAYERS.length; i++) {
-            nbRessources[i] += CatanTerminal.PLAYERS[i].nbRessources(null);
+        int[] nbRessources = new int[Game.PLAYERS.length];
+        for (int i=0; i<Game.PLAYERS.length; i++) {
+            nbRessources[i] += Game.PLAYERS[i].nbRessources(null);
         }
         // Les joueurs qui possèdent plus de 8 ressources,
         //  doivent donner la moitie de leurs ressources au voleur :
         for (int i=0; i<nbRessources.length; i++) {
-            if (nbRessources[i]>=8) CatanTerminal.PLAYERS[i].giveRessources(nbRessources[i]);
+            if (nbRessources[i]>=8) Game.PLAYERS[i].giveRessources(nbRessources[i]);
         }
         // Ensuite, le joueur qui a lance les des deplace le voleur :
         Box b = this.moveThief();
@@ -302,11 +306,11 @@ class PlayerIG {
                 int[] indexs = scanLocationOrPath(sc);
                 int k = indexs[0]-1; int l = indexs[1]-1;
                 if (k<0 || k>4 || l<0 || l>4) throw new WrongInputException();
-                if (CatanTerminal.PLAYBOARD.boxes[k][l]==CatanTerminal.PLAYBOARD.thief) throw new IllegalStateException();
-                CatanTerminal.PLAYBOARD.boxes[k][l].hasThief = true;
-                CatanTerminal.PLAYBOARD.thief.hasThief = false;
-                CatanTerminal.PLAYBOARD.thief = CatanTerminal.PLAYBOARD.boxes[k][l];
-                res = CatanTerminal.PLAYBOARD.boxes[k][l];
+                if (Game.PLAYBOARD.boxes[k][l]==Game.PLAYBOARD.thief) throw new IllegalStateException();
+                Game.PLAYBOARD.boxes[k][l].hasThief = true;
+                Game.PLAYBOARD.thief.hasThief = false;
+                Game.PLAYBOARD.thief = Game.PLAYBOARD.boxes[k][l];
+                res = Game.PLAYBOARD.boxes[k][l];
                 break;
             } catch (IllegalArgumentException ill) {
                 System.out.println("Erreur : Vous etes oblige de deplacer le voleur sur une nouvelle case");
@@ -314,8 +318,8 @@ class PlayerIG {
                 System.out.println(WrongInputException.MESSAGE);
             }
         } while (true);
-        CatanTerminal.PLAYBOARD.updatePaths();
-        CatanTerminal.PLAYBOARD.display();
+        Game.PLAYBOARD.updatePaths();
+        Game.PLAYBOARD.display();
         return res;
     }
 
@@ -598,15 +602,15 @@ class PlayerIG {
                 int[] indexs = scanLocationOrPath(sc);
                 int k = indexs[0]; int l = indexs[1];
                 if (k-1<0 || k-1>4 || l-1<0 || l-1>4) throw new IndexOutOfBoundsException();
-                if (CatanTerminal.PLAYBOARD.locations[k-1][l-1] instanceof Colony) throw new WrongInputException();
+                if (Game.PLAYBOARD.locations[k-1][l-1] instanceof Colony) throw new WrongInputException();
                 if (isFree) {
-                if (CatanTerminal.PLAYBOARD.locations[k-1][l-1].hasAnHarbor())
-                        this.harbors.add(CatanTerminal.PLAYBOARD.locations[k-1][l-1].getHarbor());
-                    CatanTerminal.PLAYBOARD.locations[k-1][l-1] = new Colony(CatanTerminal.PLAYBOARD.locations[k-1][l-1].boxes, k-1, l-1, this);
-                    this.coloniesOnPlayBoard.add((Colony) CatanTerminal.PLAYBOARD.locations[k-1][l-1]);
+                if (Game.PLAYBOARD.locations[k-1][l-1].hasAnHarbor())
+                        this.harbors.add(Game.PLAYBOARD.locations[k-1][l-1].getHarbor());
+                    Game.PLAYBOARD.locations[k-1][l-1] = new Colony(Game.PLAYBOARD.locations[k-1][l-1].boxes, k-1, l-1, this);
+                    this.coloniesOnPlayBoard.add((Colony) Game.PLAYBOARD.locations[k-1][l-1]);
                 } else {
                     ArrayList<Location> endPoints = this.getEndPoints();
-                    if (!endPoints.contains(CatanTerminal.PLAYBOARD.locations[k-1][l-1])) throw new InexistantRoadException();
+                    if (!endPoints.contains(Game.PLAYBOARD.locations[k-1][l-1])) throw new InexistantRoadException();
                     this.inventory.replace("Bois", this.inventory.get("Bois")-1); 
                     this.inventory.replace("Laine", this.inventory.get("Laine")-1); 
                     this.inventory.replace("Ble", this.inventory.get("Ble")-1); 
@@ -624,8 +628,8 @@ class PlayerIG {
                 System.out.println(WrongInputException.MESSAGE);
             }
         } while (true);
-        CatanTerminal.PLAYBOARD.updatePaths();
-        CatanTerminal.PLAYBOARD.display();
+        Game.PLAYBOARD.updatePaths();
+        Game.PLAYBOARD.display();
     }
 
     // Construction d'une ville :
@@ -645,7 +649,7 @@ class PlayerIG {
                 for (Colony col : this.coloniesOnPlayBoard) {
                     if (col.id==selectedId) {
                         col.isCity = true;
-                        ((Colony) CatanTerminal.PLAYBOARD.locations[col.indexI][col.indexJ]).isCity = true;
+                        ((Colony) Game.PLAYBOARD.locations[col.indexI][col.indexJ]).isCity = true;
                         this.inventory.replace("Roche", this.inventory.get("Roche")-3); 
                         this.inventory.replace("Ble", this.inventory.get("Ble")-2); 
                         this.victoryPoints++;
@@ -659,8 +663,8 @@ class PlayerIG {
                 System.out.println(WrongInputException.MESSAGE);
             }
         } while (true);
-        CatanTerminal.PLAYBOARD.updatePaths();
-        CatanTerminal.PLAYBOARD.display();
+        Game.PLAYBOARD.updatePaths();
+        Game.PLAYBOARD.display();
     }
 
     // Construction d'une route :
@@ -682,15 +686,15 @@ class PlayerIG {
                 } else {
                     if (k<0 || k>3 || l<0 || l>4) throw new IndexOutOfBoundsException();
                 }
-                if ((c=='H' && CatanTerminal.PLAYBOARD.horizontalPaths[k][l] instanceof Road) || 
-                    (c=='V' && CatanTerminal.PLAYBOARD.verticalPaths[k][l] instanceof Road)) {
+                if ((c=='H' && Game.PLAYBOARD.horizontalPaths[k][l] instanceof Road) || 
+                    (c=='V' && Game.PLAYBOARD.verticalPaths[k][l] instanceof Road)) {
                     System.out.println("Erreur : cet emplacement est occupe");
                 } else {
                     try {
-                        Road r = this.buildRoadNextToColony(c, (c=='H')? CatanTerminal.PLAYBOARD.horizontalPaths[k][l] : 
-                        CatanTerminal.PLAYBOARD.verticalPaths[k][l], beginning);
-                        if (c=='H') CatanTerminal.PLAYBOARD.horizontalPaths[k][l] = r;
-                        else CatanTerminal.PLAYBOARD.verticalPaths[k][l] = r;
+                        Road r = this.buildRoadNextToColony(c, (c=='H')? Game.PLAYBOARD.horizontalPaths[k][l] : 
+                        Game.PLAYBOARD.verticalPaths[k][l], beginning);
+                        if (c=='H') Game.PLAYBOARD.horizontalPaths[k][l] = r;
+                        else Game.PLAYBOARD.verticalPaths[k][l] = r;
                         this.roads.add(r);
                         if (!isFree) {
                             this.inventory.replace("Bois", this.inventory.get("Bois")-1); 
@@ -700,10 +704,10 @@ class PlayerIG {
                     } catch (InexistantColonyException ice) {
                         try {
                             if (beginning) throw new IllegalStateException();
-                            Road r = this.buildRoadNextToRoad(c, (c=='H')? CatanTerminal.PLAYBOARD.horizontalPaths[k][l] :
-                            CatanTerminal.PLAYBOARD.verticalPaths[k][l]);
-                            if (c=='H') CatanTerminal.PLAYBOARD.horizontalPaths[k][l] = r;
-                            else CatanTerminal.PLAYBOARD.verticalPaths[k][l] = r;
+                            Road r = this.buildRoadNextToRoad(c, (c=='H')? Game.PLAYBOARD.horizontalPaths[k][l] :
+                            Game.PLAYBOARD.verticalPaths[k][l]);
+                            if (c=='H') Game.PLAYBOARD.horizontalPaths[k][l] = r;
+                            else Game.PLAYBOARD.verticalPaths[k][l] = r;
                             this.roads.add(r);
                             if (!isFree) {
                                 this.inventory.replace("Bois", this.inventory.get("Bois")-1); 
@@ -724,7 +728,7 @@ class PlayerIG {
                 System.out.println(WrongInputException.MESSAGE);
             }
         } while (true);
-        CatanTerminal.PLAYBOARD.display();
+        Game.PLAYBOARD.display();
     }
 
     // Construction d'une route à côté d'une colonie :
@@ -861,7 +865,7 @@ class PlayerIG {
                     if (ids[i]!=selectedId) b++;
                 }
                 if (b==ids.length) throw new WrongInputException();
-                Harbor selectedHarbor = CatanTerminal.PLAYBOARD.getHarbor(selectedId);
+                Harbor selectedHarbor = Game.PLAYBOARD.getHarbor(selectedId);
                 if (selectedHarbor.type.equals("Simple")) 
                     if (!this.canExchange(3, null)) throw new NotEnoughRessourcesException();
                 else 
@@ -899,18 +903,18 @@ class PlayerIG {
                         this.moveThief();
                         this.specialCards.remove(c);
                         this.knights++;
-                        if (this.knights==3 && !CatanTerminal.army) {
-                            CatanTerminal.army = true;
+                        if (this.knights==3 && !Game.army) {
+                            Game.army = true;
                             this.victoryPoints += 2;
-                            CatanTerminal.hasTheStrongestArmy = this;
+                            Game.hasTheStrongestArmy = this;
                             System.out.println("Vous avez gagne 2 points de victoire");
-                        } else if (CatanTerminal.army && CatanTerminal.hasTheStrongestArmy!=this
-                                && this.knights>CatanTerminal.hasTheStrongestArmy.knights) {
-                            CatanTerminal.hasTheStrongestArmy.victoryPoints -= 2;
-                            System.out.println(CatanTerminal.hasTheStrongestArmy.name+" a perdu deux points de victoire");
+                        } else if (Game.army && Game.hasTheStrongestArmy!=this
+                                && this.knights>Game.hasTheStrongestArmy.knights) {
+                            Game.hasTheStrongestArmy.victoryPoints -= 2;
+                            System.out.println(Game.hasTheStrongestArmy.name+" a perdu deux points de victoire");
                             this.victoryPoints += 2;
                             System.out.println("Vous avez gagne 2 points de victoire");
-                            CatanTerminal.hasTheStrongestArmy = this;
+                            Game.hasTheStrongestArmy = this;
                         }
                     }else if(c.id==3 && n==3){
                         this.specialCards.remove(c);
@@ -974,7 +978,7 @@ class PlayerIG {
                 System.out.println("Veuillez choisir une ressource a monopoliser");
                 System.out.println("Roche | Laine | Argile | Ble | Bois");
                 if(s.equals("Roche") || s.equals("Laine") || s.equals("Ble") || s.equals("Bois") || s.equals("Argile")){
-                    for(Player p: CatanTerminal.PLAYERS){
+                    for(Player p: Game.PLAYERS){
                         if(p!=this){
                             n += p.inventory.get(s);
                             p.inventory.replace(s, 0);
@@ -996,7 +1000,7 @@ class PlayerIG {
         this.inventory.replace("Roche", this.inventory.get("Roche")-1); 
         this.inventory.replace("Laine", this.inventory.get("Laine")-1); 
         this.inventory.replace("Ble", this.inventory.get("Ble")-1); 
-        this.specialCards.add(CatanTerminal.DECK.getDeck().pop());
+        this.specialCards.add(Game.DECK.getDeck().pop());
     }
     
 
@@ -1010,7 +1014,7 @@ class PlayerIG {
         int[] distances = new int[startRoads.size()];
         for (int i=0; i<startRoads.size(); i++) 
             distances[i] = this.calculateLongestRoad(startRoads.get(i), new ArrayList<Road>(), 1);
-        return CatanTerminal.getMax(distances);
+        return Game.getMax(distances);
     }
     
     private final int calculateLongestRoad(Road road, ArrayList<Road> crossedRoads, int acc) {
@@ -1035,7 +1039,7 @@ class PlayerIG {
             crossedRoads.add(road.getLinkedRoads().get(2));
             int c = this.calculateLongestRoad(road.getLinkedRoads().get(2), crossedRoads, acc+1);
             int[] tab = {a,b,c};
-            return CatanTerminal.getMax(tab);
+            return Game.getMax(tab);
         }
         return acc;
     }
