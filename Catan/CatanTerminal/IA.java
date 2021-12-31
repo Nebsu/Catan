@@ -383,7 +383,7 @@ final class IA extends Player {
             Set<String> keys = this.inventory.keySet();
             ArrayList<String> selectables = new ArrayList<String>();
             for (String key : keys) {
-                if (this.inventory.get(key)>=4) selectables.add(key);
+                if (this.inventory.get(key)>=n) selectables.add(key);
             }
             String s = "";
             int r = 0;
@@ -450,12 +450,14 @@ final class IA extends Player {
                 int random2 = r2.nextInt(ids.length);
                 int selectedId = ids[random2];
                 Harbor selectedHarbor = CatanTerminal.PLAYBOARD.getHarbor(selectedId);
-                if (selectedHarbor.type.equals("Simple")) 
+                if (selectedHarbor.type.equals("Simple")) {
                     if (!this.canExchange(3, null)) throw new NotEnoughRessourcesException();
-                else 
+                    this.exchange(3, null);
+                } else {
                     if (!this.canExchange(2, selectedHarbor.ressource)) throw new NotEnoughRessourcesException();
-                this.exchange(selectedHarbor.price, selectedHarbor.ressource);
-                break;
+                    this.exchange(2, selectedHarbor.ressource);
+                }
+                return;
             } catch (Exception e) {}
         } while (true);
     }

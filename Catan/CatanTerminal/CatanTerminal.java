@@ -89,8 +89,15 @@ public final class CatanTerminal {
                 else 
                     System.out.println("Aucun joueur ne possede la route plus longue : Egalite\n");
                 // Armée la plus puissante :
+                System.out.println("Nombre de chevaliers joues :");
+                for (int j=0; j<PLAYERS.length; j++) {
+                    System.out.println(PLAYERS[i].name+" : "+PLAYERS[i].knights);
+                }
+                System.out.println();
                 if (hasTheStrongestArmy!=null)
                     System.out.println(hasTheStrongestArmy.name+" possede l'armee la plus puissante");
+                else 
+                    System.out.println("Personne ne possede l'armee la plus puissante");
                 if (!end) {
                     System.out.println();
                     for (int j=0; j<PLAYERS.length; j++) 
@@ -215,7 +222,7 @@ public final class CatanTerminal {
     private static Player longestRoad() {
         boolean b = true;
         int[] sizes = new int[PLAYERS.length];
-        System.out.println();
+        System.out.println("\nRoute la plus longue de chaque joueur :");
         for (int i=0; i<PLAYERS.length; i++) {
             sizes[i] = PLAYERS[i].longestRoad();
             System.out.println(PLAYERS[i].name+" : "+sizes[i]);
