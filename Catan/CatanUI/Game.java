@@ -3,6 +3,7 @@ package Catan.CatanUI;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Random;
 import java.awt.Choice;
 import java.awt.Font;
 
@@ -28,6 +29,8 @@ public class Game extends JFrame implements ActionListener {
     static int action = 0;
     static int acc = 0;
     static int player = 0;
+    static final int TIMER_DELAY = 5000;
+    static int bot = 0;
 
     // Données de base de la partie :
     static PlayerIG[] PLAYERS; // joueurs 
@@ -109,16 +112,17 @@ public class Game extends JFrame implements ActionListener {
                         contentPane.remove(textField); 
                         cbutton.setText("Commencer le jeu");
                         cbutton.setBounds(140, 220, 300, 40);
-                        // for(int i = number-botnumber; i < number; i++){
-                        //     PLAYERS[i] = new PlayerIG("IA"+String.valueOf(i), i);
-                        //     System.out.println(PLAYERS[i]);
-                        // }
+                        for(int i = number-botnumber; i < number; i++){
+                            PLAYERS[i] = new PlayerIG("IA"+String.valueOf(i), i);
+                            System.out.println(PLAYERS[i]);
+                        }
                     }
                     return;
                 }
                 if(action == 2 && acc == number-botnumber){
+                    bot = number-botnumber;
                     PLAYBOARD.playername.setText(PLAYERS[player].name);
-                    player++;
+                    showInventory(PLAYERS[player]);
                     PLAYBOARD.setVisible(true);
                     stop();
                     return;
@@ -129,9 +133,9 @@ public class Game extends JFrame implements ActionListener {
         PLAYBOARD.lancerDe.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                System.out.println(PLAYERS[player].throwDices());
                 PLAYBOARD.contentPane.remove(PLAYBOARD.lancerDe);
                 PLAYBOARD.contentPane.add(PLAYBOARD.passeTour);
+                PLAYBOARD.diceresult.setText(String.valueOf(PLAYERS[player].throwDices()));
                 PLAYBOARD.repaint();
                 return;
             }
@@ -141,49 +145,61 @@ public class Game extends JFrame implements ActionListener {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if(player == number-botnumber-1){
-                    PLAYBOARD.playername.setText(PLAYERS[player].name);
-                    PLAYBOARD.contentPane.remove(PLAYBOARD.passeTour);
-                    PLAYBOARD.contentPane.add(PLAYBOARD.lancerDe);
-                    PLAYBOARD.repaint();
                     player = 0;
+                    PLAYBOARD.contentPane.remove(PLAYBOARD.passeTour);
+                    PLAYBOARD.repaint();
+                    while(bot!=number){
+                        PLAYBOARD.playername.setText(PLAYERS[bot].name);
+                        PLAYBOARD.diceresult.setText(String.valueOf(PLAYERS[bot].throwDices()));
+                        System.out.println(PLAYBOARD.diceresult.getText());
+                        bot++;
+                    }
+                    bot = number-botnumber;
+                    PLAYBOARD.contentPane.add(PLAYBOARD.lancerDe);
+                    PLAYBOARD.playername.setText(PLAYERS[player].name);
+                    showInventory(PLAYERS[player]);
+                    PLAYBOARD.repaint();
                     return;
                 }
                 if(player == 0){
-                    PLAYBOARD.playername.setText(PLAYERS[player].name);
-                    PLAYBOARD.contentPane.remove(PLAYBOARD.passeTour);
-                    PLAYBOARD.contentPane.add(PLAYBOARD.lancerDe);
-                    PLAYBOARD.repaint();
                     player++;
+                    changePlayer(PLAYERS[player]);
+                    showInventory(PLAYERS[player]);
+                    PLAYBOARD.repaint();
                     return;
                 }
-                if(player == 1){
-                    PLAYBOARD.playername.setText(PLAYERS[player].name);
-                    PLAYBOARD.contentPane.remove(PLAYBOARD.passeTour);
-                    PLAYBOARD.contentPane.add(PLAYBOARD.lancerDe);
-                    PLAYBOARD.repaint();
+                if(player == 1){      
                     player++;
+                    changePlayer(PLAYERS[player]);
+                    showInventory(PLAYERS[player]);
+                    PLAYBOARD.repaint();
                     return;
                 }
                 if(player == 2){
-                    PLAYBOARD.playername.setText(PLAYERS[player].name);
-                    PLAYBOARD.contentPane.remove(PLAYBOARD.passeTour);
-                    PLAYBOARD.contentPane.add(PLAYBOARD.lancerDe);
-                    PLAYBOARD.repaint();
                     player++;
-                    return;
-                }
-                if(player == 3){
-                    PLAYBOARD.playername.setText(PLAYERS[player].name);
-                    PLAYBOARD.contentPane.remove(PLAYBOARD.passeTour);
-                    PLAYBOARD.contentPane.add(PLAYBOARD.lancerDe);
+                    changePlayer(PLAYERS[player]);
+                    showInventory(PLAYERS[player]);
                     PLAYBOARD.repaint();
-                    player = 0;
                     return;
                 }
             }
         });
 
 
+    }
+
+    public static void showInventory(PlayerIG p){
+        PLAYBOARD.qtArgile.setText(String.valueOf(p.inventory.get("Argile")));
+        PLAYBOARD.qtBois.setText(String.valueOf(p.inventory.get("Bois")));
+        PLAYBOARD.qtLaine.setText(String.valueOf(p.inventory.get("Laine")));
+        PLAYBOARD.qtBle.setText(String.valueOf(p.inventory.get("Ble")));
+        PLAYBOARD.qtRoche.setText(String.valueOf(p.inventory.get("Roche")));
+    }
+
+    public static void changePlayer(PlayerIG p){
+        PLAYBOARD.playername.setText(p.name);
+        PLAYBOARD.contentPane.remove(PLAYBOARD.passeTour);
+        PLAYBOARD.contentPane.add(PLAYBOARD.lancerDe);
     }
 
     public final static void catan() {

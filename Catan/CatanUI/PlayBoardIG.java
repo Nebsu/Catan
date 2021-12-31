@@ -1,6 +1,8 @@
 package Catan.CatanUI;
 
 import java.awt.Color;
+import java.awt.Font;
+import java.util.ArrayList;
 
 import javax.swing.*;
 import javax.swing.border.*;
@@ -19,6 +21,15 @@ public class PlayBoardIG extends JFrame{
     JButton passeTour = new JButton("<html><body>Passer<div>Tour</body></html>");
     JButton lancerDe = new JButton("<html><body>Lancer<div>Dé</body></html>");
     JLabel playername  = new JLabel();
+    JLabel diceresult = new JLabel();
+
+    JLabel qtArgile = new JLabel();
+    JLabel qtBois = new JLabel();
+    JLabel qtLaine = new JLabel();
+    JLabel qtBle = new JLabel();
+    JLabel qtRoche = new JLabel();
+	
+        
 
 	////////// Constructeur et fonctions associées à ce dernier //////////
     
@@ -33,9 +44,82 @@ public class PlayBoardIG extends JFrame{
         lancerDe.setBounds(475, 430, 85, 65);
         JPanel playerpanel = new JPanel();
         playerpanel.setBounds(10, 335, 115, 25);
+        playerpanel.setBorder(new LineBorder(new Color(0, 0, 0)));
         playerpanel.add(playername);
         contentPane.add(lancerDe);
         contentPane.add(playerpanel);
+
+        JPanel invArgile = new JPanel();
+		invArgile.setBackground(new Color(153, 102, 0));
+		invArgile.setBounds(20, 400, 80, 125);
+		contentPane.add(invArgile);
+        invArgile.setLayout(null);
+        JLabel labelArgile = new JLabel("Argile");
+		invArgile.add(labelArgile);
+        qtArgile.setFont(new Font("Tahoma", Font.PLAIN, 30));
+		qtArgile.setHorizontalAlignment(SwingConstants.CENTER);
+		qtArgile.setBounds(17, 24, 46, 73);
+		invArgile.add(qtArgile);
+		
+		JPanel invBois = new JPanel();
+		invBois.setBackground(new Color(0, 102, 51));
+		invBois.setBounds(110, 400, 80, 125);
+		contentPane.add(invBois);
+        invBois.setLayout(null);
+        JLabel labelBois = new JLabel("Bois");
+		invBois.add(labelBois);
+        qtBois.setFont(new Font("Tahoma", Font.PLAIN, 30));
+		qtBois.setHorizontalAlignment(SwingConstants.CENTER);
+		qtBois.setBounds(17, 24, 46, 73);
+		invBois.add(qtBois);
+		
+		JPanel invLaine = new JPanel();
+		invLaine.setBackground(new Color(102, 204, 51));
+		invLaine.setBounds(200, 400, 80, 125);
+		contentPane.add(invLaine);
+        invLaine.setLayout(null);
+        JLabel labelLaine = new JLabel("Laine");
+		invLaine.add(labelLaine);
+        qtLaine.setFont(new Font("Tahoma", Font.PLAIN, 30));
+		qtLaine.setHorizontalAlignment(SwingConstants.CENTER);
+		qtLaine.setBounds(17, 24, 46, 73);
+		invLaine.add(qtLaine);
+		
+		JPanel invBle = new JPanel();
+		invBle.setBackground(new Color(255, 255, 51));
+		invBle.setBounds(290, 400, 80, 125);
+		contentPane.add(invBle);
+        invBle.setLayout(null);
+        JLabel labelBle = new JLabel("Ble");
+		invBle.add(labelBle);
+        qtBle.setFont(new Font("Tahoma", Font.PLAIN, 30));
+		qtBle.setHorizontalAlignment(SwingConstants.CENTER);
+		qtBle.setBounds(17, 24, 46, 73);
+		invBle.add(qtBle);
+		
+		JPanel invRoche = new JPanel();
+		invRoche.setBackground(new Color(204, 204, 204));
+		invRoche.setBounds(380, 400, 80, 125);
+		contentPane.add(invRoche);
+        invRoche.setLayout(null);
+        JLabel labelRoche = new JLabel("Roche");
+		invRoche.add(labelRoche);
+        qtRoche.setFont(new Font("Tahoma", Font.PLAIN, 30));
+		qtRoche.setHorizontalAlignment(SwingConstants.CENTER);
+		qtRoche.setBounds(17, 24, 46, 73);
+		invRoche.add(qtRoche);
+
+        JPanel dicezone = new JPanel();
+		dicezone.setBorder(new LineBorder(new Color(0, 0, 0)));
+		dicezone.setBounds(10, 10, 70, 70);
+		contentPane.add(dicezone);
+		dicezone.setLayout(null);
+		diceresult.setHorizontalAlignment(SwingConstants.CENTER);
+		diceresult.setFont(new Font("Tahoma", Font.PLAIN, 30));
+		diceresult.setBounds(10, 11, 46, 48);
+		dicezone.add(diceresult);
+
+
 
         this.boxes = new BoxIG[4][4];
         this.constructBoxes();
@@ -436,5 +520,61 @@ public class PlayBoardIG extends JFrame{
             }
         }
     }
+
+    // Récupération des cases désignées par les dés :
+    final ArrayList<BoxIG> getBoxes(int dice) {
+        ArrayList<BoxIG> res = new ArrayList<BoxIG>();
+        for (int i=0; i<boxes.length; i++) {
+            for (int j=0; j<boxes[i].length; j++) {
+                if (this.boxes[i][j].number==dice) {
+                    res.add(this.boxes[i][j]);
+                }
+            }
+        }
+        return res;
+    }
+
+    // Récupération du port qui possède l'id passé en argument :
+    final HarborIG getHarbor(int id) {
+        for (int i=0; i<this.seaBoxes.length; i++) {
+            if (this.seaBoxes[i] instanceof HarborIG) {
+                if (((HarborIG) this.seaBoxes[i]).id==id) return ((HarborIG) this.seaBoxes[i]);
+            }
+        }
+        return null;
+    }
+
+
+    ////////// Fonctions booléennes //////////
+
+    // Renvoie true si toutes les intersections sont occupées par une colonie/ville :
+    final boolean isFilledLocations() {
+        int numberOfColonies = 0;
+        for (int i=0; i<this.locations.length; i++) {
+            for (int j=0; j<this.locations[i].length; j++) {
+                if (this.locations[i][j] instanceof ColonyIG) {
+                    numberOfColonies++;
+                }
+            }
+        }
+        return (numberOfColonies==25);
+    }
+    
+    // Renvoie true si tous les chemins ont été pris :
+    final boolean isFilledPaths() {
+        int numberOfRoads = 0;
+        for (int i=0; i<this.horizontalPaths.length; i++) {
+            for (int j=0; j<this.horizontalPaths[i].length; j++) {
+                if (this.horizontalPaths[i][j] instanceof RoadIG) numberOfRoads++;
+            }
+        }
+        for (int i=0; i<this.verticalPaths.length; i++) {
+            for (int j=0; j<this.verticalPaths[i].length; j++) {
+                if (this.verticalPaths[i][j] instanceof RoadIG) numberOfRoads++;
+            }
+        }
+        return (numberOfRoads==40);
+    }
+
 }
 
