@@ -39,50 +39,32 @@ final class Road extends Path {
 
     ////////// Route la plus longue du joueur courant //////////
 
-    // Renvoie le point qui est en contact avec d'autres routes du joueur :
-    final Location mainPoint() {
-        boolean b = this.isAStartRoad(this.point1);
-        if (!b) return this.point1;
-        else return this.point2;
-    }
-
-    // Renvoie true si l'un des deux points (celui d'arrivée ou celui de départ) de la route courante
-    // est en contact avec aucune autre route du joueur :
-    final boolean isAStartRoad() {
-        boolean point1 = this.isAStartRoad(this.point1);
-        boolean point2 = this.isAStartRoad(this.point2);
-        return (point1 || point2);
-    }
-
-    // Pour cela on analyse les chemins voisins :
-    private final boolean isAStartRoad(Location point) {
-        ArrayList<Path> neighbors = getNeighborsPaths(point);
-        for (Path path : neighbors) {
-            if (path instanceof Road && ((Road)path).player==this.player 
-            && ((Road)path)!=this) return false;
-        }
-        return true;
-    }
-
     // Renvoie true si la route courante est liée à d'autres routes du même joueur :
     final boolean hasLinkedRoads() {
-        if (this.getLinkedRoads()==null) return false;
-        return (!this.getLinkedRoads().isEmpty());
+        return (this.getLinkedRoads()!=null);
     }
 
     // Renvoie la liste des routes d'un même joueur qui sont liées à this :
     final ArrayList<Road> getLinkedRoads() {
-        Location mainPoint = this.mainPoint();
-        if (mainPoint instanceof Colony 
-        && ((Colony) mainPoint).player!=this.player) return null;
-        ArrayList<Path> neighbors = new ArrayList<Path>();
-        neighbors.addAll(getNeighborsPaths(mainPoint));
         ArrayList<Road> yourRoads = new ArrayList<Road>();
-        for (Path path : neighbors) {
-            if (path instanceof Road && ((Road)path).player==this.player 
-            && ((Road)path)!=this) yourRoads.add((Road)path);
-        }
+        yourRoads.addAll(this.getLinkedRoads(this.point1));
+        yourRoads.addAll(this.getLinkedRoads(this.point2));
+        if (yourRoads.isEmpty()) return null;
         return yourRoads;
+    }
+
+    private ArrayList<Road> getLinkedRoads(Location point) {
+        ArrayList<Road> roads = new ArrayList<Road>();
+        // Colonie adverse
+        if (point instanceof Colony 
+        && ((Colony) point).player!=this.player) return roads;
+        for (int i=0; i<point.neighborPaths.length; i++) {
+            if (point.neighborPaths[i] instanceof Road
+            &&  ((Road) point.neighborPaths[i]).player==this.player
+            &&  ((Road) point.neighborPaths[i])!=this)
+                roads.add((Road) point.neighborPaths[i]);
+        }
+        return roads;
     }
 
 }

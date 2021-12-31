@@ -28,8 +28,8 @@ public final class CatanTerminal {
     static final Deck DECK = new Deck(); // pile de cartes développement 
     static boolean army = false; // devient true quand un joueur utilise 3 chevaliers
     static Player hasTheStrongestArmy = null; // joueur qui a l'armée la plus puissante
-    static boolean longestRoad = false; // indique si un joueur possède la route la plus longue
     static Player hasTheLongestRoad = null; // joueur qui a la route la plus longue
+    static Player previousLongestRoad = null; 
 
 
     ////////// FONCTION PRINCIPALE DU JEU //////////
@@ -55,8 +55,8 @@ public final class CatanTerminal {
             PLAYERS[i].gainInitialResources();
         }
         // Route la plus longue au début :
-        hasTheLongestRoad = longestRoad(hasTheLongestRoad);
-        if (longestRoad)
+        hasTheLongestRoad = longestRoad();
+        if (hasTheLongestRoad!=null)
             System.out.println(hasTheLongestRoad.name+" a la route la plus longue\n");
         else 
             System.out.println("Aucun joueur a une route plus longue que les autres : Egalite\n");
@@ -83,8 +83,8 @@ public final class CatanTerminal {
                     break;
                 } 
                 // Route la plus longue :
-                hasTheLongestRoad = longestRoad(hasTheLongestRoad);
-                if (longestRoad)
+                hasTheLongestRoad = longestRoad();
+                if (hasTheLongestRoad!=null)
                     System.out.println(hasTheLongestRoad.name+" a la route la plus longue\n");
                 else 
                     System.out.println("Aucun joueur ne possede la route plus longue : Egalite\n");
@@ -212,7 +212,7 @@ public final class CatanTerminal {
 
     ////////// Route la plus longue //////////
 
-    private static Player longestRoad(Player previous) {
+    private static Player longestRoad() {
         boolean b = true;
         int[] sizes = new int[PLAYERS.length];
         System.out.println();
@@ -230,10 +230,12 @@ public final class CatanTerminal {
                 index = i;
             }
         }
-        if (previous!=PLAYERS[index] && b) PLAYERS[index].victoryPoints += 2;
-        if (previous!=null && previous!=PLAYERS[index] && !b) 
-            previous.victoryPoints -= 2;
-        longestRoad = b;
+        if (b && previousLongestRoad!=PLAYERS[index]) {
+            if (previousLongestRoad!=null) previousLongestRoad.victoryPoints -= 2;
+            previousLongestRoad = PLAYERS[index];
+            PLAYERS[index].victoryPoints += 2;
+        }
+        if(!b) return null;
         return PLAYERS[index];
     }
 

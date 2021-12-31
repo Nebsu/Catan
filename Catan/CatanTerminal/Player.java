@@ -678,6 +678,7 @@ class Player {
             }
         } while (true);
         CatanTerminal.PLAYBOARD.updatePaths();
+        CatanTerminal.PLAYBOARD.updateLocations();
         CatanTerminal.PLAYBOARD.display();
     }
 
@@ -712,6 +713,7 @@ class Player {
             }
         } while (true);
         CatanTerminal.PLAYBOARD.updatePaths();
+        CatanTerminal.PLAYBOARD.updateLocations();
         CatanTerminal.PLAYBOARD.display();
     }
 
@@ -778,6 +780,8 @@ class Player {
                 System.out.println(this.color+WrongInputException.MESSAGE+CatanTerminal.RESET);
             }
         } while (true);
+        CatanTerminal.PLAYBOARD.updateLocations();
+        CatanTerminal.PLAYBOARD.updatePaths();
         CatanTerminal.PLAYBOARD.display();
     }
 
@@ -1081,49 +1085,35 @@ class Player {
     ////////// Route la plus longue du joueur courant //////////
 
     protected int longestRoad() {
-        ArrayList<Road> startRoads = new ArrayList<Road>();
-        for (Road r : this.roads)  {
-            if (r.isAStartRoad()) startRoads.add(r);
-        }
-        int[] distances = new int[startRoads.size()];
-        for (int i=0; i<startRoads.size(); i++) {
+        int[] distances = new int[this.roads.size()];
+        for (int i=0; i<this.roads.size(); i++) {
             ArrayList<Road> crossedRoads = new ArrayList<Road>();
-            crossedRoads.add(startRoads.get(i));
-            distances[i] = this.calculateLongestRoad(startRoads.get(i), crossedRoads, 1);
+            crossedRoads.add(this.roads.get(i));
+            distances[i] = this.calculateLongestRoad(this.roads.get(i), crossedRoads, 1);
         }
         return CatanTerminal.getMax(distances);
     }
     
     private final int calculateLongestRoad(Road road, ArrayList<Road> crossedRoads, int acc) {
         if (!road.hasLinkedRoads()) return acc;
-        if (road.getLinkedRoads().size()==1) {
-            if (crossedRoads.contains(road.getLinkedRoads().get(0))) return acc;
-            crossedRoads.add(road.getLinkedRoads().get(0));
-            return this.calculateLongestRoad(road.getLinkedRoads().get(0), crossedRoads, acc+1);
-        }
-        if (road.getLinkedRoads().size()==2) {
-            if (crossedRoads.contains(road.getLinkedRoads().get(0))
-            || crossedRoads.contains(road.getLinkedRoads().get(1))) return acc;
-            crossedRoads.add(road.getLinkedRoads().get(0));
-            int a = this.calculateLongestRoad(road.getLinkedRoads().get(0), crossedRoads, acc+1);
-            crossedRoads.add(road.getLinkedRoads().get(1));
-            int b = this.calculateLongestRoad(road.getLinkedRoads().get(1), crossedRoads, acc+1);
-            return Math.max(a,b);
-        }
-        if (road.getLinkedRoads().size()==3) {
-            if (crossedRoads.contains(road.getLinkedRoads().get(0))
-            || crossedRoads.contains(road.getLinkedRoads().get(1))
-            || crossedRoads.contains(road.getLinkedRoads().get(2))) return acc;
-            crossedRoads.add(road.getLinkedRoads().get(0));
-            int a = this.calculateLongestRoad(road.getLinkedRoads().get(0), crossedRoads, acc+1);
-            crossedRoads.add(road.getLinkedRoads().get(1));
-            int b = this.calculateLongestRoad(road.getLinkedRoads().get(1), crossedRoads, acc+1);
-            crossedRoads.add(road.getLinkedRoads().get(2));
-            int c = this.calculateLongestRoad(road.getLinkedRoads().get(2), crossedRoads, acc+1);
-            int[] tab = {a,b,c};
+        ArrayList<Road> linkedRoads = road.getLinkedRoads();
+        if (linkedRoads.size()==1) {
+            if (crossedRoads.contains(linkedRoads.get(0))) return acc;
+            crossedRoads.add(linkedRoads.get(0));
+            return this.calculateLongestRoad(linkedRoads.get(0), crossedRoads, acc+1);
+        } else {
+            int[] tab = new int[linkedRoads.size()];
+            for (int i=0; i<tab.length; i++) {
+                if (crossedRoads.contains(linkedRoads.get(i)))
+                    i++;
+                else {
+                    crossedRoads.add(linkedRoads.get(i));
+                    tab[i] = this.calculateLongestRoad(linkedRoads.get(i), crossedRoads, acc+1);
+                }
+            }
+            System.out.println(Arrays.toString(tab));
             return CatanTerminal.getMax(tab);
         }
-        return acc;
     }
 
 }

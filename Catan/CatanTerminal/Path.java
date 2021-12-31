@@ -1,7 +1,5 @@
 package Catan.CatanTerminal;
 
-import java.util.ArrayList;
-
 class Path {
 
     ////////// Attributs //////////
@@ -25,28 +23,6 @@ class Path {
     @Override
     public String toString() {
         return ((this.position=='H')? "-------" : "||");
-    }
-
-    // Renvoie les chemins "voisins" (qui sont à côté) du chemin courant :
-    protected static final ArrayList<Path> getNeighborsPaths(Location point) {
-        ArrayList<Path> neighbors = new ArrayList<Path>();
-        // Route à gauche :
-        try {
-            neighbors.add(CatanTerminal.PLAYBOARD.horizontalPaths[point.indexI][point.indexJ-1]);
-        } catch (Exception e) {}
-        // Route à droite :
-        try {
-            neighbors.add(CatanTerminal.PLAYBOARD.horizontalPaths[point.indexI][point.indexJ]);
-        } catch (Exception e) {}
-        // Route en haut :
-        try {
-            neighbors.add(CatanTerminal.PLAYBOARD.verticalPaths[point.indexI-1][point.indexJ]);
-        } catch (Exception e) {}
-        // Route en bas :
-        try {
-            neighbors.add(CatanTerminal.PLAYBOARD.verticalPaths[point.indexI][point.indexJ]);
-        } catch (Exception e) {}
-        return neighbors;
     }
 
 }

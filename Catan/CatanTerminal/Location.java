@@ -1,10 +1,13 @@
 package Catan.CatanTerminal;
 
+import java.util.ArrayList;
+
 class Location {
 
     ////////// Attributs ////////// 
     
     protected final Box[] boxes;
+    protected Path[] neighborPaths;
     protected final int indexI;
     protected final int indexJ;
 
@@ -17,6 +20,30 @@ class Location {
         this.boxes = boxes;
         this.indexI = i;
         this.indexJ = j;
+        this.neighborPaths = this.setNeighborPaths();
+    }
+    protected Path[] setNeighborPaths() {
+        ArrayList<Path> neighbors = new ArrayList<Path>();
+        // Route à gauche :
+        try {
+            neighbors.add(CatanTerminal.PLAYBOARD.horizontalPaths[this.indexI][this.indexJ-1]);
+        } catch (Exception e) {}
+        // Route à droite :
+        try {
+            neighbors.add(CatanTerminal.PLAYBOARD.horizontalPaths[this.indexI][this.indexJ]);
+        } catch (Exception e) {}
+        // Route en haut :
+        try {
+            neighbors.add(CatanTerminal.PLAYBOARD.verticalPaths[this.indexI-1][this.indexJ]);
+        } catch (Exception e) {}
+        // Route en bas :
+        try {
+            neighbors.add(CatanTerminal.PLAYBOARD.verticalPaths[this.indexI][this.indexJ]);
+        } catch (Exception e) {}
+        Path[] paths = new Path[neighbors.size()];
+        for (int i=0; i<neighbors.size(); i++) 
+            paths[i] = neighbors.get(i);
+        return paths;
     }
 
     ////////// Fonctions auxiliaires //////////
@@ -24,6 +51,16 @@ class Location {
     // Print :
     @Override
     public String toString() {return ("OO");}
+
+    // Renvoie true si l'emplacement est lié à une route du joueur en argument :
+    protected boolean isLinkedToYourRoads(Player player) {
+        for (int k=0; k<this.neighborPaths.length; k++) {
+            if (this.neighborPaths[k] instanceof Road
+            && ((Road) this.neighborPaths[k]).player==player)
+                return true;
+        }
+        return false;
+    }
 
 
     ////////// Fonctions des ports ////////// 

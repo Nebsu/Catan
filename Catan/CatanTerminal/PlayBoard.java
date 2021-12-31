@@ -179,7 +179,7 @@ final class PlayBoard {
         return res;
     }
 
-    // Mise à jour des chemins après la constructions de colonies/villes :
+    // Mise à jour des chemins après la constructions de colonies/villes/routes :
     final void updatePaths() {
         for (int i=0; i<this.horizontalPaths.length; i++) {
             for (int j=0; j<this.horizontalPaths[i].length; j++) {
@@ -191,6 +191,15 @@ final class PlayBoard {
             for (int j=0; j<this.verticalPaths[i].length; j++) {
                 this.verticalPaths[i][j].point1 = this.locations[i][j];
                 this.verticalPaths[i][j].point2 = this.locations[i+1][j];
+            }
+        }
+    }
+
+    // Mise à jour des intersections après la constructions de colonies/villes/routes :
+    final void updateLocations() {
+        for (int i=0; i<this.locations.length; i++) {
+            for (int j=0; j<this.locations[i].length; j++) {
+                this.locations[i][j].neighborPaths = locations[i][j].setNeighborPaths();
             }
         }
     }
