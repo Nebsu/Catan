@@ -14,8 +14,8 @@ final class RoadIG extends PathIG {
 
     ////////// Constructeur et fonctions associées à ce dernier //////////
 
-    RoadIG(PlayerIG player, char position, LocationIG point1, LocationIG point2, int n, JPanel panel) {
-        super(position, point1, point2, panel);
+    RoadIG(PlayerIG player, char position, LocationIG point1, LocationIG point2,int n, int x, int y, int height, int width, PlayBoardIG playboard) {
+        super(position, point1, point2, x, y, height, width, playboard);
         this.player = player;
         if (n!=1 && n!=2) throw new IllegalArgumentException();
         if (n==1) {
@@ -26,6 +26,7 @@ final class RoadIG extends PathIG {
             this.endPoint = this.point1;
         }
     }
+
 
     ////////// Fonctions auxiliaires //////////
 

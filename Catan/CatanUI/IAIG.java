@@ -3,15 +3,15 @@ package Catan.CatanUI;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.Set;
-
+import java.awt.Color;
 import Catan.CatanTerminal.Card;
 import Catan.Exceptions.*;
 
-final class IA extends PlayerIG {
+final class IAIG extends PlayerIG {
 
     ////////// Constructeur et fonctions associées à ce dernier //////////
     
-    public IA(String name, int s) {super(name, s);}
+    public IAIG(String name, int s, Color c) {super(name, s, c);}
 
     ////////// Fonctions auxiliaires //////////
 
@@ -190,37 +190,7 @@ final class IA extends PlayerIG {
     ////////// Fonctions de proposition //////////
 
     // Menu principal du joueur :
-    @Override
-    protected void playerMenu() {
-        ArrayList<String> actions = new ArrayList<String>();
-        if (this.canExchange(4, null)) actions.add("ECHANGE BANQUE");
-        if (this.canUseHarbor()) actions.add("ECHANGE PORT");
-        if (this.canConstructColony()) actions.add("CONSTRUIRE COLONIE");
-        if (this.canConstructCity()) actions.add("CONSTRUIRE VILLE");
-        if (this.canConstructRoad()) actions.add("CONSTRUIRE ROUTE");
-        if (!this.specialCards.isEmpty()) actions.add("UTILISER CARTE");
-        if (this.canBuyACard()) actions.add("ACHETER CARTE");
-        if (actions.isEmpty()) {
-            return;
-        }
-        Random rd1 = new Random();
-        int sel = rd1.nextInt(actions.size());
-        Random rd2 = new Random();
-        boolean quit = rd2.nextBoolean();
-        if (quit) return;
-        String line = actions.get(sel);
-        switch (line) {
-            case "ECHANGE BANQUE": this.exchange(4, null); break;
-            case "ECHANGE PORT": this.useHarbor(); break;
-            case "CONSTRUIRE COLONIE": this.buildColony(false); break;
-            case "CONSTRUIRE VILLE": this.buildCity(); break;
-            case "CONSTRUIRE ROUTE": this.buildRoad(false, false); break;
-            case "UTILISER CARTE": this.useSpecialCard(); break;
-            case "ACHETER CARTE": this.buySpecialCard(); break;
-        }
-        this.playerMenu();
-        return;
-    }
+
 
     // Proposition d'utilisation d'une carte developpement :
     @Override
@@ -241,7 +211,7 @@ final class IA extends PlayerIG {
     // Remarque : on a décidé de ne pas implémenter le fait que toute colonie doit être distante d’au moins 2 intersections
     // En effet, le plateau est trop petit pour pouvoir appliquer cette règle de distance
     @Override
-    protected void buildColony(boolean beginning) {
+    protected boolean buildColony(int a, int b, boolean beginning) {
         do {
             try {
                 Random rd1 = new Random();
@@ -252,15 +222,19 @@ final class IA extends PlayerIG {
                 if (beginning) {
                     if (Game.PLAYBOARD.locations[k][l].hasAnHarbor())
                         this.harbors.add(Game.PLAYBOARD.locations[k][l].getHarbor());
-                    Game.PLAYBOARD.locations[k][l] = new ColonyIG(Game.PLAYBOARD.locations[k][l].boxes, k, l, this);
+                    Game.PLAYBOARD.remove(Game.PLAYBOARD.locations[k][l]);
+                    Game.PLAYBOARD.locations[k][l] = new ColonyIG(Game.PLAYBOARD.locations[k][l].boxes, k, l, this, Game.PLAYBOARD.locations[k][l].x, Game.PLAYBOARD.locations[k][l].y, Game.PLAYBOARD);
                     this.coloniesOnPlayBoard.add((ColonyIG) Game.PLAYBOARD.locations[k][l]);
+                    ((LocationIG)Game.PLAYBOARD.locations[k][l]).setBackground(this.color);
                 } else {
                     ArrayList<LocationIG> endPoints = this.getEndPoints();
                     if (!endPoints.contains(Game.PLAYBOARD.locations[k][l])) throw new InexistantRoadException();
                     if (Game.PLAYBOARD.locations[k][l].hasAnHarbor())
                         this.harbors.add(Game.PLAYBOARD.locations[k][l].getHarbor());
-                    Game.PLAYBOARD.locations[k][l] = new ColonyIG(Game.PLAYBOARD.locations[k][l].boxes, k, l, this);
+                    Game.PLAYBOARD.remove(Game.PLAYBOARD.locations[k][l]);
+                    Game.PLAYBOARD.locations[k][l] = new ColonyIG(Game.PLAYBOARD.locations[k][l].boxes, k, l, this, Game.PLAYBOARD.locations[k][l].x, Game.PLAYBOARD.locations[k][l].y, Game.PLAYBOARD);
                     this.coloniesOnPlayBoard.add((ColonyIG) Game.PLAYBOARD.locations[k][l]);
+                    ((LocationIG)Game.PLAYBOARD.locations[k][l]).setBackground(this.color);
                     this.inventory.replace("Bois", this.inventory.get("Bois")-1); 
                     this.inventory.replace("Laine", this.inventory.get("Laine")-1); 
                     this.inventory.replace("Ble", this.inventory.get("Ble")-1); 
@@ -271,6 +245,7 @@ final class IA extends PlayerIG {
             } catch (Exception e) {}
         } while (true);
         Game.PLAYBOARD.updatePaths();
+        return true;
     }
 
     // Construction d'une ville :
@@ -297,7 +272,7 @@ final class IA extends PlayerIG {
 
     // Construction d'une route :
     @Override
-    protected void buildRoad(boolean isFree, boolean beginning) {
+    protected boolean buildRoad(char x, int y, int z, boolean isFree, boolean beginning) {
         char c;
         do {
             try {
@@ -320,8 +295,16 @@ final class IA extends PlayerIG {
                 try {
                     RoadIG r = this.buildRoadNextToColony(c, (c=='H')? Game.PLAYBOARD.horizontalPaths[k][l] : 
                     Game.PLAYBOARD.verticalPaths[k][l], beginning);
-                    if (c=='H') Game.PLAYBOARD.horizontalPaths[k][l] = r;
-                    else Game.PLAYBOARD.verticalPaths[k][l] = r;
+                    if (c=='H') {
+                        Game.PLAYBOARD.remove(Game.PLAYBOARD.horizontalPaths[k][l]);
+                        Game.PLAYBOARD.horizontalPaths[k][l] = r;
+                        ((PathIG)Game.PLAYBOARD.horizontalPaths[k][l]).setBackground(this.color);
+                    }
+                    else {
+                        Game.PLAYBOARD.remove(Game.PLAYBOARD.verticalPaths[k][l]);
+                        Game.PLAYBOARD.verticalPaths[k][l] = r;
+                        ((PathIG)Game.PLAYBOARD.verticalPaths[k][l]).setBackground(this.color);
+                    }
                     this.roads.add(r);
                     if (!isFree) {
                         this.inventory.replace("Bois", this.inventory.get("Bois")-1); 
@@ -333,8 +316,16 @@ final class IA extends PlayerIG {
                         if (beginning) throw new IllegalStateException();
                         RoadIG r = this.buildRoadNextToRoad(c, (c=='H')? Game.PLAYBOARD.horizontalPaths[k][l] : 
                         Game.PLAYBOARD.verticalPaths[k][l]);
-                        if (c=='H') Game.PLAYBOARD.horizontalPaths[k][l] = r;
-                        else Game.PLAYBOARD.verticalPaths[k][l] = r;
+                        if (c=='H') {
+                            Game.PLAYBOARD.remove(Game.PLAYBOARD.horizontalPaths[k][l]);
+                            Game.PLAYBOARD.horizontalPaths[k][l] = r;
+                            ((PathIG)Game.PLAYBOARD.horizontalPaths[k][l]).setBackground(this.color);
+                        } 
+                        else {
+                            Game.PLAYBOARD.remove(Game.PLAYBOARD.verticalPaths[k][l]);
+                            Game.PLAYBOARD.verticalPaths[k][l] = r;
+                            ((PathIG)Game.PLAYBOARD.verticalPaths[k][l]).setBackground(this.color);
+                        } 
                         this.roads.add(r);
                         if (!isFree) {
                             this.inventory.replace("Bois", this.inventory.get("Bois")-1); 
@@ -345,6 +336,7 @@ final class IA extends PlayerIG {
                 }
             } catch (Exception e) {}
         } while (true);
+        return true;
     }
 
     // Construction d'une route à côté d'une colonie :

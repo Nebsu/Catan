@@ -1,5 +1,7 @@
 package Catan.CatanUI;
 
+import java.awt.Color;
+
 final class ColonyIG extends LocationIG {
 
     ////////// Attributs //////////
@@ -9,8 +11,8 @@ final class ColonyIG extends LocationIG {
 
     ////////// Constructeur et fonctions associées à ce dernier //////////
 
-    ColonyIG(BoxIG[] boxes, int i, int j, PlayerIG player) {
-        super(boxes, i, j);
+    ColonyIG(BoxIG[] boxes, int i, int j, PlayerIG player, int x, int y, PlayBoardIG playboard) {
+        super(boxes, i, j, x, y, playboard);
         this.player = player;
         this.isCity = false;
     }

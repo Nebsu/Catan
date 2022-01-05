@@ -1,9 +1,10 @@
 package Catan.CatanUI;
 
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
 import java.util.ArrayList;
 
 import javax.swing.JPanel;
+import javax.swing.border.EtchedBorder;
 import javax.swing.event.MouseInputListener;
 
 class PathIG extends JPanel implements MouseInputListener{
@@ -13,16 +14,28 @@ class PathIG extends JPanel implements MouseInputListener{
     protected final char position;
     protected LocationIG point1;
     protected LocationIG point2;
-    protected JPanel panel;
+    protected int x;
+    protected int y;
+    protected PlayBoardIG playboard;
+    protected int height;
+    protected int width;
 
     ////////// Constructeur et fonctions associées à ce dernier //////////
 
-    PathIG(char position, LocationIG point1, LocationIG point2, JPanel panel) {
+    PathIG(char position, LocationIG point1, LocationIG point2, int x, int y, int height, int width, PlayBoardIG playboard) {
         if (position!='H' && position!='V') throw new IllegalArgumentException();
         this.position = position;
         this.point1 = point1;
         this.point2 = point2;
-        this.panel = panel;
+        this.x = x;
+        this.y = y;
+        this.height = height;
+        this.width = width;
+        this.playboard = playboard;
+        this.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
+        this.setBounds(x, y, height, width);
+        playboard.add(this);
+        Game.PLAYBOARD = playboard;
     }
 
     ////////// Fonctions auxiliaires //////////
@@ -51,13 +64,13 @@ class PathIG extends JPanel implements MouseInputListener{
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        // TODO Auto-generated method stub
+
         
     }
 
     @Override
     public void mousePressed(MouseEvent e) {
-        // TODO Auto-generated method stub
+        System.out.println("Click");
         
     }
 

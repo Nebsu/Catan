@@ -4,11 +4,13 @@ import java.util.*;
 import Catan.Exceptions.*;
 import Catan.CatanTerminal.Card;
 import Catan.CatanTerminal.Deck;
+import java.awt.Color;
 
 class PlayerIG {
     
     ////////// Attributs //////////
 
+    protected final Color color;
     protected final String name; // nom du joueur
     protected final char symbol; // symbole du pion du joueur (son numéro)
     protected int victoryPoints; // points de victoire du joueur
@@ -22,7 +24,8 @@ class PlayerIG {
 
     ////////// Constructeur et fonctions associées à ce dernier ////////// 
 
-    PlayerIG(String name, int s) {
+    PlayerIG(String name, int s, Color color) {
+        this.color = color;
         this.name = name;
         this.symbol = String.valueOf(s).charAt(0);
         this.victoryPoints = 0;
@@ -175,7 +178,6 @@ class PlayerIG {
             System.out.println("Voleur active"+"\n");
             this.thief();
         }
-        this.playerMenu();
         this.specialCards.addAll(this.notUsableCards);
         this.notUsableCards.clear();
         if (!this.specialCards.isEmpty())
@@ -217,12 +219,16 @@ class PlayerIG {
         // Les joueurs concernes gagnent une ressource de chaque case designee par les des :
         for (ColonyIG c : colonies) {
             for (int i=0; i<c.boxes.length; i++) {
-                if (c.boxes[i].number==dice && !c.boxes[i].hasThief) {
-                    Integer a = c.player.inventory.get(c.boxes[i].ressource);
-                    if (c.isCity)
-                        c.player.inventory.put(c.boxes[i].ressource, a+Integer.valueOf(2));
-                    else 
-                        c.player.inventory.put(c.boxes[i].ressource, a+Integer.valueOf(1));
+                try{
+                    if (c.boxes[i].number==dice && !c.boxes[i].hasThief) {
+                        Integer a = c.player.inventory.get(c.boxes[i].ressource);
+                        if (c.isCity)
+                            c.player.inventory.put(c.boxes[i].ressource, a+Integer.valueOf(2));
+                        else 
+                            c.player.inventory.put(c.boxes[i].ressource, a+Integer.valueOf(1));
+                    }
+                }catch(Exception e){
+                    System.out.println(c.player);
                 }
             }
         }
@@ -403,56 +409,6 @@ class PlayerIG {
 
 
     ////////// Fonctions de proposition //////////
-
-    // Menu principal du joueur :
-    protected void playerMenu() {
-        System.out.println("Votre inventaire : "+this.inventory+"\n");
-        ArrayList<String> actions = new ArrayList<String>();
-        if (this.canExchange(4, null)) actions.add("ECHANGE BANQUE");
-        if (this.canUseHarbor()) actions.add("ECHANGE PORT");
-        if (this.canConstructColony()) actions.add("CONSTRUIRE COLONIE");
-        if (this.canConstructCity()) actions.add("CONSTRUIRE VILLE");
-        if (this.canConstructRoad()) actions.add("CONSTRUIRE ROUTE");
-        if (!this.specialCards.isEmpty()) actions.add("UTILISER CARTE");
-        if (this.canBuyACard()) actions.add("ACHETER CARTE");
-        if (actions.isEmpty()) {
-            System.out.println("Vous ne pouvez rien faire");
-            return;
-        }
-        System.out.println("Vous avez la possibilite d'effectuer l'une des actions suivantes :");
-        for (String a : actions) {
-            if (a==actions.get(actions.size()-1)) {
-                System.out.println(a);
-                break;
-            }
-            System.out.print(a+" | ");
-        }
-        Scanner sc = new Scanner(System.in);
-        do {
-            try {
-                System.out.println("Tapez l'une des actions ci-dessus ou entree pour passer votre tour :");
-                String line = sc.nextLine();
-                if (line.length()==0) return;
-                if (!line.equals("ECHANGE BANQUE") && !line.equals("ECHANGE PORT") && !line.equals("CONSTRUIRE COLONIE")
-                &&  !line.equals("CONSTRUIRE VILLE") && !line.equals("CONSTRUIRE COLONIE") && !line.equals("CONSTRUIRE ROUTE")
-                &&  !line.equals("UTILISER CARTE") && !line.equals("ACHETER CARTE")) throw new WrongInputException();
-                switch (line) {
-                    case "ECHANGE BANQUE": this.proposeToExchange41(); break;
-                    case "ECHANGE PORT": this.proposeToUseHarbor(); break;
-                    case "CONSTRUIRE COLONIE": this.proposeToConstructColony(); break;
-                    case "CONSTRUIRE VILLE": this.proposeToConstructCity(); break;
-                    case "CONSTRUIRE ROUTE": this.proposeToConstructRoad(); break;
-                    case "UTILISER CARTE": this.proposeToUseSpecialCard(); break;
-                    case "ACHETER CARTE": this.proposeToBuySpecialCard(); break;
-                }
-                this.playerMenu();
-                break;
-            } catch (Exception e) {
-                System.out.println(WrongInputException.MESSAGE);
-            }
-        } while (true);
-    }
-
     // Proposition d'échange de 4 ressources du joueur contre une de son choix,
     // (échange réalisable du moment que le joueur a au moins 4 ressources,
     //  même si ce dernier ne possède pas de port) :
@@ -503,27 +459,27 @@ class PlayerIG {
     // Proposition de construction d'une colonie : 
     // on demande au joueur s'il veut construire une colonie/ville/route
     // ou utiliser/acheter une carte developpement quand c'est possible :
-    private final void proposeToConstructColony() {
-        if (this.canConstructColony()) {
-            System.out.println("Voulez-vous construire une colonie ?");
-            System.out.println("Cout : 1 bois, 1 argile, 1 laine et 1 ble");
-            Scanner sc = new Scanner(System.in);
-            do {
-                try {
-                    System.out.println("Tapez OUI ou NON :");
-                    String line = sc.nextLine();
-                    if (!line.equals("OUI") && !line.equals("NON")) throw new WrongInputException();
-                    if (line.equals("OUI")) {
-                        this.buildColony(false);
-                        System.out.println("Votre inventaire :"+this.inventory);
-                    }
-                    break;
-                } catch (Exception e) {
-                    System.out.println(WrongInputException.MESSAGE);
-                }
-            } while (true);
-        }
-    }
+    // private final void proposeToConstructColony() {
+    //     if (this.canConstructColony()) {
+    //         System.out.println("Voulez-vous construire une colonie ?");
+    //         System.out.println("Cout : 1 bois, 1 argile, 1 laine et 1 ble");
+    //         Scanner sc = new Scanner(System.in);
+    //         do {
+    //             try {
+    //                 System.out.println("Tapez OUI ou NON :");
+    //                 String line = sc.nextLine();
+    //                 if (!line.equals("OUI") && !line.equals("NON")) throw new WrongInputException();
+    //                 if (line.equals("OUI")) {
+    //                     this.buildColony(false);
+    //                     System.out.println("Votre inventaire :"+this.inventory);
+    //                 }
+    //                 break;
+    //             } catch (Exception e) {
+    //                 System.out.println(WrongInputException.MESSAGE);
+    //             }
+    //         } while (true);
+    //     }
+    // }
 
     // Proposition de construction d'une ville :
     private final void proposeToConstructCity() {
@@ -549,27 +505,27 @@ class PlayerIG {
     }
 
     // Proposition de construction d'une route :
-    private final void proposeToConstructRoad() {
-        if (this.canConstructRoad()) {
-            System.out.println("Voulez-vous construire une route ?");
-            System.out.println("Cout : 1 bois et 1 argile");
-            Scanner sc = new Scanner(System.in);
-            do {
-                try {
-                    System.out.println("Tapez OUI ou NON :");
-                    String line = sc.nextLine();
-                    if (!line.equals("OUI") && !line.equals("NON")) throw new WrongInputException();
-                    if (line.equals("OUI")) {
-                        this.buildRoad(false, false);
-                        System.out.println("Votre inventaire :"+this.inventory);
-                    }
-                    break;
-                } catch (Exception e) {
-                    System.out.println(WrongInputException.MESSAGE);
-                }
-            } while (true);
-        }
-    }
+    // private final void proposeToConstructRoad() {
+    //     if (this.canConstructRoad()) {
+    //         System.out.println("Voulez-vous construire une route ?");
+    //         System.out.println("Cout : 1 bois et 1 argile");
+    //         Scanner sc = new Scanner(System.in);
+    //         do {
+    //             try {
+    //                 System.out.println("Tapez OUI ou NON :");
+    //                 String line = sc.nextLine();
+    //                 if (!line.equals("OUI") && !line.equals("NON")) throw new WrongInputException();
+    //                 if (line.equals("OUI")) {
+    //                     this.buildRoad(false, false);
+    //                     System.out.println("Votre inventaire :"+this.inventory);
+    //                 }
+    //                 break;
+    //             } catch (Exception e) {
+    //                 System.out.println(WrongInputException.MESSAGE);
+    //             }
+    //         } while (true);
+    //     }
+    // }
 
     // Proposition d'utilisation d'une carte developpement :
     protected void proposeToUseSpecialCard() {
@@ -624,26 +580,23 @@ class PlayerIG {
     // Construction d'une colonie :
     // Remarque : on a décidé de ne pas implémenter le fait que toute colonie doit être distante d’au moins 2 intersections
     // En effet, le plateau est trop petit pour pouvoir appliquer cette règle de distance
-    protected void buildColony(boolean beginning) {
-        Scanner sc = new Scanner(System.in);
-        do {
+    protected boolean buildColony(int k, int l, boolean beginning) {
             try {
-                System.out.println(this.name+", placez votre colonie :");
-                int[] indexs = scanLocationOrPath(sc);
-                int k = indexs[0]-1, l = indexs[1]-1;
-                if (k<0 || k>4 || l<0 || l>4) throw new IndexOutOfBoundsException();
                 if (Game.PLAYBOARD.locations[k][l] instanceof ColonyIG) throw new WrongInputException();
                 if (beginning) {
                     if (Game.PLAYBOARD.locations[k][l].hasAnHarbor())
                         this.harbors.add(Game.PLAYBOARD.locations[k][l].getHarbor());
-                    Game.PLAYBOARD.locations[k][l] = new ColonyIG(Game.PLAYBOARD.locations[k][l].boxes, k, l, this);
+                    Game.PLAYBOARD.remove(Game.PLAYBOARD.locations[k][l]);
+                    Game.PLAYBOARD.locations[k][l] = new ColonyIG(Game.PLAYBOARD.locations[k][l].boxes, k, l, this, Game.PLAYBOARD.locations[k][l].x, Game.PLAYBOARD.locations[k][l].y, Game.PLAYBOARD);
+                    ((LocationIG)Game.PLAYBOARD.locations[k][l]).setBackground(this.color);
                     this.coloniesOnPlayBoard.add((ColonyIG) Game.PLAYBOARD.locations[k][l]);
                 } else {
                     ArrayList<LocationIG> endPoints = this.getEndPoints();
                     if (!endPoints.contains(Game.PLAYBOARD.locations[k][l])) throw new InexistantRoadException();
                     if (Game.PLAYBOARD.locations[k][l].hasAnHarbor())
                         this.harbors.add(Game.PLAYBOARD.locations[k][l].getHarbor());
-                    Game.PLAYBOARD.locations[k][l] = new ColonyIG(Game.PLAYBOARD.locations[k][l].boxes, k, l, this);
+                    Game.PLAYBOARD.locations[k][l] = new ColonyIG(Game.PLAYBOARD.locations[k][l].boxes, k, l, this, Game.PLAYBOARD.locations[k][l].x, Game.PLAYBOARD.locations[k][l].y, Game.PLAYBOARD);
+                    ((LocationIG)Game.PLAYBOARD.locations[k][l]).setBackground(this.color);
                     this.coloniesOnPlayBoard.add((ColonyIG) Game.PLAYBOARD.locations[k][l]);
                     this.inventory.replace("Bois", this.inventory.get("Bois")-1); 
                     this.inventory.replace("Laine", this.inventory.get("Laine")-1); 
@@ -651,18 +604,19 @@ class PlayerIG {
                     this.inventory.replace("Argile", this.inventory.get("Argile")-1);
                 }
                 this.victoryPoints++;
-                break;
-            } catch (IndexOutOfBoundsException ind) {
-                System.out.println("Erreur : cet emplacement n'existe pas");
             } catch (WrongInputException w) {
                 System.out.println("Erreur : cet emplacement est occupe");
+                System.out.println(((ColonyIG)Game.PLAYBOARD.locations[k][l]).player);
+                return false;
             } catch (InexistantRoadException ire) {
                 System.out.println("Erreur : cet emplacement n'est pas en contact avec l'une de vos routes");
+                return false;
             } catch (Exception e) {
                 System.out.println(WrongInputException.MESSAGE);
+                return false;
             }
-        } while (true);
         Game.PLAYBOARD.updatePaths();
+        return true;
     }
 
     // Construction d'une ville :
@@ -698,67 +652,68 @@ class PlayerIG {
     }
 
     // Construction d'une route :
-    protected void buildRoad(boolean isFree, boolean beginning) {
-        Scanner sc = new Scanner(System.in);
-        char c;
-        do {
-            try {
-                System.out.println(this.name+", voulez-vous placer une route " 
-                +"horizontale ou verticale ?");
-                System.out.println("Tapez H pour horizontale ou V pour verticale :");
-                c = sc.nextLine().charAt(0);
-                if (c!='H' && c!='V') throw new WrongInputException();
-                System.out.println("Placez votre route :");
-                int[] indexs = scanLocationOrPath(sc);
-                int k = indexs[0]-1; int l = indexs[1]-1;
-                if (c=='H') {
-                    if (k<0 || k>4 || l<0 || l>3) throw new IndexOutOfBoundsException();
-                } else {
-                    if (k<0 || k>3 || l<0 || l>4) throw new IndexOutOfBoundsException();
-                }
+    protected boolean buildRoad(char c, int k, int l, boolean isFree, boolean beginning) {
+        try {
                 if ((c=='H' && Game.PLAYBOARD.horizontalPaths[k][l] instanceof RoadIG) || 
                     (c=='V' && Game.PLAYBOARD.verticalPaths[k][l] instanceof RoadIG)) 
-                    throw new IllegalStateException();
-                try {
+                throw new IllegalStateException();
+            try {
+                if(this.canConstructRoad() || isFree){
                     RoadIG r = this.buildRoadNextToColony(c, (c=='H')? Game.PLAYBOARD.horizontalPaths[k][l] : 
                     Game.PLAYBOARD.verticalPaths[k][l], beginning);
-                    if (c=='H') Game.PLAYBOARD.horizontalPaths[k][l] = r;
-                    else Game.PLAYBOARD.verticalPaths[k][l] = r;
+                    if (c=='H') {
+                        Game.PLAYBOARD.remove(Game.PLAYBOARD.horizontalPaths[k][l]);
+                        Game.PLAYBOARD.horizontalPaths[k][l] = r;
+                        ((PathIG)Game.PLAYBOARD.horizontalPaths[k][l]).setBackground(this.color);
+                    }
+                    else {
+                        Game.PLAYBOARD.remove(Game.PLAYBOARD.verticalPaths[k][l]);
+                        Game.PLAYBOARD.verticalPaths[k][l] = r;
+                        ((PathIG)Game.PLAYBOARD.verticalPaths[k][l]).setBackground(this.color);
+                    } 
                     this.roads.add(r);
                     if (!isFree) {
                         this.inventory.replace("Bois", this.inventory.get("Bois")-1); 
                         this.inventory.replace("Argile", this.inventory.get("Argile")-1); 
                     }
-                    break;
-                } catch (InexistantColonyException ice) {
-                    try {
+                }else{
+                    System.out.println("Vous n'avez pas assez de ressources");
+                }
+            } catch (InexistantColonyException ice) {
+                try {
+                    if(this.canConstructRoad() || isFree){
                         if (beginning) throw new IllegalStateException();
                         RoadIG r = this.buildRoadNextToRoad(c, (c=='H')? Game.PLAYBOARD.horizontalPaths[k][l] :
                         Game.PLAYBOARD.verticalPaths[k][l]);
-                        if (c=='H') Game.PLAYBOARD.horizontalPaths[k][l] = r;
-                        else Game.PLAYBOARD.verticalPaths[k][l] = r;
+                        if (c=='H'){
+                            Game.PLAYBOARD.remove(Game.PLAYBOARD.horizontalPaths[k][l]);
+                            Game.PLAYBOARD.horizontalPaths[k][l] = r; 
+                            ((PathIG)Game.PLAYBOARD.horizontalPaths[k][l]).setBackground(this.color);
+                        } 
+                        else {
+                            Game.PLAYBOARD.remove(Game.PLAYBOARD.verticalPaths[k][l]);
+                            Game.PLAYBOARD.verticalPaths[k][l] = r;
+                            ((PathIG)Game.PLAYBOARD.verticalPaths[k][l]).setBackground(this.color);
+                        } 
                         this.roads.add(r);
                         if (!isFree) {
                             this.inventory.replace("Bois", this.inventory.get("Bois")-1); 
                             this.inventory.replace("Argile", this.inventory.get("Argile")-1); 
                         }
-                        break;
-                    } catch (IllegalStateException e) {
-                        System.out.println(
-                        "Erreur : Vous devez construire votre route a cote de la colonie que vous venez de construire");
-                    } catch (InexistantRoadException ire) {
-                        System.out.println(ice);
-                        System.out.println(ire);
+                    }else{
+                        System.out.println("Vous n'avez pas assez de ressources");
                     }
+                } catch (IllegalStateException e) {
+                    return false;
+                } catch (InexistantRoadException ire) {
+                    return false;
                 }
-            } catch (IndexOutOfBoundsException ind) {
-                System.out.println("Erreur : ce chemin n'existe pas");
-            } catch (IllegalStateException ill) {
-                System.out.println("Erreur : cet emplacement est occupe");
-            } catch (Exception e) {
-                System.out.println(WrongInputException.MESSAGE);
             }
-        } while (true);
+        } catch (IllegalStateException ill) {
+            System.out.println("Erreur : cet emplacement est occupe");
+            return false;
+        }
+        return true;
     }
 
     // Construction d'une route à côté d'une colonie :
@@ -766,16 +721,16 @@ class PlayerIG {
         if (selectedPath.point1 instanceof ColonyIG) {
             ColonyIG col = (ColonyIG) selectedPath.point1;
             if (col.player==this && !beginning)
-                return new RoadIG(this, c, selectedPath.point1, selectedPath.point2, 1);
+                return new RoadIG(this, c, selectedPath.point1, selectedPath.point2, 1, selectedPath.x, selectedPath.y, selectedPath.height, selectedPath.width, Game.PLAYBOARD);
             if (col==this.coloniesOnPlayBoard.get(this.coloniesOnPlayBoard.size()-1) && beginning)
-                return new RoadIG(this, c, selectedPath.point1, selectedPath.point2, 1);
+                return new RoadIG(this, c, selectedPath.point1, selectedPath.point2, 1, selectedPath.x, selectedPath.y, selectedPath.height, selectedPath.width, Game.PLAYBOARD);
         }
         if (selectedPath.point2 instanceof ColonyIG) {
             ColonyIG col = (ColonyIG) selectedPath.point2;
             if (col.player==this && !beginning) 
-                return new RoadIG(this, c, selectedPath.point1, selectedPath.point2, 2);
+                return new RoadIG(this, c, selectedPath.point1, selectedPath.point2, 2, selectedPath.x, selectedPath.y, selectedPath.height, selectedPath.width, Game.PLAYBOARD);
             if (col==this.coloniesOnPlayBoard.get(this.coloniesOnPlayBoard.size()-1) && beginning)
-                return new RoadIG(this, c, selectedPath.point1, selectedPath.point2, 2);
+                return new RoadIG(this, c, selectedPath.point1, selectedPath.point2, 2, selectedPath.x, selectedPath.y, selectedPath.height, selectedPath.width, Game.PLAYBOARD);
         }
         throw new InexistantColonyException();
     }
@@ -785,10 +740,10 @@ class PlayerIG {
         ArrayList<LocationIG> endPoints = this.getEndPoints();
         for (LocationIG endPoint : endPoints) {
             if (selectedPath.point1==endPoint) {
-                return new RoadIG(this, c, selectedPath.point1, selectedPath.point2, 1);
+                return new RoadIG(this, c, selectedPath.point1, selectedPath.point2, 1, selectedPath.x, selectedPath.y, selectedPath.height, selectedPath.width, Game.PLAYBOARD);
             }
             if (selectedPath.point2==endPoint) {
-                return new RoadIG(this, c, selectedPath.point1, selectedPath.point2, 2);
+                return new RoadIG(this, c, selectedPath.point1, selectedPath.point2, 2, selectedPath.x, selectedPath.y, selectedPath.height, selectedPath.width, Game.PLAYBOARD);
             }
         }
         throw new InexistantRoadException();

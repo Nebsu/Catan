@@ -17,37 +17,75 @@ public class PlayBoardIG extends JFrame{
 	PathIG[][] horizontalPaths; // chemins horizontaux
 	PathIG[][] verticalPaths; // chemins verticaux
 	BoxIG thief; // case contenant le voleur 
-	JPanel contentPane;
+	JPanel contentPane = new JPanel();
     JButton passeTour = new JButton("<html><body>Passer<div>Tour</body></html>");
-    JButton lancerDe = new JButton("<html><body>Lancer<div>Dé</body></html>");
+    JButton lancerDe = new JButton("<html><body>Lancer<div>De</body></html>");
     JLabel playername  = new JLabel();
     JLabel diceresult = new JLabel();
+    JButton placerColonie = new JButton("<html><body>Placer<div>une<div>colonie</body></html>");
+    JButton placerRoute = new JButton("<html><body>Placer<div>une<div>route</body></html>");
+
+    ArrayList<JButton> boutonsJeu = new ArrayList<JButton>();
+    JButton construireColonie = new JButton("Colonie");
+    JButton route = new JButton("Route");
+    JButton construireVille = new JButton("Ville");
+    JButton annuler = new JButton("Annuler");
+    //PopUp
+    JButton echangePort = new JButton("Port");
+    JButton cartes = new JButton("Cartes");
 
     JLabel qtArgile = new JLabel();
     JLabel qtBois = new JLabel();
     JLabel qtLaine = new JLabel();
     JLabel qtBle = new JLabel();
     JLabel qtRoche = new JLabel();
-	
-        
 
-	////////// Constructeur et fonctions associées à ce dernier //////////
+    ArrayList<PathIG> roads = new ArrayList<PathIG>();
+    ArrayList<LocationIG> colonies = new ArrayList<LocationIG>();
+	
+	////////// Constructeur et fonctions associees à ce dernier //////////
     
     PlayBoardIG() {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 600, 600);
-		contentPane = new JPanel();
 		contentPane.setBorder(null);
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
         passeTour.setBounds(475, 430, 85, 65);
         lancerDe.setBounds(475, 430, 85, 65);
+        cartes.setBounds(10, 91, 70, 23);
+        placerColonie.setBounds(475, 430, 85, 65);
+        placerRoute.setBounds(475, 430, 85, 65);
         JPanel playerpanel = new JPanel();
         playerpanel.setBounds(10, 335, 115, 25);
         playerpanel.setBorder(new LineBorder(new Color(0, 0, 0)));
         playerpanel.add(playername);
-        contentPane.add(lancerDe);
         contentPane.add(playerpanel);
+        contentPane.add(cartes);
+        
+
+        route.setBounds(470, 80, 90, 40);
+		contentPane.add(route);
+        route.setEnabled(false);
+        construireColonie.setBounds(470, 135, 90, 40);
+		contentPane.add(construireColonie);
+        construireColonie.setEnabled(false);
+        construireVille.setBounds(470, 195, 90, 40);
+		contentPane.add(construireVille);
+        construireVille.setEnabled(false);
+        echangePort.setBounds(470, 249, 90, 40);
+		contentPane.add(echangePort);
+        echangePort.setEnabled(false);
+        annuler.setBounds(470, 304, 90, 40);
+		contentPane.add(annuler);
+        annuler.setEnabled(false);
+
+        boutonsJeu.add(route);
+        boutonsJeu.add(construireColonie);
+        boutonsJeu.add(construireVille);
+        boutonsJeu.add(echangePort);
+        boutonsJeu.add(cartes);
+        boutonsJeu.add(annuler);
 
         JPanel invArgile = new JPanel();
 		invArgile.setBackground(new Color(153, 102, 0));
@@ -259,25 +297,25 @@ public class PlayBoardIG extends JFrame{
         JLabel foret3 = new JLabel("<html><body>Foret<br>02</body></html>");
 		box44.add(foret3);
 
-        this.boxes[0][0] = new BoxIG("Forêt", "Bois", 6, 0, 0, false, box11);
-        this.boxes[0][1] = new BoxIG("Pré", "Laine", 10, 0, 1, false, box12);
-        this.boxes[0][2] = new BoxIG("Champs", "Blé", 11, 0, 2, false, box13);
-        this.boxes[0][3] = new BoxIG("Pré", "Laine", 8, 0, 3, false, box14);
-        this.boxes[1][0] = new BoxIG("Champs", "Blé", 4, 1,0, false, box21);
+        this.boxes[0][0] = new BoxIG("Foret", "Bois", 6, 0, 0, false, box11);
+        this.boxes[0][1] = new BoxIG("Pre", "Laine", 10, 0, 1, false, box12);
+        this.boxes[0][2] = new BoxIG("Champs", "Ble", 11, 0, 2, false, box13);
+        this.boxes[0][3] = new BoxIG("Pre", "Laine", 8, 0, 3, false, box14);
+        this.boxes[1][0] = new BoxIG("Champs", "Ble", 4, 1,0, false, box21);
         this.boxes[1][1] = new BoxIG("Colline", "Argile", 9, 1, 1, false, box22);
-        this.boxes[1][2] = new BoxIG("Forêt", "Bois", 5, 1, 2, false, box23);
+        this.boxes[1][2] = new BoxIG("Foret", "Bois", 5, 1, 2, false, box23);
         this.boxes[1][3] = new BoxIG("Montagne", "Roche", 12, 1, 3, false, box24);
         this.boxes[2][0] = new BoxIG("Montagne", "Roche", 3, 2, 0, false, box31);
-        this.boxes[2][1] = new BoxIG("Désert", null, 7, 2, 1, true, box32);
-        this.boxes[2][2] = new BoxIG("Champs", "Blé", 10, 2, 2, false, box33);
+        this.boxes[2][1] = new BoxIG("Desert", null, 7, 2, 1, true, box32);
+        this.boxes[2][2] = new BoxIG("Champs", "Ble", 10, 2, 2, false, box33);
         this.boxes[2][3] = new BoxIG("Colline", "Argile", 6, 2, 3, false, box34);
         this.boxes[3][0] = new BoxIG("Colline", "Argile", 9, 3, 0, false, box41);
         this.boxes[3][1] = new BoxIG("Montagne", "Roche", 8, 3, 1, false, box42);
-        this.boxes[3][2] = new BoxIG("Pré", "Laine", 5, 3, 2, false, box43);
-        this.boxes[3][3] = new BoxIG("Forêt", "Bois", 2, 3, 3, false, box44);
+        this.boxes[3][2] = new BoxIG("Pre", "Laine", 5, 3, 2, false, box43);
+        this.boxes[3][3] = new BoxIG("Foret", "Bois", 2, 3, 3, false, box44);
     }
 
-	// Construction des intersections (nommées emplacements) :
+	// Construction des intersections (nommees emplacements) :
     private final void constructLocations() throws IllegalArgumentException {
         this.locations = new LocationIG[5][5];
         int x = 200;
@@ -292,18 +330,15 @@ public class PlayBoardIG extends JFrame{
                     int k = (i==4)? 3 : i; 
                     int l = (j==4)? 3 : j;
                     int m = (i==4)? 320 : 40;
-                    int n = (j==4)? 130 : 410;
+                    int n = (j==4)? 410 : 130;
                     BoxIG[] b = {this.boxes[k][l]};
-                    try {this.locations[i][j] = new LocationIG(b, i, j);
-                        JPanel c = new JPanel();
-                        c.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
-                        c.setBounds(n, m, 10, 10);
-                        contentPane.add(c);
+                    try {this.locations[i][j] = new LocationIG(b, i, j, n, m, this);
+                        colonies.add(this.locations[i][j]);
                     }catch (IllegalArgumentException e) {
                         System.out.println("Erreur d'argument");
                         return;
                     }
-                // Arêtes horizontales du plateau (2 cases adjacentes) :
+                // Aretes horizontales du plateau (2 cases adjacentes) :
                 } else if (i==0 && (j!=0 && j!=4) || i==4 && (j!=0 && j!=4)) {
                     int k = (i==4)? 3 : i;
                     int n = 0;
@@ -312,12 +347,13 @@ public class PlayBoardIG extends JFrame{
                     if(j==3)n = 340;
                     int m = (i==4)? 320 : 40;
                     BoxIG[] b = {this.boxes[k][j-1], this.boxes[k][j]};
-                    this.locations[i][j] = new LocationIG(b, i, j);
-                    JPanel c = new JPanel();
-                    c.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
-                    c.setBounds(n, m, 10, 10);
-                    contentPane.add(c);
-                // Arêtes verticales du plateau (2 cases adjacentes) :
+                    this.locations[i][j] = new LocationIG(b, i, j, n, m, this);
+                    colonies.add(this.locations[i][j]);
+                    // JPanel c = new JPanel();
+                    // c.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
+                    // c.setBounds(n, m, 10, 10);
+                    // contentPane.add(c);
+                // Aretes verticales du plateau (2 cases adjacentes) :
                 } else if (j==0 && (i!=0 && i!=4) || j==4 && (i!=0 && i!=4)) {
                     int l = (j==4)? 3 : j;
                     int m = 0;
@@ -326,11 +362,12 @@ public class PlayBoardIG extends JFrame{
                     if(i==3)m = 250;
                     int n = (j==4)? 410 : 130;
                     BoxIG[] b = {this.boxes[i-1][l], this.boxes[i][l]};
-                    try {this.locations[i][j] = new LocationIG(b, i, j);
-                        JPanel c = new JPanel();
-                        c.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
-                        c.setBounds(n, m, 10, 10);
-                        contentPane.add(c);
+                    try {this.locations[i][j] = new LocationIG(b, i, j, n, m, this);
+                        colonies.add(this.locations[i][j]);
+                        // JPanel c = new JPanel();
+                        // c.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
+                        // c.setBounds(n, m, 10, 10);
+                        // contentPane.add(c);
                     }catch (IllegalArgumentException e) {
                         System.out.println("Erreur d'argument");
                         return;
@@ -338,11 +375,12 @@ public class PlayBoardIG extends JFrame{
                 // Centre du plateau (4 cases adjacentes) :
                 } else {
                     BoxIG[] b = {this.boxes[i-1][j-1], this.boxes[i-1][j], this.boxes[i][j-1], this.boxes[i][j]};
-                    try {this.locations[i][j] = new LocationIG(b, i, j);
-                        JPanel c = new JPanel();
-                        c.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
-                        c.setBounds(x, y, 10, 10);
-                        contentPane.add(c);
+                    try {this.locations[i][j] = new LocationIG(b, i, j, x, y, this);
+                        colonies.add(this.locations[i][j]);
+                        // JPanel c = new JPanel();
+                        // c.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
+                        // c.setBounds(x, y, 10, 10);
+                        // contentPane.add(c);
                         x += 70;
                     }catch (IllegalArgumentException e) {
                         System.out.println("Erreur d'argument");
@@ -361,11 +399,12 @@ public class PlayBoardIG extends JFrame{
             n = 145;
             m += 70;
             for (int j=0; j<4; j++) {
-                JPanel hr = new JPanel();
-                hr.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
-                hr.setBounds(n, m, 50, 10);
-                contentPane.add(hr);
-                this.horizontalPaths[i][j] = new PathIG('H', this.locations[i][j], this.locations[i][j+1], hr);
+                // JPanel hr = new JPanel();
+                // hr.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
+                // hr.setBounds(n, m, 50, 10);
+                // contentPane.add(hr);
+                this.horizontalPaths[i][j] = new PathIG('H', this.locations[i][j], this.locations[i][j+1], n, m, 50, 10, this);
+                roads.add(this.horizontalPaths[i][j]);
                 n += 70;
                 if(j==4){
                     m = 40;
@@ -378,11 +417,12 @@ public class PlayBoardIG extends JFrame{
         for (int k=0; k<4; k++) {
             n2 = 130;
             for (int l=0; l<5; l++) {
-                JPanel vr = new JPanel();
-                vr.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
-                vr.setBounds(n2, m2, 10, 50);
-                contentPane.add(vr);
-                this.verticalPaths[k][l] = new PathIG('V', this.locations[k][l], this.locations[k+1][l], vr);
+                // JPanel vr = new JPanel();
+                // vr.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
+                // vr.setBounds(n2, m2, 10, 50);
+                // contentPane.add(vr);
+                this.verticalPaths[k][l] = new PathIG('V', this.locations[k][l], this.locations[k+1][l], n2, m2, 10, 50, this);
+                roads.add(this.verticalPaths[k][l]);
                 n2 += 70;
                 if(l==4){
                     m2 += 70;
@@ -521,7 +561,7 @@ public class PlayBoardIG extends JFrame{
         }
     }
 
-    // Récupération des cases désignées par les dés :
+    // Recuperation des cases designees par les des :
     final ArrayList<BoxIG> getBoxes(int dice) {
         ArrayList<BoxIG> res = new ArrayList<BoxIG>();
         for (int i=0; i<boxes.length; i++) {
@@ -534,7 +574,7 @@ public class PlayBoardIG extends JFrame{
         return res;
     }
 
-    // Récupération du port qui possède l'id passé en argument :
+    // Recuperation du port qui possède l'id passe en argument :
     final HarborIG getHarbor(int id) {
         for (int i=0; i<this.seaBoxes.length; i++) {
             if (this.seaBoxes[i] instanceof HarborIG) {
@@ -545,9 +585,9 @@ public class PlayBoardIG extends JFrame{
     }
 
 
-    ////////// Fonctions booléennes //////////
+    ////////// Fonctions booleennes //////////
 
-    // Renvoie true si toutes les intersections sont occupées par une colonie/ville :
+    // Renvoie true si toutes les intersections sont occupees par une colonie/ville :
     final boolean isFilledLocations() {
         int numberOfColonies = 0;
         for (int i=0; i<this.locations.length; i++) {
@@ -560,7 +600,7 @@ public class PlayBoardIG extends JFrame{
         return (numberOfColonies==25);
     }
     
-    // Renvoie true si tous les chemins ont été pris :
+    // Renvoie true si tous les chemins ont ete pris :
     final boolean isFilledPaths() {
         int numberOfRoads = 0;
         for (int i=0; i<this.horizontalPaths.length; i++) {

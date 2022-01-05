@@ -95,7 +95,6 @@ class Player {
                     this.inventory.replace(boxes[i].ressource, this.inventory.get(boxes[i].ressource)+1);
             }
         }
-        System.out.println(this.color+"Votre inventaire : "+this.inventory+CatanTerminal.RESET+"\n");
     }
 
 
