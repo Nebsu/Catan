@@ -75,7 +75,6 @@ final class IAIG extends PlayerIG {
             //System.out.println(this.color+"Voleur active"+Game.RESET);
             this.thief();
         }
-        this.playerMenu();
         this.specialCards.addAll(this.notUsableCards);
         this.notUsableCards.clear();
         if (!this.specialCards.isEmpty())
@@ -191,9 +190,41 @@ final class IAIG extends PlayerIG {
 
     // Menu principal du joueur :
 
+    protected void playerMenu() {
+        ArrayList<String> actions = new ArrayList<String>();
+        if (this.canExchange(4, null)) actions.add("ECHANGE BANQUE");
+        if (this.canUseHarbor()) actions.add("ECHANGE PORT");
+        if (this.canConstructColony()) actions.add("CONSTRUIRE COLONIE");
+        if (this.canConstructCity()) actions.add("CONSTRUIRE VILLE");
+        if (this.canConstructRoad()) actions.add("CONSTRUIRE ROUTE");
+        if (!this.specialCards.isEmpty()) actions.add("UTILISER CARTE");
+        if (this.canBuyACard()) actions.add("ACHETER CARTE");
+        if (actions.isEmpty()) {
+            return;
+        }
+        Random rd1 = new Random();
+        int sel = rd1.nextInt(actions.size());
+        Random rd2 = new Random();
+        boolean quit = rd2.nextBoolean();
+        if (quit) {
+            return;
+        }
+        String line = actions.get(sel);
+        switch (line) {
+            //case "ECHANGE BANQUE": System.out.println("Banque"); this.exchange(4, null); break;
+            //case "ECHANGE PORT": System.out.println("Port");this.useHarbor(); break;
+            //case "CONSTRUIRE COLONIE":System.out.println("Colonie"); this.buildColony(0,0,false); break;
+            case "CONSTRUIRE VILLE":System.out.println("Ville"); this.buildCity(0,0); break;
+            case "CONSTRUIRE ROUTE":System.out.println("Route"); this.buildRoad(' ',0,0,false, false); break;
+            case "UTILISER CARTE":System.out.println("Carte"); this.useSpecialCard(); break;
+            case "ACHETER CARTE":System.out.println("CarteAchat"); this.buySpecialCard(); break;
+        }
+        return;
+    }
+
 
     // Proposition d'utilisation d'une carte developpement :
-    @Override
+
     protected void proposeToUseSpecialCard() {
         if (!this.specialCards.isEmpty()) {
             Random rd = new Random();
@@ -250,7 +281,7 @@ final class IAIG extends PlayerIG {
 
     // Construction d'une ville :
     @Override
-    protected void buildCity() {
+    protected boolean buildCity(int a, int b) {
         do {   
             try {   
                 Random random1 = new Random();
@@ -261,6 +292,7 @@ final class IAIG extends PlayerIG {
                 if (((ColonyIG) Game.PLAYBOARD.locations[k][l]).player!=this) throw new IllegalStateException();
                 if (((ColonyIG) Game.PLAYBOARD.locations[k][l]).isCity) throw new WrongInputException();
                 ((ColonyIG) Game.PLAYBOARD.locations[k][l]).isCity = true;
+                ((LocationIG)Game.PLAYBOARD.locations[k][l]).setBackground(Color.BLACK);
                 this.inventory.replace("Roche", this.inventory.get("Roche")-3); 
                 this.inventory.replace("Ble", this.inventory.get("Ble")-2); 
                 this.victoryPoints++;
@@ -268,6 +300,7 @@ final class IAIG extends PlayerIG {
             } catch (Exception e) {}
         } while (true);
         Game.PLAYBOARD.updatePaths();
+        return true;
     }
 
     // Construction d'une route :
@@ -363,7 +396,7 @@ final class IAIG extends PlayerIG {
 
     // Fonction qui procède à un échange de ressources via le commerce maritime :
     @Override
-    protected void exchange(int n, String ressource) {
+    protected boolean exchange(int n, String ressource) {
         if (ressource==null) {
             Set<String> keys = this.inventory.keySet();
             ArrayList<String> selectables = new ArrayList<String>();
@@ -388,7 +421,6 @@ final class IAIG extends PlayerIG {
                     String line = s;
                     if (!selectables.contains(line)) throw new WrongInputException();
                     this.exchange(n, line);
-                    return;
                 } catch (Exception e) {}
             } while (true);
         } else {
@@ -414,14 +446,14 @@ final class IAIG extends PlayerIG {
                     if (line.equals(ressource)) throw new WrongInputException();
                     Integer b = this.inventory.get(line);
                     this.inventory.put(line, b+Integer.valueOf(1));
-                    return;
+                    return true;
                 } catch (Exception e) {}
             } while (true); 
         }   
     }
 
     // Fonction pour utiliser l'un des ports que possède le joueur :
-    @Override
+
     protected void useHarbor() {
         int[] ids = new int[this.harbors.size()];
         int a = 0;
@@ -449,7 +481,6 @@ final class IAIG extends PlayerIG {
     ////////// Fonctions des cartes developpement //////////
 
     // Utilisation d'une carte developpement :
-    @Override
     protected void useSpecialCard() {
         do {
             try {
@@ -522,10 +553,9 @@ final class IAIG extends PlayerIG {
     }
 
     // Carte progrès route :
-    @Override
     protected void carteRoute() {
-        this.buildRoad(true, false);
-        this.buildRoad(true, false);
+        this.buildRoad(' ', 0, 0, true, false);
+        this.buildRoad(' ', 0, 0, true, false);
     }
     
     // Carte progrès monopole :

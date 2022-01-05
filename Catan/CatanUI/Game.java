@@ -30,11 +30,16 @@ public class Game extends JFrame implements ActionListener, MouseInputListener {
     static int action = 0;
     static int acc = 0;
     static int player = 0;
-    static int bot = 0;
     static boolean firstRound = true;
     static int firstRoundacc = 1;
     static boolean canConstructColony = true;
     static boolean canConstructRoad = true;
+    static boolean canConstructCity = false;
+    static boolean harborEnable = false;
+    static boolean roadCard = false;
+    static int roadCardacc = 0;
+    static PopUpEchange popupechange = new PopUpEchange(null);
+
 
     // Données de base de la partie :
     static PlayerIG[] PLAYERS; // joueurs 
@@ -44,6 +49,9 @@ public class Game extends JFrame implements ActionListener, MouseInputListener {
     static PlayerIG hasTheStrongestArmy = null; // joueur qui a l'armée la plus puissante
     static boolean longestRoad = false; // indique si un joueur possède la route la plus longue
     static PlayerIG hasTheLongestRoad = null; // joueur qui a la route la plus longue
+    static PlayerIG previousLongestRoad = null; 
+    static boolean end = false;
+    static PlayerIG winner = null;
     ////////// Constructeur et fonctions associées à ce dernier //////////
 
     Game(){
@@ -75,8 +83,10 @@ public class Game extends JFrame implements ActionListener, MouseInputListener {
             public void actionPerformed(ActionEvent e) {   
                 if(action==0){
                     number = Integer.valueOf(choice.getSelectedItem());
-                    PLAYERS = new PlayerIG[number];
-                    System.out.println("Nombre de joueur : " + number);                   
+                    PLAYERS = new PlayerIG[number];             
+                    PLAYBOARD.add(PLAYBOARD.player1);
+                    PLAYBOARD.add(PLAYBOARD.player2);  
+                    PLAYBOARD.add(PLAYBOARD.player3);        
                     lblNewLabel.setText("Veuillez choisir le nombre d'IA");  
                     contentPane.remove(choice);
                     choice2.setBounds(230, 200, 100, 20);
@@ -90,6 +100,7 @@ public class Game extends JFrame implements ActionListener, MouseInputListener {
                         choice2.add("1");
                         choice2.add("2");
                         choice2.add("3");
+                        PLAYBOARD.add(PLAYBOARD.player4);
                     }
                     action++;
                     return;
@@ -97,7 +108,6 @@ public class Game extends JFrame implements ActionListener, MouseInputListener {
                 if(action == 1){
                     if(choice2.getSelectedItem()!=null){
                         botnumber = Integer.valueOf(choice2.getSelectedItem());
-                        System.out.println("Nombre d'IA = " + botnumber);
                         lblNewLabel.setText("Veuillez choisir votre nom");
                         contentPane.remove(choice2);
                         textField.setBounds(140, 220, 300, 40);  
@@ -110,7 +120,6 @@ public class Game extends JFrame implements ActionListener, MouseInputListener {
                 if(action == 2 && acc < number-botnumber && !textField.getText().equals("")){
                     name = textField.getText();
                     PLAYERS[n] = new PlayerIG(name, n+1, colors[n]);
-                    System.out.println("Joueur " + Integer.valueOf(n+1) + " = " + name);
                     textField.setText("");
                         n++;
                         acc++;
@@ -121,13 +130,11 @@ public class Game extends JFrame implements ActionListener, MouseInputListener {
                         cbutton.setBounds(140, 220, 300, 40);
                         for(int i = number-botnumber; i < number; i++){
                             PLAYERS[i] = new IAIG("IA"+String.valueOf(i+1), i, colors[i]);
-                            System.out.println(PLAYERS[i]);
                         }
                     }
                     return;
                 }
                 if(action == 2 && acc == number-botnumber){
-                    bot = number-botnumber;
                     PLAYBOARD.playername.setText(PLAYERS[player].name);
                     showInventory(PLAYERS[player]);
                     PLAYBOARD.contentPane.add(PLAYBOARD.placerColonie);
@@ -167,12 +174,15 @@ public class Game extends JFrame implements ActionListener, MouseInputListener {
                     player = 0;
                     PLAYBOARD.contentPane.remove(PLAYBOARD.passeTour);
                     PLAYBOARD.repaint();
-                    while(bot!=number){
-                        PLAYBOARD.playername.setText(PLAYERS[bot].name);
-                        PLAYBOARD.diceresult.setText(String.valueOf(PLAYERS[bot].throwDices()));
-                        PlayerIG.earnResources(Integer.parseInt(PLAYBOARD.diceresult.getText()));
-                        System.out.println(PLAYBOARD.diceresult.getText());
-                        bot++;
+                    for(int i = number-botnumber; i < number; i++){
+                        if(!firstRound){
+                            PLAYBOARD.playername.setText(PLAYERS[i].name);
+                            PLAYBOARD.diceresult.setText(String.valueOf(PLAYERS[i].throwDices()));
+                            PlayerIG.earnResources(Integer.parseInt(PLAYBOARD.diceresult.getText()));
+                            ((IAIG)PLAYERS[i]).playerMenu();
+                            refreshVictoryPoints();
+                            System.out.println(i);
+                        }
                     }
                     if(firstRound && botnumber !=0 && firstRoundacc == 1){
                         for(int i = number-botnumber; i < number; i++){
@@ -183,8 +193,8 @@ public class Game extends JFrame implements ActionListener, MouseInputListener {
                             ((IAIG)PLAYERS[i]).buildColony(0, 0, true);
                             ((IAIG)PLAYERS[i]).buildRoad(' ',0,0,true,true);
                         }
+                        refreshVictoryPoints();
                     }
-                    bot = number-botnumber;
                     if(firstRoundacc==2){
                         for(PlayerIG p : PLAYERS){
                             p.gainInitialResources();
@@ -199,6 +209,22 @@ public class Game extends JFrame implements ActionListener, MouseInputListener {
                         PLAYBOARD.playername.setText(PLAYERS[player].name);
                         disableAll();
                         showInventory(PLAYERS[player]);
+                        PLAYERS[player].specialCards.addAll(PLAYERS[player].notUsableCards);
+                        PLAYERS[player].notUsableCards.clear();
+                        if (PLAYERS[player].hasAVictoryPointCard() && PLAYERS[player].victoryPoints==9) PLAYERS[player].victoryPoints = 10;
+                        for (int i=0; i<PLAYERS.length; i++) {
+                            if (PLAYERS[i].isWinner()) {
+                                end = true;
+                                winner = PLAYERS[i];
+                                break;
+                            } 
+                        }
+                        if (hasTheStrongestArmy != null){
+                            PLAYBOARD.knightUsedlbl.setText(PLAYERS[player].name);
+                        }
+                        if(end){
+                            stop();
+                        }
                         PLAYBOARD.repaint();
                         return;
                     }else{
@@ -214,6 +240,9 @@ public class Game extends JFrame implements ActionListener, MouseInputListener {
                     disableAll();
                     changePlayer(PLAYERS[player]);
                     showInventory(PLAYERS[player]);
+                    PLAYERS[player].specialCards.addAll(PLAYERS[player].notUsableCards);
+                    PLAYERS[player].notUsableCards.clear();
+                    if (PLAYERS[player].hasAVictoryPointCard() && PLAYERS[player].victoryPoints==9) PLAYERS[player].victoryPoints = 10;
                     PLAYBOARD.repaint();
                     return;
                 }
@@ -225,6 +254,9 @@ public class Game extends JFrame implements ActionListener, MouseInputListener {
                     disableAll();
                     changePlayer(PLAYERS[player]);
                     showInventory(PLAYERS[player]);
+                    PLAYERS[player].specialCards.addAll(PLAYERS[player].notUsableCards);
+                    PLAYERS[player].notUsableCards.clear();
+                    if (PLAYERS[player].hasAVictoryPointCard() && PLAYERS[player].victoryPoints==9) PLAYERS[player].victoryPoints = 10;
                     PLAYBOARD.repaint();
                     return;
                 }
@@ -236,6 +268,8 @@ public class Game extends JFrame implements ActionListener, MouseInputListener {
                     disableAll();
                     changePlayer(PLAYERS[player]);
                     showInventory(PLAYERS[player]);
+                    PLAYERS[player].specialCards.addAll(PLAYERS[player].notUsableCards);
+                    PLAYERS[player].notUsableCards.clear();
                     PLAYBOARD.repaint();
                     return;
                 }
@@ -245,7 +279,8 @@ public class Game extends JFrame implements ActionListener, MouseInputListener {
         PLAYBOARD.cartes.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                new PopUp(PLAYERS[player]).setVisible(true);
+                JFrame popup = new PopUp(PLAYERS[player]);
+                popup.setVisible(true);
             }
         });
 
@@ -253,6 +288,7 @@ public class Game extends JFrame implements ActionListener, MouseInputListener {
             @Override
             public void actionPerformed(ActionEvent e) {
                 enableAllExcept(PLAYBOARD.annuler);
+                PLAYBOARD.passeTour.setEnabled(true);
                 canConstructColony = false;
                 canConstructRoad = false;               
             }
@@ -275,15 +311,18 @@ public class Game extends JFrame implements ActionListener, MouseInputListener {
                                 if(canConstructRoad == true && firstRound){
                                     if(PLAYERS[player].buildRoad('H',k,l,true,true)){
                                         canConstructRoad = false;
+                                        PLAYBOARD.passeTour.setEnabled(true);
                                         PLAYBOARD.contentPane.remove(PLAYBOARD.placerRoute);
                                         PLAYBOARD.contentPane.add(PLAYBOARD.passeTour);
                                         disableAll();
                                     }
-                                }else if(canConstructRoad == true && !firstRound){
+                                }else if(canConstructRoad == true && !firstRound && roadCard == false){
                                     if(PLAYERS[player].buildRoad('H',k,l,false,false)){
                                         canConstructRoad = false;
+                                        PLAYBOARD.passeTour.setEnabled(true);
                                         enableAllExcept(PLAYBOARD.annuler);
                                         showInventory(PLAYERS[player]);
+                                        hasTheLongestRoad = longestRoad();
                                     }    
                                 }
                             }
@@ -303,14 +342,33 @@ public class Game extends JFrame implements ActionListener, MouseInputListener {
                                         canConstructRoad = false;
                                         PLAYBOARD.contentPane.remove(PLAYBOARD.placerRoute);
                                         PLAYBOARD.contentPane.add(PLAYBOARD.passeTour);
+                                        PLAYBOARD.passeTour.setEnabled(true);
                                         disableAll();
                                     }
-                                }else if(canConstructRoad == true && !firstRound){
-                                    if(PLAYERS[player].buildRoad('V',k,l,false,false)){
-                                        canConstructRoad = false;
+                                }else if(roadCard == true){
+                                    if(PLAYERS[player].buildRoad('V',k,l,true,false) && roadCardacc == 0){
+                                        roadCardacc++;
+                                    }
+                                    if(PLAYERS[player].buildRoad('V',k,l,true,false) && roadCardacc == 1){
+                                        roadCardacc = 0;
+                                        roadCard = false;
                                         enableAllExcept(PLAYBOARD.annuler);
-                                        showInventory(PLAYERS[player]);
-                                    }    
+                                    }
+                                }else if(canConstructRoad == true && !firstRound && roadCard == false){
+                                    if(PLAYERS[player].buildRoad('V',k,l,false,false)){
+                                    canConstructRoad = false;
+                                    enableAllExcept(PLAYBOARD.annuler);
+                                    showInventory(PLAYERS[player]);
+                                    PLAYBOARD.passeTour.setEnabled(true);
+                                    hasTheLongestRoad = longestRoad();
+                                        if(hasTheLongestRoad == null){
+                                            PLAYBOARD.lrPlayer.setText(" ");
+                                            refreshVictoryPoints();
+                                        }else{
+                                            PLAYBOARD.lrPlayer.setText(hasTheLongestRoad.name);
+                                            refreshVictoryPoints();
+                                        }
+                                    }
                                 }
                             }
                         });
@@ -324,6 +382,7 @@ public class Game extends JFrame implements ActionListener, MouseInputListener {
             public void actionPerformed(ActionEvent e) { 
                 if(!firstRound){
                     disableAllExcept(PLAYBOARD.annuler);
+                    PLAYBOARD.passeTour.setEnabled(false);
                 }
                 canConstructColony = true;
                 for(int i = 0; i < PLAYBOARD.locations.length; i++) {
@@ -341,10 +400,15 @@ public class Game extends JFrame implements ActionListener, MouseInputListener {
                                             PLAYBOARD.contentPane.remove(PLAYBOARD.placerColonie);
                                             PLAYBOARD.contentPane.add(PLAYBOARD.placerRoute);
                                             disableAll();
+                                            refreshVictoryPoints();
                                         }
                                     }else if(canConstructColony == true && !firstRound){
                                         if(PLAYERS[player].buildColony(k,l,false)){
                                             canConstructColony = false;
+                                            enableAllExcept(PLAYBOARD.annuler);
+                                            PLAYBOARD.passeTour.setEnabled(true);
+                                            showInventory(PLAYERS[player]);
+                                            refreshVictoryPoints();
                                         }
                                     }
                                 }
@@ -358,14 +422,65 @@ public class Game extends JFrame implements ActionListener, MouseInputListener {
         PLAYBOARD.construireVille.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                canConstructCity = true;
                 disableAllExcept(PLAYBOARD.annuler);
+                PLAYBOARD.passeTour.setEnabled(false);
+                for(int i = 0; i < PLAYBOARD.locations.length; i++) {
+                    int k = i;
+                    for(int j = 0; j < PLAYBOARD.locations[i].length; j++) {
+                        int l = j;
+                        PLAYBOARD.locations[i][j].addMouseListener(new MouseAdapter(){
+                            @Override
+                            public void mousePressed(MouseEvent e) {
+                                if(canConstructCity){
+                                    if(PLAYERS[player].buildCity(k,l)){
+                                        enableAllExcept(PLAYBOARD.annuler);
+                                        canConstructCity = false;
+                                        PLAYBOARD.passeTour.setEnabled(true);
+                                        showInventory(PLAYERS[player]);
+                                        refreshVictoryPoints();
+                                    }
+                                }
+                                
+                            }
+                        });
+                    }
+                }
             }
         });
 
         PLAYBOARD.echangePort.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                harborEnable = true;
+                PLAYBOARD.passeTour.setEnabled(false);
                 disableAllExcept(PLAYBOARD.annuler);
+                popupechange = new PopUpEchange(PLAYERS[player]);
+                for(int i = 0; i < PLAYBOARD.seaBoxes.length; i++){
+                    int k = i;
+                    if(PLAYBOARD.seaBoxes[i] instanceof HarborIG){
+                        PLAYBOARD.seaBoxes[i].contentPane.addMouseListener(new MouseAdapter(){
+                            @Override
+                            public void mousePressed(MouseEvent e) {
+                                if(harborEnable){
+                                    int selectedId = ((HarborIG)PLAYBOARD.seaBoxes[k]).id;
+                                    if(PLAYERS[player].useHarbor(selectedId)) {
+                                        enableAllExcept(PLAYBOARD.annuler);
+                                        showInventory(PLAYERS[player]);
+                                        PLAYBOARD.passeTour.setEnabled(true);
+                                        harborEnable = false;
+                                        return;
+                                    }else{
+                                        harborEnable = false;
+                                        enableAllExcept(PLAYBOARD.annuler);
+                                        PLAYBOARD.passeTour.setEnabled(true);
+                                        return;                               
+                                    }
+                                }
+                            }
+                        });
+                    }
+                }
             }
         });
     }
@@ -403,12 +518,10 @@ public class Game extends JFrame implements ActionListener, MouseInputListener {
     private static PlayerIG longestRoad(PlayerIG previous) {
         boolean b = true;
         int[] sizes = new int[PLAYERS.length];
-        System.out.println();
         for (int i=0; i<PLAYERS.length; i++) {
             sizes[i] = PLAYERS[i].longestRoad();
             System.out.println(PLAYERS[i].name+" : "+sizes[i]);
         }
-        System.out.println();
         int max = sizes[0];
         int index = 0;
         for (int i=1; i<sizes.length; i++) { 
@@ -442,7 +555,7 @@ public class Game extends JFrame implements ActionListener, MouseInputListener {
         }
     }
 
-    void disableAll(){
+    public static void disableAll(){
         for(JButton b : PLAYBOARD.boutonsJeu){
             b.setEnabled(false);
         }
@@ -456,6 +569,39 @@ public class Game extends JFrame implements ActionListener, MouseInputListener {
             }
         }
     }
+    
+    static void refreshVictoryPoints(){
+        PLAYBOARD.victory1.setText(Integer.toString(PLAYERS[0].victoryPoints));
+        PLAYBOARD.victory2.setText(Integer.toString(PLAYERS[1].victoryPoints));
+        PLAYBOARD.victory3.setText(Integer.toString(PLAYERS[2].victoryPoints));
+        if(number == 4){
+            PLAYBOARD.victory4.setText(Integer.toString(PLAYERS[3].victoryPoints));
+        }
+    }
+
+    private static PlayerIG longestRoad() {
+        boolean b = true;
+        int[] sizes = new int[PLAYERS.length];
+        for (int i=0; i<PLAYERS.length; i++) {
+            sizes[i] = PLAYERS[i].longestRoad();
+        }
+        int max = sizes[0];
+        int index = 0;
+        for (int i=1; i<sizes.length; i++) { 
+            if (sizes[i]==max) b = false;
+            if (sizes[i]>max) {
+                max = sizes[i];
+                index = i;
+            }
+        }
+        if (b && previousLongestRoad!=PLAYERS[index]) {
+            if (previousLongestRoad!=null) previousLongestRoad.victoryPoints -= 2;
+            previousLongestRoad = PLAYERS[index];
+            PLAYERS[index].victoryPoints += 2;
+        }
+        if(!b) return null;
+        return PLAYERS[index];
+    }
 
     public static void main(String[] args) {
         catan();
@@ -463,12 +609,6 @@ public class Game extends JFrame implements ActionListener, MouseInputListener {
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    public void mousePressed(MouseEvent e) {
         // TODO Auto-generated method stub
         
     }
@@ -499,6 +639,12 @@ public class Game extends JFrame implements ActionListener, MouseInputListener {
 
     @Override
     public void mouseMoved(MouseEvent e) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void mousePressed(MouseEvent e) {
         // TODO Auto-generated method stub
         
     }

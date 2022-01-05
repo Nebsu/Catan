@@ -10,14 +10,18 @@ import java.awt.Color;
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
 import javax.swing.JButton;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
+import java.awt.event.*;
 import java.awt.Font;
 
 public class PopUp extends JFrame {
 
 	private JPanel contentPane;
     private PlayerIG player;
+	JLabel qtCh = new JLabel();
+	JLabel qtVic = new JLabel();
+	JLabel qtRt = new JLabel();
+	JLabel qtInv = new JLabel();
+	JLabel qtMon = new JLabel();
 
 	public PopUp(PlayerIG player) {
         this.player = player;
@@ -27,6 +31,12 @@ public class PopUp extends JFrame {
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
+
+		qtCh.setText(nbCh());
+		qtVic.setText(nbVic());
+		qtRt.setText(nbRt());
+		qtInv.setText(nbInv());
+		qtMon.setText(nbMon());
 		
 		JPanel chevalier = new JPanel();
 		chevalier.setBackground(Color.LIGHT_GRAY);
@@ -39,7 +49,7 @@ public class PopUp extends JFrame {
 		lblCh.setBounds(10, 11, 46, 14);
 		chevalier.add(lblCh);
 		
-		JLabel qtCh = new JLabel(nbCh());
+		
 		qtCh.setHorizontalAlignment(SwingConstants.CENTER);
 		qtCh.setFont(new Font("Tahoma", Font.PLAIN, 18));
 		qtCh.setBounds(10, 30, 46, 49);
@@ -56,7 +66,7 @@ public class PopUp extends JFrame {
 		lblVic.setBounds(10, 11, 46, 14);
 		victoire.add(lblVic);
 		
-		JLabel qtVic = new JLabel(nbVic());
+		
 		qtVic.setHorizontalAlignment(SwingConstants.CENTER);
 		qtVic.setFont(new Font("Tahoma", Font.PLAIN, 18));
 		qtVic.setBounds(10, 30, 46, 49);
@@ -73,7 +83,7 @@ public class PopUp extends JFrame {
 		lblRt.setBounds(10, 11, 46, 14);
 		route.add(lblRt);
 		
-		JLabel qtRt = new JLabel(nbRt());
+		
 		qtRt.setHorizontalAlignment(SwingConstants.CENTER);
 		qtRt.setFont(new Font("Tahoma", Font.PLAIN, 18));
 		qtRt.setBounds(10, 30, 46, 49);
@@ -90,7 +100,7 @@ public class PopUp extends JFrame {
 		lblInv.setBounds(10, 11, 46, 14);
 		invention.add(lblInv);
 		
-		JLabel qtInv = new JLabel(nbInv());
+		
 		qtInv.setHorizontalAlignment(SwingConstants.CENTER);
 		qtInv.setFont(new Font("Tahoma", Font.PLAIN, 18));
 		qtInv.setBounds(10, 30, 46, 49);
@@ -107,7 +117,7 @@ public class PopUp extends JFrame {
 		lblMon.setBounds(10, 11, 46, 14);
 		monopole.add(lblMon);
 		
-		JLabel qtMon = new JLabel(nbMon());
+		
 		qtMon.setHorizontalAlignment(SwingConstants.CENTER);
 		qtMon.setFont(new Font("Tahoma", Font.PLAIN, 18));
 		qtMon.setBounds(10, 30, 46, 49);
@@ -119,8 +129,74 @@ public class PopUp extends JFrame {
 				stop();
 			}
 		});
-		retour.setBounds(247, 117, 89, 23);
+		retour.setBounds(354, 117, 89, 23);
 		contentPane.add(retour);
+
+		JButton acheterCarte = new JButton("Acheter");
+		acheterCarte.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				player.buySpecialCard();
+				Game.showInventory(player);
+				refreshCard();
+			}
+		});
+		acheterCarte.setBounds(143, 117, 89, 23);
+		contentPane.add(acheterCarte);
+
+		chevalier.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mousePressed(MouseEvent e) {
+				if(Integer.parseInt(nbCh())>0){
+				player.useSpecialCard(1);
+				refreshCard();
+				}
+			}
+		});
+		victoire.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mousePressed(MouseEvent e) {
+				if(Integer.parseInt(nbVic())>0){
+				player.useSpecialCard(0);
+				refreshCard();
+				}
+			}
+		});
+		route.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mousePressed(MouseEvent e) {
+				if(Integer.parseInt(nbRt())>0){
+				stop();
+				Game.PLAYBOARD.passeTour.setEnabled(false);
+				player.useSpecialCard(2);
+				refreshCard();
+				}
+			}
+		});
+		monopole.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mousePressed(MouseEvent e) {
+				if(Integer.parseInt(nbMon())>0){
+					stop();
+					Game.PLAYBOARD.passeTour.setEnabled(false);
+					player.useSpecialCard(4);
+					refreshCard();
+					Game.showInventory(player);
+				}
+			}
+		});
+		invention.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mousePressed(MouseEvent e) {
+				if(Integer.parseInt(nbInv())>0){
+					stop();
+					Game.PLAYBOARD.passeTour.setEnabled(false);
+					player.useSpecialCard(3);
+					refreshCard();
+					Game.showInventory(player);
+				}
+			}
+		});
+		
 	}
 	void stop() {
 		this.dispose();
@@ -171,5 +247,14 @@ public class PopUp extends JFrame {
         }
         return String.valueOf(acc);
     }
+
+	void refreshCard(){
+		qtInv.setText(nbInv());
+		qtCh.setText(nbCh());
+		qtRt.setText(nbRt());
+		qtVic.setText(nbVic());
+		qtMon.setText(nbMon());
+		this.repaint();
+	}
 }
 

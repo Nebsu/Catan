@@ -3,8 +3,8 @@ package Catan.CatanUI;
 import java.util.*;
 import Catan.Exceptions.*;
 import Catan.CatanTerminal.Card;
-import Catan.CatanTerminal.Deck;
 import java.awt.Color;
+import java.awt.event.*;
 
 class PlayerIG {
     
@@ -21,6 +21,12 @@ class PlayerIG {
     protected final ArrayList<ColonyIG> coloniesOnPlayBoard; // colonies construites par le joueur sur le plateau
     protected final ArrayList<HarborIG> harbors; // ports possédés par le joueur
     protected int knights; // nombre de cartes chevalier jouées par le joueur
+
+    boolean monopoleCard = false;
+    boolean inventionCard = false;
+    int inventionacc = 0;
+    boolean harborExchange = false;
+    String monopoleResource = "";
 
     ////////// Constructeur et fonctions associées à ce dernier ////////// 
 
@@ -169,7 +175,6 @@ class PlayerIG {
         System.out.println("-------------------------------------------------------------------------------------------------");
         System.out.println("Au tour de "+this.name+" :");
         // Proposition d'utilisation d'une carte développement (si le joueur en a) :
-        this.proposeToUseSpecialCard();
         System.out.println("Tapez sur entree pour lancer les des :");
         int dice = throwDices();
         System.out.println("Resultat du lancer : " + dice+"\n");
@@ -215,7 +220,6 @@ class PlayerIG {
             System.out.println("Pas de chance, personne n'a rien gagne");
             return;
         }
-        for (ColonyIG c : colonies) System.out.println(c);
         // Les joueurs concernes gagnent une ressource de chaque case designee par les des :
         for (ColonyIG c : colonies) {
             for (int i=0; i<c.boxes.length; i++) {
@@ -407,180 +411,13 @@ class PlayerIG {
         }
     }
 
-
-    ////////// Fonctions de proposition //////////
-    // Proposition d'échange de 4 ressources du joueur contre une de son choix,
-    // (échange réalisable du moment que le joueur a au moins 4 ressources,
-    //  même si ce dernier ne possède pas de port) :
-    private final void proposeToExchange41() {
-        if (this.canExchange(4, null)) {
-            System.out.println("Voulez-vous echanger 4 ressources contre une de votre choix ?");
-            Scanner sc = new Scanner(System.in);
-            do {
-                try {
-                    System.out.println("Tapez OUI ou NON :");
-                    String line = sc.nextLine();
-                    if (!line.equals("OUI") && !line.equals("NON")) throw new WrongInputException();
-                    if (line.equals("OUI")) {
-                        this.exchange(4, null);
-                        System.out.println("Votre inventaire :"+this.inventory);
-                    }
-                    break;
-                } catch (Exception e) {
-                    System.out.println(WrongInputException.MESSAGE);
-                }
-            } while (true);
-        }
-    }
-
-    // Proposition d'utilisation d'un port pour faire un échange :
-    private final void proposeToUseHarbor() {
-        if (this.canUseHarbor()) {
-            System.out.println("Vous possedez un ou plusieurs port(s).");
-            System.out.println("Voulez vous faire un echange base sur l'un de vos ports ?");
-            Scanner sc = new Scanner(System.in);
-            do {
-                try {
-                    System.out.println("Tapez OUI ou NON :");
-                    String line = sc.nextLine();
-                    if (!line.equals("OUI") && !line.equals("NON")) throw new WrongInputException();
-                    if (line.equals("OUI")) {
-                        this.useHarbor();
-                        System.out.println("Votre inventaire :"+this.inventory);
-                    }
-                    break;
-                } catch (Exception e) {
-                    System.out.println(WrongInputException.MESSAGE);
-                }
-            } while (true);
-        }
-    }
-
-    // Proposition de construction d'une colonie : 
-    // on demande au joueur s'il veut construire une colonie/ville/route
-    // ou utiliser/acheter une carte developpement quand c'est possible :
-    // private final void proposeToConstructColony() {
-    //     if (this.canConstructColony()) {
-    //         System.out.println("Voulez-vous construire une colonie ?");
-    //         System.out.println("Cout : 1 bois, 1 argile, 1 laine et 1 ble");
-    //         Scanner sc = new Scanner(System.in);
-    //         do {
-    //             try {
-    //                 System.out.println("Tapez OUI ou NON :");
-    //                 String line = sc.nextLine();
-    //                 if (!line.equals("OUI") && !line.equals("NON")) throw new WrongInputException();
-    //                 if (line.equals("OUI")) {
-    //                     this.buildColony(false);
-    //                     System.out.println("Votre inventaire :"+this.inventory);
-    //                 }
-    //                 break;
-    //             } catch (Exception e) {
-    //                 System.out.println(WrongInputException.MESSAGE);
-    //             }
-    //         } while (true);
-    //     }
-    // }
-
-    // Proposition de construction d'une ville :
-    private final void proposeToConstructCity() {
-        if (this.canConstructCity()) {
-            System.out.println("Voulez-vous construire une ville ?");
-            System.out.println("Cout : 3 roches et 2 bles");
-            Scanner sc = new Scanner(System.in);
-            do {
-                try {
-                    System.out.println("Tapez OUI ou NON :");
-                    String line = sc.nextLine();
-                    if (!line.equals("OUI") && !line.equals("NON")) throw new WrongInputException();
-                    if (line.equals("OUI")) {
-                        this.buildCity();
-                        System.out.println("Votre inventaire :"+this.inventory);
-                    }
-                    break;
-                } catch (Exception e) {
-                    System.out.println(WrongInputException.MESSAGE);
-                }
-            } while (true);
-        }
-    }
-
-    // Proposition de construction d'une route :
-    // private final void proposeToConstructRoad() {
-    //     if (this.canConstructRoad()) {
-    //         System.out.println("Voulez-vous construire une route ?");
-    //         System.out.println("Cout : 1 bois et 1 argile");
-    //         Scanner sc = new Scanner(System.in);
-    //         do {
-    //             try {
-    //                 System.out.println("Tapez OUI ou NON :");
-    //                 String line = sc.nextLine();
-    //                 if (!line.equals("OUI") && !line.equals("NON")) throw new WrongInputException();
-    //                 if (line.equals("OUI")) {
-    //                     this.buildRoad(false, false);
-    //                     System.out.println("Votre inventaire :"+this.inventory);
-    //                 }
-    //                 break;
-    //             } catch (Exception e) {
-    //                 System.out.println(WrongInputException.MESSAGE);
-    //             }
-    //         } while (true);
-    //     }
-    // }
-
-    // Proposition d'utilisation d'une carte developpement :
-    protected void proposeToUseSpecialCard() {
-        if (!this.specialCards.isEmpty()) {
-            System.out.println("Votre inventaire : "+this.inventory);
-            System.out.println("Vos cartes developpement :\n"+this.specialCards);
-            System.out.println("Voulez vous utiliser une carte ?");
-            Scanner sc = new Scanner(System.in);
-            do {
-                try {
-                    System.out.println("Tapez OUI ou NON :");
-                    String line = sc.nextLine();
-                    if (!line.equals("OUI") && !line.equals("NON")) throw new WrongInputException();
-                    if (line.equals("OUI")) {
-                        this.useSpecialCard();
-                        System.out.println("Vos cartes developpement :\n"+this.specialCards);
-                    }
-                    break;
-                } catch (Exception e) {
-                    System.out.println(WrongInputException.MESSAGE);
-                }
-            } while (true);
-        }
-    }
-
-    // Proposition d'achat d'une carte developpement :
-    private final void proposeToBuySpecialCard() {
-        if (this.canBuyACard()) {
-            do {
-                System.out.println("Voulez-vous acheter une carte developpement ?");
-                System.out.println("Cout : 1 roche, 1 laine et 1 ble");
-                Scanner sc = new Scanner(System.in);
-                try {
-                    System.out.println("Tapez OUI ou NON :");
-                    String line = sc.nextLine();
-                    if (!line.equals("OUI") && !line.equals("NON")) throw new WrongInputException();
-                    if (line.equals("OUI")) {
-                        this.buySpecialCard();
-                        System.out.println("Votre inventaire :"+this.inventory);
-                    }
-                    break;
-                } catch (Exception e) {
-                    System.out.println(WrongInputException.MESSAGE);
-                }
-            } while (true);
-        }
-    }
-
-
     ////////// Fonctions de construction //////////
 
     // Construction d'une colonie :
     // Remarque : on a décidé de ne pas implémenter le fait que toute colonie doit être distante d’au moins 2 intersections
     // En effet, le plateau est trop petit pour pouvoir appliquer cette règle de distance
     protected boolean buildColony(int k, int l, boolean beginning) {
+        if(this.canConstructColony() || beginning){
             try {
                 if (Game.PLAYBOARD.locations[k][l] instanceof ColonyIG) throw new WrongInputException();
                 if (beginning) {
@@ -595,6 +432,7 @@ class PlayerIG {
                     if (!endPoints.contains(Game.PLAYBOARD.locations[k][l])) throw new InexistantRoadException();
                     if (Game.PLAYBOARD.locations[k][l].hasAnHarbor())
                         this.harbors.add(Game.PLAYBOARD.locations[k][l].getHarbor());
+                    Game.PLAYBOARD.remove(Game.PLAYBOARD.locations[k][l]);
                     Game.PLAYBOARD.locations[k][l] = new ColonyIG(Game.PLAYBOARD.locations[k][l].boxes, k, l, this, Game.PLAYBOARD.locations[k][l].x, Game.PLAYBOARD.locations[k][l].y, Game.PLAYBOARD);
                     ((LocationIG)Game.PLAYBOARD.locations[k][l]).setBackground(this.color);
                     this.coloniesOnPlayBoard.add((ColonyIG) Game.PLAYBOARD.locations[k][l]);
@@ -617,16 +455,16 @@ class PlayerIG {
             }
         Game.PLAYBOARD.updatePaths();
         return true;
+        }else{
+            System.out.println("Vous n'avez pas assez de ressources");
+            return false;
+        }
     }
 
     // Construction d'une ville :
-    protected void buildCity() {
-        do {   
+    protected boolean buildCity(int k, int l) {
+        if(canConstructCity()){
             try {
-                Scanner sc = new Scanner(System.in);
-                System.out.println(this.name+", choisissez la colonie a transformer en ville :");
-                int[] index = scanLocationOrPath(sc);
-                int k = index[0]-1, l = index[1]-1;
                 if (k<0 || k>4 || l<0 || l>4) throw new IndexOutOfBoundsException();
                 if (!(Game.PLAYBOARD.locations[k][l] instanceof ColonyIG)) throw new InexistantColonyException();
                 if (((ColonyIG) Game.PLAYBOARD.locations[k][l]).player!=this) throw new IllegalStateException();
@@ -634,21 +472,24 @@ class PlayerIG {
                 ((ColonyIG) Game.PLAYBOARD.locations[k][l]).isCity = true;
                 this.inventory.replace("Roche", this.inventory.get("Roche")-3); 
                 this.inventory.replace("Ble", this.inventory.get("Ble")-2); 
+                ((LocationIG)Game.PLAYBOARD.locations[k][l]).setBackground(Color.BLACK);
                 this.victoryPoints++;
-                break;
-            } catch (IndexOutOfBoundsException ind) {
-                System.out.println("Erreur : cet emplacement n'existe pas");
-            } catch (InexistantColonyException ice) {
-                System.out.println("Erreur : cet emplacement ne contient pas de colonie");
             } catch (IllegalStateException ise) {
                 System.out.println("Erreur : cette colonie ne vous appartient pas");
+                return false;
             } catch (WrongInputException w) {
                 System.out.println("Erreur : vous avez selectionne une ville");
+                return false;
             } catch (Exception e) {
                 System.out.println(WrongInputException.MESSAGE);
+                return false;
             }
-        } while (true);
-        Game.PLAYBOARD.updatePaths();
+            Game.PLAYBOARD.updatePaths();
+            return true;
+        }else{
+            System.out.println("Vous n'avez pas assez de ressources");
+            return false;
+        }
     }
 
     // Construction d'une route :
@@ -779,142 +620,99 @@ class PlayerIG {
     ////////// Fonctions des ports et du commerce maritime //////////
 
     // Fonction qui procède à un échange de ressources via le commerce maritime :
-    protected void exchange(int n, String ressource) {
-        if (ressource==null) {
-            System.out.println("Choisissez la ressource dont vous voulez donner "+n+" unites :");
-            Set<String> keys = this.inventory.keySet();
-            ArrayList<String> selectables = new ArrayList<String>();
-            for (String key : keys) {
-                if (this.inventory.get(key)>=n) selectables.add(key);
+    protected boolean exchange(int n, String ressource) {
+        harborExchange = true;
+        if(harborExchange){
+            if (ressource==null) {
+                Set<String> keys = this.inventory.keySet();
+                ArrayList<String> selectables = new ArrayList<String>();
+                for (String key : keys) {
+                    if (this.inventory.get(key)>=n) selectables.add(key);
+                }
+                for (String sel : selectables) {
+                    Game.popupechange.giveChoice.add(sel);
+                }
+                Game.popupechange.quantity = n;
+                Game.popupechange.setVisible(true);
+                return true;
+            } else {
+                Game.popupechange.quantity = n;
+                Game.popupechange.giveChoice.add(ressource);
+                Game.popupechange.setVisible(true);
+                return true;
             }
-            Scanner sc = new Scanner(System.in);
-            do {
-                try {
-                    System.out.println("Tapez l'une des ressources ci-dessous :");
-                    for (String sel : selectables) 
-                        System.out.print(sel+"   ");
-                    System.out.println();
-                    String line = sc.nextLine();
-                    if (!selectables.contains(line)) throw new WrongInputException();
-                    this.exchange(n, line);
-                    return;
-                } catch (Exception e) {
-                    System.out.println(WrongInputException.MESSAGE);
-                }
-            } while (true);
-        } else {
-            Integer a = this.inventory.get(ressource);
-            this.inventory.put(ressource, a-Integer.valueOf(n));
-            System.out.println("Veuillez maintenant prendre une ressource de votre choix :");
-            System.out.println("Votre inventaire : "+this.inventory);
-            System.out.println("Choisissez une ressource :");
-            Scanner sc = new Scanner(System.in);
-            do {
-                try {
-                    System.out.println("Tapez Bois, Argile, Laine, Ble ou Roche :");
-                    String line = sc.nextLine();
-                    if (!line.equals("Bois") && !line.equals("Argile") && !line.equals("Laine") && 
-                        !line.equals("Ble") && !line.equals("Roche")) throw new WrongInputException();
-                    if (line.equals(ressource)) throw new WrongInputException();
-                    Integer b = this.inventory.get(line);
-                    this.inventory.put(line, b+Integer.valueOf(1));
-                    break;
-                } catch (Exception e) {
-                    System.out.println(WrongInputException.MESSAGE);
-                }
-            } while (true); 
-        }       
+        }
+        return false;       
     }
 
     // Fonction pour utiliser l'un des ports que possède le joueur :
-    protected void useHarbor() {
+    protected boolean useHarbor(int selectedId) {
         int[] ids = new int[this.harbors.size()];
         int a = 0;
-        System.out.println("Vos ports :");
         for (HarborIG h : this.harbors) {
             ids[a] = h.id;
             a++;
         }
-        System.out.println();
-        System.out.println("Choisissez l'un de vos ports :");
-        do {
-            try {
-                Scanner sc = new Scanner(System.in);
-                System.out.println("Tapez l'ID du port que vous voulez utiliser :");
-                int selectedId = sc.nextInt();
-                int b = 0;
-                for (int i=0; i<ids.length; i++) {
-                    if (ids[i]!=selectedId) b++;
-                }
-                if (b==ids.length) throw new WrongInputException();
-                HarborIG selectedHarbor = Game.PLAYBOARD.getHarbor(selectedId);
-                if (selectedHarbor.type.equals("Simple")) 
-                    if (!this.canExchange(3, null)) throw new NotEnoughRessourcesException();
-                else 
-                    if (!this.canExchange(2, selectedHarbor.ressource)) throw new NotEnoughRessourcesException();
-                this.exchange(selectedHarbor.price, selectedHarbor.ressource);
-                break;
-            } catch (NotEnoughRessourcesException not) {
-                System.out.println(not);
-            } catch (Exception e) {
-                System.out.println(WrongInputException.MESSAGE);
+        try {
+            int b = 0;
+            for (int i=0; i<ids.length; i++) {
+                if (ids[i]!=selectedId) b++;
             }
-        } while (true);
+            if (b==ids.length) throw new WrongInputException();
+            HarborIG selectedHarbor = Game.PLAYBOARD.getHarbor(selectedId);
+            if (selectedHarbor.type.equals("Simple")) 
+                if (!this.canExchange(3, null)) throw new NotEnoughRessourcesException();
+            else 
+                if (!this.canExchange(2, selectedHarbor.ressource)) throw new NotEnoughRessourcesException();
+            this.exchange(selectedHarbor.price, selectedHarbor.ressource);
+        } catch (NotEnoughRessourcesException not) {
+            System.out.println(not);
+            return false;
+        } catch (Exception e) {
+            System.out.println(WrongInputException.MESSAGE);
+            return false;
+        }
+        return true;
     }
 
     
     ////////// Fonctions des cartes developpement //////////
 
     // Utilisation d'une carte developpement :
-    protected void useSpecialCard() {      
-        System.out.println("Vos cartes developpement : "+this.specialCards);
-        System.out.println("Choisissez la carte que vous voulez utiliser (ID)");
-        System.out.println("0 = Point de victoire\n1 = Chevalier\n"+
-        "2 = Construction de Route\n3 = Invention\n4 = Monopole");
-        do {
-            try {
-                Scanner sc = new Scanner(System.in);
-                int n = sc.nextInt();
-                if (n!=0 && n!=1 && n!=2 && n!=3 && n!=4) throw new WrongInputException();
-                for(Card c : this.specialCards){
-                    // Carte point de victoire :
-                    if (c.id==0 && n==0) {
-                        this.specialCards.remove(c);
-                        this.victoryPoints++; 
-                        System.out.println("Vous avez gagne un point de victoire");
-                        break;
-                    }
-                    // Carte chevalier :
-                    if(c.id==1 && n==1){
-                        this.specialCards.remove(c);
-                        this.knight();
-                        break;
-                    }
-                    // Carte progrès invention :
-                    if(c.id==3 && n==3){
-                        this.specialCards.remove(c);
-                        this.invention();
-                        break;
-                    }
-                    // Carte progrès route :
-                    if(c.id==2 && n==2){
-                        this.specialCards.remove(c);
-                        this.carteRoute();
-                        break;
-                    }
-                    // Carte progrès monopole :
-                    if(c.id==4 && n==4){
-                        this.specialCards.remove(c);
-                        this.monopole();
-                        break;
-                    }
-                    throw new WrongInputException();
-                }
+    protected void useSpecialCard(int n) {      
+        for(Card c : this.specialCards){
+            // Carte point de victoire :
+            if (c.id==0 && n==0) {
+                this.specialCards.remove(c);
+                this.victoryPoints++;
+                Game.refreshVictoryPoints();
                 break;
-            } catch (Exception e) {
-                System.out.println(WrongInputException.MESSAGE);
             }
-        } while (true);
+            // Carte chevalier :
+            if(c.id==1 && n==1){
+                this.specialCards.remove(c);
+                this.knight();
+                break;
+            }
+            // Carte progrès invention :
+            if(c.id==3 && n==3){
+                this.specialCards.remove(c);
+                this.invention();
+                break;
+            }
+            // Carte progrès route :
+            if(c.id==2 && n==2){
+                this.specialCards.remove(c);
+                Game.roadCard = true;
+                break;
+            }
+            // Carte progrès monopole :
+            if(c.id==4 && n==4){
+                this.specialCards.remove(c);
+                this.monopole();
+                break;
+            }
+        }
     }
 
     // Carte chevalier :
@@ -942,71 +740,28 @@ class PlayerIG {
 
     // Carte progrès invention :
     protected void invention() {
-        int acc = 1;
-        Scanner sc = new Scanner(System.in);
-        do{
-            try{
-                if(acc == 1){
-                    System.out.println("Choisissez votre première ressource");
-                }else if(acc == 2){
-                    System.out.println("Choisissez votre deuxième ressource");
-                }
-                String s = sc.nextLine();
-                if(s.equals("Roche") || s.equals("Laine") || s.equals("Ble") || s.equals("Argile") || s.equals("Bois")){
-                    this.inventory.replace(s, this.inventory.get(s)+1);
-                    acc = 2;
-                    if(acc == 2) break;
-                }else{
-                    throw new WrongInputException();
-                }
-            }catch(Exception e){
-                System.out.println(WrongInputException.MESSAGE);
-            }
-        }while (true);
+        inventionCard = true;
+        new Invention(this).setVisible(true);
     }
 
-    // Carte progrès route :
-    protected void carteRoute() {
-        System.out.println("Veuillez construire votre premiere route");
-        this.buildRoad(true, false);
-        System.out.println("Veuillez construire votre seconde route");
-        this.buildRoad(true, false);
+    protected void inventionFunc(String s) {
+        this.inventory.replace(s, this.inventory.get(s)+1);
     }
 
     // Carte progrès monopole :
     protected void monopole() {
-        int n = 0;
-        Scanner sc = new Scanner(System.in);
-        System.out.println("Votre inventaire : "+this.inventory);
-        while(true){
-            try{
-                System.out.println("Veuillez choisir une ressource a monopoliser");
-                System.out.println("Roche | Laine | Argile | Ble | Bois");
-                String s = sc.nextLine();
-                if(s.equals("Roche") || s.equals("Laine") || s.equals("Ble") || s.equals("Bois") || s.equals("Argile")){
-                    for(PlayerIG p: Game.PLAYERS){
-                        if(p!=this){
-                            n += p.inventory.get(s);
-                            p.inventory.replace(s, 0);
-                        }
-                    }
-                    this.inventory.replace(s, this.inventory.get(s) + n);
-                    return;
-                }else{
-                    throw new WrongInputException();
-                }
-            }catch(Exception e){
-                System.out.println(WrongInputException.MESSAGE);
-            }
-        }
+        new Monopole(this).setVisible(true);
     }
+
 
     // Achat d'une carte developpement :
     protected void buySpecialCard() {
-        this.inventory.replace("Roche", this.inventory.get("Roche")-1); 
-        this.inventory.replace("Laine", this.inventory.get("Laine")-1); 
-        this.inventory.replace("Ble", this.inventory.get("Ble")-1); 
-        this.notUsableCards.add(Game.DECK.getDeck().pop());
+        if(this.canBuyACard()){
+            this.inventory.replace("Roche", this.inventory.get("Roche")-1); 
+            this.inventory.replace("Laine", this.inventory.get("Laine")-1); 
+            this.inventory.replace("Ble", this.inventory.get("Ble")-1); 
+            this.notUsableCards.add(Game.DECK.getDeck().pop());
+        }
     }
     
 

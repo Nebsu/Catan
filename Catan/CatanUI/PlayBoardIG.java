@@ -34,14 +34,34 @@ public class PlayBoardIG extends JFrame{
     JButton echangePort = new JButton("Port");
     JButton cartes = new JButton("Cartes");
 
+    JPanel invBois = new JPanel();
+    JPanel invLaine = new JPanel();
+    JPanel invBle = new JPanel();
+    JPanel invRoche = new JPanel();
+    JPanel invArgile = new JPanel();
+
     JLabel qtArgile = new JLabel();
     JLabel qtBois = new JLabel();
     JLabel qtLaine = new JLabel();
     JLabel qtBle = new JLabel();
     JLabel qtRoche = new JLabel();
 
-    ArrayList<PathIG> roads = new ArrayList<PathIG>();
-    ArrayList<LocationIG> colonies = new ArrayList<LocationIG>();
+    JPanel player1 = new JPanel();
+    JLabel victory1 = new JLabel("0");
+    JPanel player2 = new JPanel();
+    JLabel victory2 = new JLabel("0");
+    JPanel player3 = new JPanel();
+    JLabel victory3 = new JLabel("0");
+    JPanel player4 = new JPanel();
+    JLabel victory4 = new JLabel("0");
+
+    JPanel longestRoad = new JPanel();
+    JLabel lrPlayer = new JLabel("Joueur");
+    JLabel longestRoadlbl = new JLabel("Route la plus longue");
+
+    JPanel knightUsed = new JPanel();
+    JLabel knightPanellbl = new JLabel(" ");
+    JLabel knightUsedlbl = new JLabel("Armee");
 	
 	////////// Constructeur et fonctions associees à ce dernier //////////
     
@@ -63,7 +83,28 @@ public class PlayBoardIG extends JFrame{
         contentPane.add(playerpanel);
         contentPane.add(cartes);
         
+        longestRoad.setBorder(new LineBorder(new Color(0, 0, 0)));
+		longestRoad.setBounds(475, 25, 80, 25);
+		contentPane.add(longestRoad);
+		longestRoad.setLayout(null);
+		lrPlayer.setHorizontalAlignment(SwingConstants.CENTER);
+		lrPlayer.setBounds(0, 0, 80, 25);
+		longestRoad.add(lrPlayer);
+        longestRoadlbl.setBounds(465, 10, 111, 14);
+		contentPane.add(longestRoadlbl);
 
+        knightUsed.setBorder(new LineBorder(new Color(0, 0, 0)));
+		knightUsed.setBounds(10, 290, 70, 25);
+		contentPane.add(knightUsed);
+		knightUsed.setLayout(null);
+        knightPanellbl.setFont(new Font("Tahoma", Font.PLAIN, 25));
+		knightPanellbl.setHorizontalAlignment(SwingConstants.CENTER);
+		knightPanellbl.setBounds(0, 0, 70, 25);
+		knightUsed.add(knightPanellbl);
+        knightUsedlbl.setHorizontalAlignment(SwingConstants.CENTER);
+		knightUsedlbl.setBounds(10, 270, 70, 14);
+		contentPane.add(knightUsedlbl);
+        
         route.setBounds(470, 80, 90, 40);
 		contentPane.add(route);
         route.setEnabled(false);
@@ -87,7 +128,6 @@ public class PlayBoardIG extends JFrame{
         boutonsJeu.add(cartes);
         boutonsJeu.add(annuler);
 
-        JPanel invArgile = new JPanel();
 		invArgile.setBackground(new Color(153, 102, 0));
 		invArgile.setBounds(20, 400, 80, 125);
 		contentPane.add(invArgile);
@@ -99,7 +139,6 @@ public class PlayBoardIG extends JFrame{
 		qtArgile.setBounds(17, 24, 46, 73);
 		invArgile.add(qtArgile);
 		
-		JPanel invBois = new JPanel();
 		invBois.setBackground(new Color(0, 102, 51));
 		invBois.setBounds(110, 400, 80, 125);
 		contentPane.add(invBois);
@@ -111,7 +150,6 @@ public class PlayBoardIG extends JFrame{
 		qtBois.setBounds(17, 24, 46, 73);
 		invBois.add(qtBois);
 		
-		JPanel invLaine = new JPanel();
 		invLaine.setBackground(new Color(102, 204, 51));
 		invLaine.setBounds(200, 400, 80, 125);
 		contentPane.add(invLaine);
@@ -122,8 +160,7 @@ public class PlayBoardIG extends JFrame{
 		qtLaine.setHorizontalAlignment(SwingConstants.CENTER);
 		qtLaine.setBounds(17, 24, 46, 73);
 		invLaine.add(qtLaine);
-		
-		JPanel invBle = new JPanel();
+
 		invBle.setBackground(new Color(255, 255, 51));
 		invBle.setBounds(290, 400, 80, 125);
 		contentPane.add(invBle);
@@ -134,8 +171,7 @@ public class PlayBoardIG extends JFrame{
 		qtBle.setHorizontalAlignment(SwingConstants.CENTER);
 		qtBle.setBounds(17, 24, 46, 73);
 		invBle.add(qtBle);
-		
-		JPanel invRoche = new JPanel();
+
 		invRoche.setBackground(new Color(204, 204, 204));
 		invRoche.setBounds(380, 400, 80, 125);
 		contentPane.add(invRoche);
@@ -157,7 +193,37 @@ public class PlayBoardIG extends JFrame{
 		diceresult.setBounds(10, 11, 46, 48);
 		dicezone.add(diceresult);
 
+        player1.setBackground(Color.BLUE);
+		player1.setBorder(new LineBorder(new Color(0, 0, 0)));
+		player1.setBounds(10, 125, 70, 29);
+        player1.setLayout(null);
+        victory1.setHorizontalAlignment(SwingConstants.CENTER);
+		victory1.setBounds(12, 5, 46, 20);
+		player1.add(victory1);
 
+        player2.setBorder(new LineBorder(new Color(0, 0, 0)));
+		player2.setBackground(Color.GREEN);
+		player2.setBounds(10, 160, 70, 29);
+        player2.setLayout(null);
+        victory2.setHorizontalAlignment(SwingConstants.CENTER);
+		victory2.setBounds(12, 5, 46, 20);
+		player2.add(victory2);
+
+        player3.setBorder(new LineBorder(new Color(0, 0, 0)));
+		player3.setBackground(Color.RED);
+		player3.setBounds(10, 195, 70, 29);
+        player3.setLayout(null);
+        victory3.setHorizontalAlignment(SwingConstants.CENTER);
+		victory3.setBounds(12, 5, 46, 20);
+		player3.add(victory3);
+
+        player4.setBorder(new LineBorder(new Color(0, 0, 0)));
+		player4.setBackground(Color.YELLOW);
+		player4.setBounds(10, 230, 70, 29);
+        player4.setLayout(null);
+        victory4.setHorizontalAlignment(SwingConstants.CENTER);
+		victory4.setBounds(12, 5, 46, 20);
+		player4.add(victory4);
 
         this.boxes = new BoxIG[4][4];
         this.constructBoxes();
@@ -333,7 +399,6 @@ public class PlayBoardIG extends JFrame{
                     int n = (j==4)? 410 : 130;
                     BoxIG[] b = {this.boxes[k][l]};
                     try {this.locations[i][j] = new LocationIG(b, i, j, n, m, this);
-                        colonies.add(this.locations[i][j]);
                     }catch (IllegalArgumentException e) {
                         System.out.println("Erreur d'argument");
                         return;
@@ -348,7 +413,6 @@ public class PlayBoardIG extends JFrame{
                     int m = (i==4)? 320 : 40;
                     BoxIG[] b = {this.boxes[k][j-1], this.boxes[k][j]};
                     this.locations[i][j] = new LocationIG(b, i, j, n, m, this);
-                    colonies.add(this.locations[i][j]);
                     // JPanel c = new JPanel();
                     // c.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
                     // c.setBounds(n, m, 10, 10);
@@ -363,7 +427,6 @@ public class PlayBoardIG extends JFrame{
                     int n = (j==4)? 410 : 130;
                     BoxIG[] b = {this.boxes[i-1][l], this.boxes[i][l]};
                     try {this.locations[i][j] = new LocationIG(b, i, j, n, m, this);
-                        colonies.add(this.locations[i][j]);
                         // JPanel c = new JPanel();
                         // c.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
                         // c.setBounds(n, m, 10, 10);
@@ -376,7 +439,6 @@ public class PlayBoardIG extends JFrame{
                 } else {
                     BoxIG[] b = {this.boxes[i-1][j-1], this.boxes[i-1][j], this.boxes[i][j-1], this.boxes[i][j]};
                     try {this.locations[i][j] = new LocationIG(b, i, j, x, y, this);
-                        colonies.add(this.locations[i][j]);
                         // JPanel c = new JPanel();
                         // c.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
                         // c.setBounds(x, y, 10, 10);
@@ -404,7 +466,6 @@ public class PlayBoardIG extends JFrame{
                 // hr.setBounds(n, m, 50, 10);
                 // contentPane.add(hr);
                 this.horizontalPaths[i][j] = new PathIG('H', this.locations[i][j], this.locations[i][j+1], n, m, 50, 10, this);
-                roads.add(this.horizontalPaths[i][j]);
                 n += 70;
                 if(j==4){
                     m = 40;
@@ -422,7 +483,6 @@ public class PlayBoardIG extends JFrame{
                 // vr.setBounds(n2, m2, 10, 50);
                 // contentPane.add(vr);
                 this.verticalPaths[k][l] = new PathIG('V', this.locations[k][l], this.locations[k+1][l], n2, m2, 10, 50, this);
-                roads.add(this.verticalPaths[k][l]);
                 n2 += 70;
                 if(l==4){
                     m2 += 70;
@@ -435,115 +495,99 @@ public class PlayBoardIG extends JFrame{
         JPanel seabox1 = new JPanel();
 		seabox1.setBackground(new Color(0, 0, 102));
 		seabox1.setBounds(145, 10, 50, 25);
-		contentPane.add(seabox1);
 
         JPanel seabox2 = new JPanel();
 		seabox2.setBackground(new Color(0, 102, 204));
 		seabox2.setBounds(215, 10, 50, 25);
-		contentPane.add(seabox2);
         JLabel laine = new JLabel("PLa");
 		seabox2.add(laine);
 
         JPanel seabox3 = new JPanel();
 		seabox3.setBackground(new Color(0, 0, 102));
 		seabox3.setBounds(285, 10, 50, 25);
-		contentPane.add(seabox3);
 
         JPanel seabox4 = new JPanel();
 		seabox4.setBackground(new Color(0, 102, 204));
 		seabox4.setBounds(355, 10, 50, 25);
-		contentPane.add(seabox4);
         JLabel lblNewLabel_3 = new JLabel("PS");
 		seabox4.add(lblNewLabel_3);
 
         JPanel seabox5 = new JPanel();
 		seabox5.setBackground(new Color(0, 0, 102));
 		seabox5.setBounds(425, 55, 25, 50);
-		contentPane.add(seabox5);
 
         JPanel seabox6 = new JPanel();
 		seabox6.setBackground(new Color(0, 102, 204));
 		seabox6.setBounds(425, 125, 25, 50);
-		contentPane.add(seabox6);
         JLabel bois = new JLabel("PBo");
 		seabox6.add(bois);
 
         JPanel seabox7 = new JPanel();
 		seabox7.setBackground(new Color(0, 0, 102));
 		seabox7.setBounds(425, 195, 25, 50);
-		contentPane.add(seabox7);
 
         JPanel seabox8 = new JPanel();
 		seabox8.setBackground(new Color(0, 102, 204));
 		seabox8.setBounds(425, 265, 25, 50);
-		contentPane.add(seabox8);
         JLabel lblNewLabel_4 = new JLabel("PS");
 		seabox8.add(lblNewLabel_4);
 
         JPanel seabox9 = new JPanel();
 		seabox9.setBackground(new Color(0, 0, 102));
 		seabox9.setBounds(355, 335, 50, 25);
-		contentPane.add(seabox9);
 
         JPanel seabox10 = new JPanel();
 		seabox10.setBackground(new Color(0, 102, 204));
 		seabox10.setBounds(285, 335, 50, 25);
-		contentPane.add(seabox10);
         JLabel argile = new JLabel("PAr");
 		seabox10.add(argile);
 
         JPanel seabox11 = new JPanel();
 		seabox11.setBackground(new Color(0, 0, 102));
 		seabox11.setBounds(215, 335, 50, 25);
-		contentPane.add(seabox11);
 
         JPanel seabox12 = new JPanel();
 		seabox12.setBackground(new Color(0, 102, 204));
 		seabox12.setBounds(145, 335, 50, 25);
-		contentPane.add(seabox12);
         JLabel roche = new JLabel("PRo");
 		seabox12.add(roche);
 
         JPanel seabox13 = new JPanel();
 		seabox13.setBackground(new Color(0, 0, 102));
 		seabox13.setBounds(100, 265, 25, 50);
-		contentPane.add(seabox13);
 
         JPanel seabox14 = new JPanel();
 		seabox14.setBackground(new Color(0, 102, 204));
 		seabox14.setBounds(100, 195, 25, 50);
-		contentPane.add(seabox14);
         JLabel ble = new JLabel("PBl");
 		seabox14.add(ble);
 
         JPanel seabox15 = new JPanel();
 		seabox15.setBackground(new Color(0, 0, 102));
 		seabox15.setBounds(100, 125, 25, 50);
-		contentPane.add(seabox15);
 
         JPanel seabox16 = new JPanel();
 		seabox16.setBackground(new Color(0, 102, 204));
 		seabox16.setBounds(100, 55, 25, 50);
-		contentPane.add(seabox16);
-        JLabel lblNewLabel_5 = new JLabel("PS");
-		seabox16.add(lblNewLabel_5);
+        JLabel pSimple = new JLabel("PS");
+		seabox16.add(pSimple);
 
-        this.seaBoxes[0] = new SeaBoxIG(this.locations[0][0], this.locations[0][1], seabox1);
-        this.seaBoxes[1] = new HarborIG(this.locations[0][1], this.locations[0][2], 2, "Laine", seabox2);
-        this.seaBoxes[2] = new SeaBoxIG(this.locations[0][2], this.locations[0][3], seabox3);
-        this.seaBoxes[3] = new HarborIG(this.locations[0][3], this.locations[0][4], seabox4);
-        this.seaBoxes[4] = new SeaBoxIG(this.locations[0][4], this.locations[1][4], seabox5);
-        this.seaBoxes[5] = new HarborIG(this.locations[1][4], this.locations[2][4], 2, "Bois", seabox6);
-        this.seaBoxes[6] = new SeaBoxIG(this.locations[2][4], this.locations[3][4], seabox7);
-        this.seaBoxes[7] = new HarborIG(this.locations[3][4], this.locations[4][4], seabox8);
-        this.seaBoxes[8] = new SeaBoxIG(this.locations[4][4], this.locations[4][3], seabox9);
-        this.seaBoxes[9] = new HarborIG(this.locations[4][3], this.locations[4][2], 2, "Argile", seabox10);
-        this.seaBoxes[10] = new SeaBoxIG(this.locations[4][2], this.locations[4][1], seabox11);
-        this.seaBoxes[11] = new HarborIG(this.locations[4][1], this.locations[4][0], 2, "Roche", seabox12);
-        this.seaBoxes[12] = new SeaBoxIG(this.locations[4][0], this.locations[3][0], seabox13);
-        this.seaBoxes[13] = new HarborIG(this.locations[3][0], this.locations[2][0], 2, "Ble", seabox14);
-        this.seaBoxes[14] = new SeaBoxIG(this.locations[2][0], this.locations[1][0], seabox15);
-        this.seaBoxes[15] = new HarborIG(this.locations[1][0], this.locations[0][0], seabox16);
+        this.seaBoxes[0] = new SeaBoxIG(this.locations[0][0], this.locations[0][1], seabox1, this);
+        this.seaBoxes[1] = new HarborIG(this.locations[0][1], this.locations[0][2], 2, "Laine", seabox2, this);
+        this.seaBoxes[2] = new SeaBoxIG(this.locations[0][2], this.locations[0][3], seabox3, this);
+        this.seaBoxes[3] = new HarborIG(this.locations[0][3], this.locations[0][4], seabox4, this);
+        this.seaBoxes[4] = new SeaBoxIG(this.locations[0][4], this.locations[1][4], seabox5, this);
+        this.seaBoxes[5] = new HarborIG(this.locations[1][4], this.locations[2][4], 2, "Bois", seabox6, this);
+        this.seaBoxes[6] = new SeaBoxIG(this.locations[2][4], this.locations[3][4], seabox7, this);
+        this.seaBoxes[7] = new HarborIG(this.locations[3][4], this.locations[4][4], seabox8, this);
+        this.seaBoxes[8] = new SeaBoxIG(this.locations[4][4], this.locations[4][3], seabox9, this);
+        this.seaBoxes[9] = new HarborIG(this.locations[4][3], this.locations[4][2], 2, "Argile", seabox10, this);
+        this.seaBoxes[10] = new SeaBoxIG(this.locations[4][2], this.locations[4][1], seabox11, this);
+        this.seaBoxes[11] = new HarborIG(this.locations[4][1], this.locations[4][0], 2, "Roche", seabox12, this);
+        this.seaBoxes[12] = new SeaBoxIG(this.locations[4][0], this.locations[3][0], seabox13, this);
+        this.seaBoxes[13] = new HarborIG(this.locations[3][0], this.locations[2][0], 2, "Ble", seabox14, this);
+        this.seaBoxes[14] = new SeaBoxIG(this.locations[2][0], this.locations[1][0], seabox15, this);
+        this.seaBoxes[15] = new HarborIG(this.locations[1][0], this.locations[0][0], seabox16, this);
     }
  
     final void updatePaths() {

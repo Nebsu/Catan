@@ -1,7 +1,5 @@
 package Catan.CatanUI;
 
-import java.awt.Color;
-
 final class ColonyIG extends LocationIG {
 
     ////////// Attributs //////////

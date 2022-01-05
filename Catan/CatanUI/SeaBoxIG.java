@@ -1,21 +1,70 @@
 package Catan.CatanUI;
 
-import javax.swing.JPanel;
+import java.awt.event.*;
 
-class SeaBoxIG {
+import javax.swing.JPanel;
+import javax.swing.event.MouseInputListener;
+
+class SeaBoxIG extends JPanel implements MouseInputListener{
  
     ////////// Attributs //////////
 
     protected final LocationIG loc1;
     protected final LocationIG loc2;
-    protected final JPanel panel;
+    PlayBoardIG playboard;
+    JPanel contentPane = new JPanel();
 
     ////////// Constructeur et fonctions associées à ce dernier //////////
 
-    SeaBoxIG(LocationIG loc1, LocationIG loc2, JPanel panel) {
+    SeaBoxIG(LocationIG loc1, LocationIG loc2,JPanel panel , PlayBoardIG playboard) {
         this.loc1 = loc1;
         this.loc2 = loc2;
-        this.panel = panel;
+        this.playboard = playboard;
+        contentPane = panel;
+        playboard.add(panel);
+        Game.PLAYBOARD = this.playboard;
+    }
+
+    @Override
+    public void mouseClicked(MouseEvent e) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void mousePressed(MouseEvent e) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void mouseReleased(MouseEvent e) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void mouseEntered(MouseEvent e) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void mouseExited(MouseEvent e) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void mouseDragged(MouseEvent e) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void mouseMoved(MouseEvent e) {
+        // TODO Auto-generated method stub
+        
     }
 
 

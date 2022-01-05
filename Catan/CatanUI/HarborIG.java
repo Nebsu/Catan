@@ -14,8 +14,8 @@ final class HarborIG extends SeaBoxIG {
 
     ////////// Constructeurs et fonctions associées à ce dernier //////////
 
-    HarborIG(LocationIG loc1, LocationIG loc2, int price, String ressource, JPanel panel) {
-        super(loc1, loc2, panel);
+    HarborIG(LocationIG loc1, LocationIG loc2, int price, String ressource, JPanel panel, PlayBoardIG playboard) {
+        super(loc1, loc2, panel, playboard);
         if (ressource==null && price==3) this.type = "Simple";
         else if (ressource!=null && price==2) this.type = "Special";
         else throw new IllegalArgumentException();
@@ -23,8 +23,8 @@ final class HarborIG extends SeaBoxIG {
         this.ressource = ressource;
         this.id = count++;
     }
-    HarborIG(LocationIG loc1, LocationIG loc2, JPanel panel) {
-        this(loc1, loc2, 3, null, panel);
+    HarborIG(LocationIG loc1, LocationIG loc2, JPanel panel, PlayBoardIG playboard) {
+        this(loc1, loc2, 3, null, panel, playboard);
     }
 
     ////////// Fonctions auxiliaires //////////
