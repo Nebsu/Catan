@@ -30,5 +30,6 @@ public class Victory extends JFrame{
 		winner.setFont(new Font("Tahoma", Font.PLAIN, 25));
 		winner.setBounds(193, 67, 200, 57);
 		contentPane.add(winner);
+		Game.PLAYBOARD.stop();
     }
 }

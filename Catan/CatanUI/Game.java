@@ -2,10 +2,8 @@ package Catan.CatanUI;
 
 import javax.swing.*;
 import javax.swing.event.MouseInputListener;
-import java.util.Random;
 import java.awt.*;
 import java.awt.event.*;
-import javax.swing.JButton.*;
 
 import Catan.CatanTerminal.Deck;
 
@@ -15,30 +13,14 @@ public class Game extends JFrame implements ActionListener, MouseInputListener {
 
     // Variables IG :
     static Color[] colors = new Color[4];
-    static int botnumber;
-    static String name;
-    static int number;
-    static int n = 0;
+    static Color[] cityColors = new Color[4];
     static JPanel contentPane = new JPanel();
     static JTextField textField = new JTextField();
     static boolean visible = false;
     static Choice choice = new Choice();
     static Choice choice2 = new Choice();
     static JLabel lblNewLabel = new JLabel("Choisissez le nombre de joueur total");
-    static JPanel panel = new JPanel();
     static JButton cbutton = new JButton("Confirmer");
-    static int action = 0;
-    static int acc = 0;
-    static int player = 0;
-    static boolean firstRound = true;
-    static int firstRoundacc = 1;
-    static boolean canConstructColony = true;
-    static boolean canConstructRoad = true;
-    static boolean canConstructCity = false;
-    static boolean harborEnable = false;
-    static boolean roadCard = false;
-    static boolean moveThief = false;
-    static int roadCardacc = 0;
     static PopUpEchange popupechange = new PopUpEchange(null);
 
 
@@ -53,13 +35,36 @@ public class Game extends JFrame implements ActionListener, MouseInputListener {
     static PlayerIG previousLongestRoad = null; 
     static boolean end = false;
     static PlayerIG winner = null;
+    static int action = 0; // numero de l'action qui est joué
+    static int acc = 0;
+    static int player = 0; // numero du joueur
+    static boolean firstRound = true;
+    static int firstRoundacc = 1;
+    static boolean canConstructColony = true;
+    static boolean canConstructRoad = true;
+    static boolean canConstructCity = false;
+    static boolean harborEnable = false;
+    static boolean roadCard = false;
+    static boolean moveThief = false;
+    static boolean echange41 = false;
+    static int roadCardacc = 0; // accumulateur pour le nombre de route posé avec la carte route
+    static int botnumber; // nombre de bot
+    static int number; // nombre de joueur
+    static String name; // variable pour récuperer le nom dans le textField
+    static int n = 0;
     ////////// Constructeur et fonctions associées à ce dernier //////////
 
     Game(){
-        colors[0] = new Color(0,0,255);
-        colors[1] = new Color(0,255,0);
-        colors[2] = new Color(255,0,0);
-        colors[3] = new Color(255,255,0);
+        //Couleur des joueurs
+        colors[0] = new Color(70,70,255);
+        colors[1] = new Color(70,255,70);
+        colors[2] = new Color(255,70,70);
+        colors[3] = new Color(255,255,70);
+        //Couleur des villes des joueurs
+        cityColors[0] = new Color(0,0,155);
+        cityColors[1] = new Color(0,155,0);
+        cityColors[2] = new Color(155,0,0);
+        cityColors[3] = new Color(155,155,0);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 600, 600);
 		contentPane.setBorder(null);
@@ -67,11 +72,10 @@ public class Game extends JFrame implements ActionListener, MouseInputListener {
 		contentPane.setLayout(null);
 
         //Choix du nombre de joueur
-		panel.setBounds(125, 45, 340, 40);
-		contentPane.add(panel);
-		lblNewLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        lblNewLabel.setBounds(118, 56, 344, 55);
+        lblNewLabel.setHorizontalAlignment(SwingConstants.CENTER);
 		lblNewLabel.setFont(new Font("Tahoma", Font.PLAIN, 21));
-		panel.add(lblNewLabel);
+        contentPane.add(lblNewLabel);
 		choice.setBounds(230, 200, 100, 20);
         choice.add("3");
         choice.add("4");
@@ -79,6 +83,7 @@ public class Game extends JFrame implements ActionListener, MouseInputListener {
         cbutton.setBounds(230, 360, 100, 55);
         contentPane.add(cbutton);
 
+        //Menu principal
         cbutton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {   
@@ -113,6 +118,7 @@ public class Game extends JFrame implements ActionListener, MouseInputListener {
                         contentPane.remove(choice2);
                         textField.setBounds(140, 220, 300, 40);  
                         textField.setColumns(10);
+                        textField.setBackground(new Color(240,240,240));
                         contentPane.add(textField);
                         action++;
                         return;
@@ -120,7 +126,7 @@ public class Game extends JFrame implements ActionListener, MouseInputListener {
                 }
                 if(action == 2 && acc < number-botnumber && !textField.getText().equals("")){
                     name = textField.getText();
-                    PLAYERS[n] = new PlayerIG(name, n+1, colors[n]);
+                    PLAYERS[n] = new PlayerIG(name, n+1, colors[n], cityColors[n]);
                     textField.setText("");
                         n++;
                         acc++;
@@ -130,7 +136,7 @@ public class Game extends JFrame implements ActionListener, MouseInputListener {
                         cbutton.setText("Commencer le jeu");
                         cbutton.setBounds(140, 220, 300, 40);
                         for(int i = number-botnumber; i < number; i++){
-                            PLAYERS[i] = new IAIG("IA"+String.valueOf(i+1), i, colors[i]);
+                            PLAYERS[i] = new IAIG("IA"+String.valueOf(i+1), i, colors[i], cityColors[i]);
                         }
                     }
                     return;
@@ -154,6 +160,7 @@ public class Game extends JFrame implements ActionListener, MouseInputListener {
             PLAYBOARD.route.setEnabled(true);
         });
 
+        //Lancer de dé
         PLAYBOARD.lancerDe.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -161,9 +168,9 @@ public class Game extends JFrame implements ActionListener, MouseInputListener {
                 PLAYBOARD.contentPane.add(PLAYBOARD.passeTour);
                 int dice = PLAYERS[player].throwDices();
                 PLAYBOARD.diceresult.setText(String.valueOf(dice));
-                // if(dice == 7){
-                //     PLAYERS[player].thief();
-                // }
+                if(dice == 7){
+                    PLAYERS[player].thief();
+                }
                 enableAllExcept(PLAYBOARD.annuler);
                 PlayerIG.earnResources(Integer.parseInt(PLAYBOARD.diceresult.getText()));
                 showInventory(PLAYERS[player]);
@@ -172,6 +179,7 @@ public class Game extends JFrame implements ActionListener, MouseInputListener {
             }
         });
 
+        //Système des tours
         PLAYBOARD.passeTour.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -285,6 +293,7 @@ public class Game extends JFrame implements ActionListener, MouseInputListener {
             }
         });
 
+        //Affichage fenêtre des cartes
         PLAYBOARD.cartes.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -293,6 +302,7 @@ public class Game extends JFrame implements ActionListener, MouseInputListener {
             }
         });
 
+        //Bouton annuler
         PLAYBOARD.annuler.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -303,6 +313,7 @@ public class Game extends JFrame implements ActionListener, MouseInputListener {
             }
         });
 
+        //Construction de route
         PLAYBOARD.route.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -405,6 +416,7 @@ public class Game extends JFrame implements ActionListener, MouseInputListener {
             }
         });
         
+        //Construction de colonie
         PLAYBOARD.construireColonie.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) { 
@@ -447,6 +459,7 @@ public class Game extends JFrame implements ActionListener, MouseInputListener {
             }
         });
 
+        //Construction de ville
         PLAYBOARD.construireVille.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -477,6 +490,7 @@ public class Game extends JFrame implements ActionListener, MouseInputListener {
             }
         });
 
+        //Echange Port
         PLAYBOARD.echangePort.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -512,6 +526,8 @@ public class Game extends JFrame implements ActionListener, MouseInputListener {
             }
         });
 
+        
+        //Mouvement du voleur (ne marche pas)
         for(int i = 0; i < PLAYBOARD.boxes.length; i++){
             int k = i;
             for(int j = 0; j < PLAYBOARD.boxes[i].length; j++){
@@ -525,9 +541,22 @@ public class Game extends JFrame implements ActionListener, MouseInputListener {
                     }
                 });
             }
-        }   
+        }
+
+        //Echange 4 - 1
+        PLAYBOARD.echange41.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                popupechange = new PopUpEchange(PLAYERS[player]);
+                disableAllExcept(PLAYBOARD.annuler);
+                PLAYERS[player].exchange(4, null);
+            }
+        });
+        
+        
     }
 
+    //Met à jour l'affiche de l'inventaire
     public static void showInventory(PlayerIG p){
         PLAYBOARD.qtArgile.setText(String.valueOf(p.inventory.get("Argile")));
         PLAYBOARD.qtBois.setText(String.valueOf(p.inventory.get("Bois")));
@@ -548,10 +577,6 @@ public class Game extends JFrame implements ActionListener, MouseInputListener {
         Game frame = new Game();
         frame.setVisible(true);
     } 
-
-    @Override
-    public void actionPerformed(ActionEvent e) { 
-    }
 
     public void stop(){
         this.dispose();
@@ -646,10 +671,6 @@ public class Game extends JFrame implements ActionListener, MouseInputListener {
         return PLAYERS[index];
     }
 
-    public static void main(String[] args) {
-        catan();
-    }
-
     @Override
     public void mouseClicked(MouseEvent e) {
         // TODO Auto-generated method stub
@@ -690,6 +711,10 @@ public class Game extends JFrame implements ActionListener, MouseInputListener {
     public void mousePressed(MouseEvent e) {
         // TODO Auto-generated method stub
         
+    }
+    
+    @Override
+    public void actionPerformed(ActionEvent e) { 
     }
 
 }

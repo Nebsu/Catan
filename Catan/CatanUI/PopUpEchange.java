@@ -16,6 +16,7 @@ public class PopUpEchange extends JFrame{
     
     public PopUpEchange(PlayerIG player) {
         this.player = player;
+		//Initialisation des éléments du JFrame
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 600, 190);
 		contentPane = new JPanel();
@@ -31,6 +32,7 @@ public class PopUpEchange extends JFrame{
 		lblRecevoir.setBounds(354, 27, 46, 14);
 		contentPane.add(lblRecevoir);
 
+		//Action du bouton Retour
 		JButton retour = new JButton("Retour");
 		retour.setBounds(354, 117, 89, 23);
 		retour.addActionListener(new ActionListener() {
@@ -40,6 +42,7 @@ public class PopUpEchange extends JFrame{
 			}
 		});
 
+		//Action du bouton Confirmer
 		JButton confirmer = new JButton("Confirmer");
 		confirmer.setBounds(143, 117, 89, 23);
 		confirmer.addActionListener(new ActionListener() {
@@ -50,13 +53,15 @@ public class PopUpEchange extends JFrame{
 				player.inventory.replace(get, player.inventory.get(get)+1);
 				player.harborExchange = false;
 				Game.showInventory(player);
+				Game.enableAllExcept(Game.PLAYBOARD.annuler);
 				stop();
 			}
 		});
 
 		contentPane.add(confirmer);
 		contentPane.add(retour);
-		
+
+		//Ajout des choix possibles
 		giveChoice.setBounds(100, 47, 132, 52);
 		contentPane.add(giveChoice);
 

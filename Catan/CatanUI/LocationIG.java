@@ -5,7 +5,6 @@ import java.awt.event.*;
 import javax.swing.JPanel;
 import javax.swing.border.EtchedBorder;
 import javax.swing.event.*;
-import java.awt.Color;
 
 class LocationIG extends JPanel implements MouseInputListener{
 

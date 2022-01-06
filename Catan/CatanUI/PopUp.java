@@ -25,6 +25,7 @@ public class PopUp extends JFrame {
 
 	public PopUp(PlayerIG player) {
         this.player = player;
+		//Initialisation des éléments du JFrame
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 600, 190);
 		contentPane = new JPanel();
@@ -45,6 +46,7 @@ public class PopUp extends JFrame {
 		chevalier.setLayout(null);
 		
 		JLabel lblCh = new JLabel("Chevalier");
+		lblCh.setFont(new Font("Tahoma", Font.PLAIN, 11));
 		lblCh.setHorizontalAlignment(SwingConstants.CENTER);
 		lblCh.setBounds(10, 11, 46, 14);
 		chevalier.add(lblCh);
@@ -62,6 +64,7 @@ public class PopUp extends JFrame {
 		victoire.setLayout(null);
 		
 		JLabel lblVic = new JLabel("Victoire");
+		lblVic.setFont(new Font("Tahoma", Font.PLAIN, 11));
 		lblVic.setHorizontalAlignment(SwingConstants.CENTER);
 		lblVic.setBounds(10, 11, 46, 14);
 		victoire.add(lblVic);
@@ -79,6 +82,7 @@ public class PopUp extends JFrame {
 		route.setLayout(null);
 		
 		JLabel lblRt = new JLabel("Route");
+		lblRt.setFont(new Font("Tahoma", Font.PLAIN, 11));
 		lblRt.setHorizontalAlignment(SwingConstants.CENTER);
 		lblRt.setBounds(10, 11, 46, 14);
 		route.add(lblRt);
@@ -96,6 +100,7 @@ public class PopUp extends JFrame {
 		invention.setLayout(null);
 		
 		JLabel lblInv = new JLabel("Invention");
+		lblInv.setFont(new Font("Tahoma", Font.PLAIN, 11));
 		lblInv.setHorizontalAlignment(SwingConstants.CENTER);
 		lblInv.setBounds(10, 11, 46, 14);
 		invention.add(lblInv);
@@ -113,6 +118,7 @@ public class PopUp extends JFrame {
 		monopole.setLayout(null);
 		
 		JLabel lblMon = new JLabel("Monopole");
+		lblMon.setFont(new Font("Tahoma", Font.PLAIN, 11));
 		lblMon.setHorizontalAlignment(SwingConstants.CENTER);
 		lblMon.setBounds(10, 11, 46, 14);
 		monopole.add(lblMon);
@@ -143,6 +149,7 @@ public class PopUp extends JFrame {
 		acheterCarte.setBounds(143, 117, 89, 23);
 		contentPane.add(acheterCarte);
 
+		//Action sur chaque carte
 		chevalier.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mousePressed(MouseEvent e) {
@@ -202,6 +209,7 @@ public class PopUp extends JFrame {
 		this.dispose();
 	}
 
+	//Récupération du nombre de chaque ressource
     String nbCh(){
         int acc = 0;
         for(Card c : player.specialCards){
@@ -248,6 +256,7 @@ public class PopUp extends JFrame {
         return String.valueOf(acc);
     }
 
+	//Mise a jour de l'affichage
 	void refreshCard(){
 		qtInv.setText(nbInv());
 		qtCh.setText(nbCh());

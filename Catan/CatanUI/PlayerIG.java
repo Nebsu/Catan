@@ -4,13 +4,13 @@ import java.util.*;
 import Catan.Exceptions.*;
 import Catan.CatanTerminal.Card;
 import java.awt.Color;
-import java.awt.event.*;
 
 class PlayerIG {
     
     ////////// Attributs //////////
 
     protected final Color color;
+    protected final Color cityColor;
     protected final String name; // nom du joueur
     protected final char symbol; // symbole du pion du joueur (son numéro)
     protected int victoryPoints; // points de victoire du joueur
@@ -26,13 +26,13 @@ class PlayerIG {
 
     boolean monopoleCard = false;
     boolean inventionCard = false;
-    int inventionacc = 0;
     boolean harborExchange = false;
     
     ////////// Constructeur et fonctions associées à ce dernier ////////// 
 
-    PlayerIG(String name, int s, Color color) {
+    PlayerIG(String name, int s, Color color, Color cityColor) {
         this.color = color;
+        this.cityColor = cityColor;
         this.name = name;
         this.symbol = String.valueOf(s).charAt(0);
         this.victoryPoints = 0;
@@ -57,12 +57,6 @@ class PlayerIG {
 
     ////////// Fonctions auxiliaires //////////
     
-    // Print :
-    @Override
-    public String toString() {
-        return (this.name+" possede "+this.victoryPoints+" points de victoire.");
-    }
-
     // Renvoie le nombre de ressources total du joueur :
     protected int nbRessources(String ressource) {
         int nbRessources = 0;
@@ -76,10 +70,6 @@ class PlayerIG {
         return nbRessources;
     }
 
-    // Gain de ressources pendant la phase initiale :
-    // Comme dans notre version du Catan, une colonie peut être collée jusqu'à 4 terrains différents (tuiles carrées), 
-    // on décide de donner 3 ressources au lieu de 4 pour les colonies collées à 4 tuiles de terrains, dans le but 
-    // d'améliorer la jouabilité (4 ressources dès le début c'est un peu de la triche) :
     protected void gainInitialResources() {
         ColonyIG lastConstructedColony = this.coloniesOnPlayBoard.get(this.coloniesOnPlayBoard.size()-1);
         BoxIG[] boxes = lastConstructedColony.boxes;
@@ -183,26 +173,6 @@ class PlayerIG {
 
     ////////// FONCTIONS DU JEU //////////
 
-    // Fonction principale (tour du joueur) :
-    protected void play() {
-        System.out.println("-------------------------------------------------------------------------------------------------");
-        System.out.println("Au tour de "+this.name+" :");
-        // Proposition d'utilisation d'une carte développement (si le joueur en a) :
-        System.out.println("Tapez sur entree pour lancer les des :");
-        int dice = throwDices();
-        System.out.println("Resultat du lancer : " + dice+"\n");
-        if (dice!=7) earnResources(dice);
-        else {
-            System.out.println("Voleur active"+"\n");
-            this.thief();
-        }
-        this.specialCards.addAll(this.notUsableCards);
-        this.notUsableCards.clear();
-        if (!this.specialCards.isEmpty())
-            System.out.println("Vos cartes developpement :\n"+this.specialCards);
-        if (this.hasAVictoryPointCard() && this.victoryPoints==9) this.victoryPoints = 10;
-    }
-
     // Lancé des dés :
     public int throwDices() { 
         Random rd1 = new Random(), rd2 = new Random();
@@ -230,7 +200,6 @@ class PlayerIG {
         }
         // Cas où aucune colonie est adjacentes aux cases designees par les des :
         if (colonies.isEmpty()) {
-            System.out.println("Pas de chance, personne n'a rien gagne");
             return;
         }
         // Les joueurs concernes gagnent une ressource de chaque case designee par les des :
@@ -245,7 +214,6 @@ class PlayerIG {
                             c.player.inventory.put(c.boxes[i].ressource, a+Integer.valueOf(1));
                     }
                 }catch(Exception e){
-                    System.out.println(c.player);
                 }
             }
         }
@@ -256,22 +224,14 @@ class PlayerIG {
 
     // Fonction principale du voleur :
     protected void thief() {
-        // On compte les ressources de chaque joueur :
         int[] nbRessources = new int[Game.PLAYERS.length];
         for (int i=0; i<Game.PLAYERS.length; i++) {
             nbRessources[i] += Game.PLAYERS[i].nbRessources(null);
         }
-        // Les joueurs qui possèdent plus de 8 ressources,
-        //  doivent donner la moitie de leurs ressources au voleur :
         for (int i=0; i<nbRessources.length; i++) {
             if (nbRessources[i]>=8) Game.PLAYERS[i].giveRessources(nbRessources[i]);
         }
-
-        // Ensuite, le joueur qui a lance les des deplace le voleur :
         this.moveThief();
-        // Ensuite, le joueur courant choisi le joueur a qui il veut voler une ressource :
-        // Si le joueur courant a choisi une case avec des colonies adjacentes, 
-        // alors le joueur designe par le joueur courant subit le vol : 
     }
 
     // Donner des ressources au voleur :
@@ -309,9 +269,7 @@ class PlayerIG {
 
     // Choix de la cible du joueur pour voler des ressources : 
     protected PlayerIG selectPlayerToStealFrom(BoxIG b) {
-        // On recupère les emplacement adjacents de la case :
         ArrayList<LocationIG> locations = b.getLocations();
-        // On va verifier si le joueur possède une colonie sur l'un des ces emplacements :
         ArrayList<ColonyIG> colonies = new ArrayList<ColonyIG>();
         Victim v = new Victim(this);
         for (LocationIG l : locations) {
@@ -378,9 +336,6 @@ class PlayerIG {
 
     ////////// Fonctions de construction //////////
 
-    // Construction d'une colonie :
-    // Remarque : on a décidé de ne pas implémenter le fait que toute colonie doit être distante d’au moins 2 intersections
-    // En effet, le plateau est trop petit pour pouvoir appliquer cette règle de distance
     protected boolean buildColony(int k, int l, boolean beginning) {
         if(this.canConstructColony() || beginning){
             try {
@@ -437,7 +392,7 @@ class PlayerIG {
                 ((ColonyIG) Game.PLAYBOARD.locations[k][l]).isCity = true;
                 this.inventory.replace("Roche", this.inventory.get("Roche")-3); 
                 this.inventory.replace("Ble", this.inventory.get("Ble")-2); 
-                ((LocationIG)Game.PLAYBOARD.locations[k][l]).setBackground(Color.BLACK);
+                ((LocationIG)Game.PLAYBOARD.locations[k][l]).setBackground(this.cityColor);
                 this.victoryPoints++;
             } catch (IllegalStateException ise) {
                 System.out.println("Erreur : cette colonie ne vous appartient pas");
@@ -623,10 +578,8 @@ class PlayerIG {
                 if (!this.canExchange(2, selectedHarbor.ressource)) throw new NotEnoughRessourcesException();
             this.exchange(selectedHarbor.price, selectedHarbor.ressource);
         } catch (NotEnoughRessourcesException not) {
-            System.out.println(not);
             return false;
         } catch (Exception e) {
-            System.out.println(WrongInputException.MESSAGE);
             return false;
         }
         return true;
@@ -675,20 +628,15 @@ class PlayerIG {
     // Carte chevalier :
     protected void knight() {
         this.moveThief();
-        // Ensuite, le joueur courant choisi le joueur a qui il veut voler une ressource :
-        // Si le joueur courant a choisi une case avec des colonies adjacentes, 
-        // alors le joueur designe par le joueur courant subit le vol : 
         this.knights++;
         if (this.knights==3 && !Game.army) {
             Game.army = true;
             this.victoryPoints += 2;
             Game.hasTheStrongestArmy = this;
-            System.out.println("Vous avez gagne 2 points de victoire");
         } else if (Game.army && Game.hasTheStrongestArmy!=this
                 && this.knights>Game.hasTheStrongestArmy.knights) {
             Game.hasTheStrongestArmy.victoryPoints -= 2;
             this.victoryPoints += 2;
-            System.out.println("Vous avez gagne 2 points de victoire");
             Game.hasTheStrongestArmy = this;
         }
     }

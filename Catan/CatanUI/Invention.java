@@ -15,6 +15,7 @@ public class Invention extends JFrame{
     
     public Invention(PlayerIG player) {
         this.player = player;
+		//Initialisation des éléments du JFrame
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 600, 190);
 		contentPane = new JPanel();
@@ -34,6 +35,8 @@ public class Invention extends JFrame{
 
 		JButton confirmer = new JButton("Confirmer");
 		confirmer.setBounds(247, 117, 89, 23);
+
+		//Action du bouton confirmer
 		confirmer.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
                 get = getChoice.getSelectedItem();
@@ -46,9 +49,9 @@ public class Invention extends JFrame{
 				stop();
 			}
 		});
-
 		contentPane.add(confirmer);
 
+		//Ajout des choix possibles
 		getChoice.setBounds(108, 47, 132, 20);
 		contentPane.add(getChoice);
 		getChoice.add("Ble");

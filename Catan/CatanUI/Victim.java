@@ -14,6 +14,7 @@ public class Victim extends JFrame{
     
     public Victim(PlayerIG player) {
         this.player = player;
+		//Initialisation des éléments du JFrame
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 600, 190);
 		contentPane = new JPanel();
@@ -27,6 +28,7 @@ public class Victim extends JFrame{
 		victimes.setBounds(227, 27, 46, 14);
 		contentPane.add(victimes);
 
+		//Action du bouton Confirmer
         JButton confirmer = new JButton("Confirmer");
 		confirmer.setBounds(247, 117, 89, 23);
 		contentPane.add(confirmer);
@@ -45,10 +47,9 @@ public class Victim extends JFrame{
 			}
 		});
 
+		//Ajout des choix possibles dans la classe PlayerIG
 		getChoice.setBounds(225, 47, 132, 20);
 		contentPane.add(getChoice);
-
-
     }
 
 	void stop(){

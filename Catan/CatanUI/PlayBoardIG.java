@@ -32,6 +32,7 @@ public class PlayBoardIG extends JFrame{
     JButton annuler = new JButton("Annuler");
     //PopUp
     JButton echangePort = new JButton("Port");
+    JButton echange41 = new JButton("Echange 41");
     JButton cartes = new JButton("Cartes");
 
     JPanel invBois = new JPanel();
@@ -117,7 +118,10 @@ public class PlayBoardIG extends JFrame{
         echangePort.setBounds(470, 249, 90, 40);
 		contentPane.add(echangePort);
         echangePort.setEnabled(false);
-        annuler.setBounds(470, 304, 90, 40);
+        echange41.setBounds(470, 300, 90, 40);
+        contentPane.add(echange41);
+        echange41.setEnabled(false);
+        annuler.setBounds(470, 351, 90, 40);
 		contentPane.add(annuler);
         annuler.setEnabled(false);
 
@@ -127,6 +131,7 @@ public class PlayBoardIG extends JFrame{
         boutonsJeu.add(echangePort);
         boutonsJeu.add(cartes);
         boutonsJeu.add(annuler);
+        boutonsJeu.add(echange41);
 
 		invArgile.setBackground(new Color(153, 102, 0));
 		invArgile.setBounds(20, 400, 80, 125);
@@ -193,7 +198,7 @@ public class PlayBoardIG extends JFrame{
 		diceresult.setBounds(10, 11, 46, 48);
 		dicezone.add(diceresult);
 
-        player1.setBackground(Color.BLUE);
+        player1.setBackground(new Color(70,70,255));
 		player1.setBorder(new LineBorder(new Color(0, 0, 0)));
 		player1.setBounds(10, 125, 70, 29);
         player1.setLayout(null);
@@ -202,7 +207,7 @@ public class PlayBoardIG extends JFrame{
 		player1.add(victory1);
 
         player2.setBorder(new LineBorder(new Color(0, 0, 0)));
-		player2.setBackground(Color.GREEN);
+		player2.setBackground(new Color(70,255,70));
 		player2.setBounds(10, 160, 70, 29);
         player2.setLayout(null);
         victory2.setHorizontalAlignment(SwingConstants.CENTER);
@@ -210,7 +215,7 @@ public class PlayBoardIG extends JFrame{
 		player2.add(victory2);
 
         player3.setBorder(new LineBorder(new Color(0, 0, 0)));
-		player3.setBackground(Color.RED);
+		player3.setBackground(new Color(255,70,70));
 		player3.setBounds(10, 195, 70, 29);
         player3.setLayout(null);
         victory3.setHorizontalAlignment(SwingConstants.CENTER);
@@ -218,7 +223,7 @@ public class PlayBoardIG extends JFrame{
 		player3.add(victory3);
 
         player4.setBorder(new LineBorder(new Color(0, 0, 0)));
-		player4.setBackground(Color.YELLOW);
+		player4.setBackground(new Color(255,255,70));
 		player4.setBounds(10, 230, 70, 29);
         player4.setLayout(null);
         victory4.setHorizontalAlignment(SwingConstants.CENTER);
@@ -241,6 +246,7 @@ public class PlayBoardIG extends JFrame{
 		box11.setBounds(145, 55, 50, 50);
 		contentPane.add(box11);
         JLabel foret1 = new JLabel("<html><body>Foret<br>06</body></html>");
+        foret1.setFont(new Font("Tahoma", Font.PLAIN, 12));
 		box11.add(foret1);
 		
 		JPanel box12 = new JPanel();
@@ -249,6 +255,7 @@ public class PlayBoardIG extends JFrame{
 		box12.setBounds(215, 55, 50, 50);
 		contentPane.add(box12);
         JLabel pre1 = new JLabel("<html><body>Pre<br>10</body></html>");
+        pre1.setFont(new Font("Tahoma", Font.PLAIN, 12));
 		box12.add(pre1);
 		
 		JPanel box13 = new JPanel();
@@ -257,6 +264,7 @@ public class PlayBoardIG extends JFrame{
 		box13.setBounds(285, 55, 50, 50);
 		contentPane.add(box13);
         JLabel champ1 = new JLabel("<html><body>Champs<br>11</body></html>");
+        champ1.setFont(new Font("Tahoma", Font.PLAIN, 12));
 		box13.add(champ1);
 		
 		JPanel box14 = new JPanel();
@@ -265,6 +273,7 @@ public class PlayBoardIG extends JFrame{
 		box14.setBounds(355, 55, 50, 50);
 		contentPane.add(box14);
         JLabel pre2 = new JLabel("<html><body>Pre<br>08</body></html>");
+        pre2.setFont(new Font("Tahoma", Font.PLAIN, 12));
 		box14.add(pre2);
 		
 		JPanel box21 = new JPanel();
@@ -273,6 +282,7 @@ public class PlayBoardIG extends JFrame{
 		box21.setBounds(145, 125, 50, 50);
 		contentPane.add(box21);
         JLabel champ2 = new JLabel("<html><body>Champs<br>04</body></html>");
+        champ2.setFont(new Font("Tahoma", Font.PLAIN, 12));
 		box21.add(champ2);
 		
 		JPanel box22 = new JPanel();
@@ -281,6 +291,7 @@ public class PlayBoardIG extends JFrame{
 		box22.setBounds(215, 125, 50, 50);
 		contentPane.add(box22);
         JLabel colline1 = new JLabel("<html><body>Colline<br>09</body></html>");
+        colline1.setFont(new Font("Tahoma", Font.PLAIN, 12));
 		box22.add(colline1);
 		
 		JPanel box23 = new JPanel();
@@ -289,6 +300,7 @@ public class PlayBoardIG extends JFrame{
 		box23.setBounds(285, 125, 50, 50);
 		contentPane.add(box23);
         JLabel foret2 = new JLabel("<html><body>Foret<br>05</body></html>");
+        foret2.setFont(new Font("Tahoma", Font.PLAIN, 12));
 		box23.add(foret2);
 		
 		JPanel box24 = new JPanel();
@@ -297,6 +309,7 @@ public class PlayBoardIG extends JFrame{
 		box24.setBounds(355, 125, 50, 50);
 		contentPane.add(box24);
         JLabel montagne1 = new JLabel("<html><body>Montagne<br>12</body></html>");
+        montagne1.setFont(new Font("Tahoma", Font.PLAIN, 12));
 		box24.add(montagne1);
 		
 		JPanel box31 = new JPanel();
@@ -305,6 +318,7 @@ public class PlayBoardIG extends JFrame{
 		box31.setBounds(145, 195, 50, 50);
 		contentPane.add(box31);
         JLabel montagne2 = new JLabel("<html><body>Montagne<br>03</body></html>");
+        montagne2.setFont(new Font("Tahoma", Font.PLAIN, 12));
 		box31.add(montagne2);
 		
 		JPanel box32 = new JPanel();
@@ -313,6 +327,7 @@ public class PlayBoardIG extends JFrame{
 		box32.setBounds(215, 195, 50, 50);
 		contentPane.add(box32);
         JLabel desert = new JLabel("<html><body>Desert<br>07</body></html>");
+        desert.setFont(new Font("Tahoma", Font.PLAIN, 12));
 		box32.add(desert);
 		
 		JPanel box33 = new JPanel();
@@ -321,6 +336,7 @@ public class PlayBoardIG extends JFrame{
 		box33.setBounds(285, 195, 50, 50);
 		contentPane.add(box33);
         JLabel champ3 = new JLabel("<html><body>Champs<br>10</body></html>");
+        champ3.setFont(new Font("Tahoma", Font.PLAIN, 12));
 		box33.add(champ3);
 		
 		JPanel box34 = new JPanel();
@@ -329,6 +345,7 @@ public class PlayBoardIG extends JFrame{
 		box34.setBounds(355, 195, 50, 50);
 		contentPane.add(box34);
         JLabel colline2 = new JLabel("<html><body>Colline<br>06</body></html>");
+        colline2.setFont(new Font("Tahoma", Font.PLAIN, 12));
 		box34.add(colline2);
 		
 		JPanel box41 = new JPanel();
@@ -337,6 +354,7 @@ public class PlayBoardIG extends JFrame{
 		box41.setBounds(145, 265, 50, 50);
 		contentPane.add(box41);
         JLabel colline3 = new JLabel("<html><body>Colline<br>09</body></html>");
+        colline3.setFont(new Font("Tahoma", Font.PLAIN, 12));
 		box41.add(colline3);
 		
 		JPanel box42 = new JPanel();
@@ -345,6 +363,7 @@ public class PlayBoardIG extends JFrame{
 		box42.setBounds(215, 265, 50, 50);
 		contentPane.add(box42);
         JLabel montagne3 = new JLabel("<html><body>Montagne<br>08</body></html>");
+        montagne3.setFont(new Font("Tahoma", Font.PLAIN, 12));
 		box42.add(montagne3);
 		
 		JPanel box43 = new JPanel();
@@ -353,6 +372,7 @@ public class PlayBoardIG extends JFrame{
 		box43.setBounds(285, 265, 50, 50);
 		contentPane.add(box43);
         JLabel pre3 = new JLabel("<html><body>Pre<br>05</body></html>");
+        pre3.setFont(new Font("Tahoma", Font.PLAIN, 12));
 		box43.add(pre3);
 		
 		JPanel box44 = new JPanel();
@@ -361,6 +381,7 @@ public class PlayBoardIG extends JFrame{
 		box44.setBounds(355, 265, 50, 50);
 		contentPane.add(box44);
         JLabel foret3 = new JLabel("<html><body>Foret<br>02</body></html>");
+        foret3.setFont(new Font("Tahoma", Font.PLAIN, 12));
 		box44.add(foret3);
 
         this.boxes[0][0] = new BoxIG("Foret", "Bois", 6, 0, 0, false, box11);
@@ -413,10 +434,6 @@ public class PlayBoardIG extends JFrame{
                     int m = (i==4)? 320 : 40;
                     BoxIG[] b = {this.boxes[k][j-1], this.boxes[k][j]};
                     this.locations[i][j] = new LocationIG(b, i, j, n, m, this);
-                    // JPanel c = new JPanel();
-                    // c.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
-                    // c.setBounds(n, m, 10, 10);
-                    // contentPane.add(c);
                 // Aretes verticales du plateau (2 cases adjacentes) :
                 } else if (j==0 && (i!=0 && i!=4) || j==4 && (i!=0 && i!=4)) {
                     int l = (j==4)? 3 : j;
@@ -427,10 +444,6 @@ public class PlayBoardIG extends JFrame{
                     int n = (j==4)? 410 : 130;
                     BoxIG[] b = {this.boxes[i-1][l], this.boxes[i][l]};
                     try {this.locations[i][j] = new LocationIG(b, i, j, n, m, this);
-                        // JPanel c = new JPanel();
-                        // c.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
-                        // c.setBounds(n, m, 10, 10);
-                        // contentPane.add(c);
                     }catch (IllegalArgumentException e) {
                         System.out.println("Erreur d'argument");
                         return;
@@ -439,10 +452,6 @@ public class PlayBoardIG extends JFrame{
                 } else {
                     BoxIG[] b = {this.boxes[i-1][j-1], this.boxes[i-1][j], this.boxes[i][j-1], this.boxes[i][j]};
                     try {this.locations[i][j] = new LocationIG(b, i, j, x, y, this);
-                        // JPanel c = new JPanel();
-                        // c.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
-                        // c.setBounds(x, y, 10, 10);
-                        // contentPane.add(c);
                         x += 70;
                     }catch (IllegalArgumentException e) {
                         System.out.println("Erreur d'argument");
@@ -658,6 +667,10 @@ public class PlayBoardIG extends JFrame{
             }
         }
         return (numberOfRoads==40);
+    }
+
+    public void stop() {
+        this.dispose();
     }
 
 }

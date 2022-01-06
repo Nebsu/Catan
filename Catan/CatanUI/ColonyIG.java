@@ -15,16 +15,6 @@ final class ColonyIG extends LocationIG {
         this.isCity = false;
     }
 
-    ////////// Fonctions auxiliaires //////////
-
-    // Print :
-    @Override
-    public String toString() {
-        String type = (this.isCity)? "V" : "C";
-        return (type+this.player.symbol);
-    }
-
-
     ////////// Fonctions des ports ////////// 
 
     // Renvoie true si la colonie est à côté d'un port :

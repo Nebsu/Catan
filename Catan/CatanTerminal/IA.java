@@ -209,8 +209,8 @@ final class IA extends Player {
         Random rd1 = new Random();
         int sel = rd1.nextInt(actions.size());
         Random rd2 = new Random();
-        boolean quit = rd2.nextBoolean();
-        if (quit) return;
+        int quit = rd2.nextInt(3);
+        if (quit == 2) return;
         String line = actions.get(sel);
         System.out.println(this.color+line+CatanTerminal.RESET);
         switch (line) {

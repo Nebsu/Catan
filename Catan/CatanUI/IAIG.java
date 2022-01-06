@@ -11,7 +11,7 @@ final class IAIG extends PlayerIG {
 
     ////////// Constructeur et fonctions associées à ce dernier //////////
     
-    public IAIG(String name, int s, Color c) {super(name, s, c);}
+    public IAIG(String name, int s, Color c, Color c2) {super(name, s, c, c2);}
 
     ////////// Fonctions auxiliaires //////////
 
@@ -62,24 +62,18 @@ final class IAIG extends PlayerIG {
     ////////// FONCTIONS DU JEU //////////
 
     // Fonction principale (tour de l'IA) :
-    @Override
     public void play() {
-        //System.out.println(this.color+"Au tour de "+this.name+" :"+Game.RESET);
-        // Proposition d'utilisation d'une carte développement (si le joueur en a) :
         this.proposeToUseSpecialCard();
         int dice = throwDices();
-        //System.out.println(this.color+"Resultat du lancer : " + dice+Game.RESET+"\n");
         if (dice!=7) PlayerIG.earnResources(dice);
         else {
-            //System.out.println(this.color+"Voleur active"+Game.RESET);
-            // this.thief();
+            this.thief();
         }
         this.playerMenu();
         this.specialCards.addAll(this.notUsableCards);
         this.notUsableCards.clear();
         Game.refreshVictoryPoints();
         if (!this.specialCards.isEmpty())
-            //System.out.println("Vos cartes developpement :\n"+this.specialCards+Game.RESET);
         if (this.hasAVictoryPointCard() && this.victoryPoints==9) this.victoryPoints = 10;
     }
 
@@ -97,13 +91,10 @@ final class IAIG extends PlayerIG {
     // Fonction principale du voleur ;
     @Override
     protected void thief() {
-        // On compte les ressources de chaque joueur :
         int[] nbRessources = new int[Game.PLAYERS.length];
         for (int i=0; i<Game.PLAYERS.length; i++) {
             nbRessources[i] += Game.PLAYERS[i].nbRessources(null);
         }
-        // Les joueurs qui possèdent plus de 8 ressources,
-        //  doivent donner la moitie de leurs ressources au voleur :
         for (int i=0; i<nbRessources.length; i++) {
             if (nbRessources[i]>=8) {
                 if(Game.PLAYERS[i] instanceof PlayerIG){
@@ -114,12 +105,8 @@ final class IAIG extends PlayerIG {
 
             }
         }
-        // Ensuite, le joueur qui a lance les des deplace le voleur :
         BoxIG b = this.moveThief2();
-        // Ensuite, le joueur courant choisi le joueur a qui il veut voler une ressource :
         PlayerIG victim = this.selectPlayerToStealFrom(b);
-        // Si le joueur courant a choisi une case avec des colonies adjacentes, 
-        // alors le joueur designe par le joueur courant subit le vol : 
         if (victim!=null) this.steal(victim);} 
 
     // Donner des ressources au voleur :
@@ -170,9 +157,7 @@ final class IAIG extends PlayerIG {
     // Choix de la cible du joueur pour voler des ressources :
     @Override
     protected PlayerIG selectPlayerToStealFrom(BoxIG b) {
-        // On recupère les emplacement adjacents de la case :
         ArrayList<LocationIG> locations = b.getLocations();
-        // On va verifier si le joueur possède une colonie sur l'un des ces emplacements :
         ArrayList<ColonyIG> colonies = new ArrayList<ColonyIG>();
         for (LocationIG l : locations) {
             if (l instanceof ColonyIG && ((ColonyIG) l).player!=this) 
@@ -209,7 +194,6 @@ final class IAIG extends PlayerIG {
     @Override
     protected void steal(PlayerIG victim) {super.steal(victim);}
 
-
     ////////// Fonctions de proposition //////////
 
     // Menu principal du joueur :
@@ -229,12 +213,13 @@ final class IAIG extends PlayerIG {
         Random rd1 = new Random();
         int sel = rd1.nextInt(actions.size());
         Random rd2 = new Random();
-        boolean quit = rd2.nextBoolean();
-        if (quit) {
+        int quit = rd2.nextInt(3);
+        if (quit == 2) {
             return;
         }
         String line = actions.get(sel);
         switch (line) {
+            //Affichage des actions pour voir ce qui se passe (il n y a pas d'indicateur sur l'IG)
             case "ECHANGE BANQUE": System.out.println("Banque"); this.exchangeIA(4, null); break;
             case "ECHANGE PORT": System.out.println("Port");this.useHarbor(); break;
             case "CONSTRUIRE COLONIE":System.out.println("Colonie"); this.buildColony(0,0,false); break;
@@ -249,7 +234,6 @@ final class IAIG extends PlayerIG {
 
 
     // Proposition d'utilisation d'une carte developpement :
-
     protected void proposeToUseSpecialCard() {
         if (!this.specialCards.isEmpty()) {
             Random rd = new Random();
@@ -263,9 +247,6 @@ final class IAIG extends PlayerIG {
 
     ////////// Fonctions de construction //////////
 
-    // Construction d'une colonie :
-    // Remarque : on a décidé de ne pas implémenter le fait que toute colonie doit être distante d’au moins 2 intersections
-    // En effet, le plateau est trop petit pour pouvoir appliquer cette règle de distance
     @Override
     protected boolean buildColony(int a, int b, boolean beginning) {
         do {
@@ -317,7 +298,7 @@ final class IAIG extends PlayerIG {
                 if (((ColonyIG) Game.PLAYBOARD.locations[k][l]).player!=this) throw new IllegalStateException();
                 if (((ColonyIG) Game.PLAYBOARD.locations[k][l]).isCity) throw new WrongInputException();
                 ((ColonyIG) Game.PLAYBOARD.locations[k][l]).isCity = true;
-                ((LocationIG)Game.PLAYBOARD.locations[k][l]).setBackground(Color.BLACK);
+                ((LocationIG)Game.PLAYBOARD.locations[k][l]).setBackground(this.color);
                 this.inventory.replace("Roche", this.inventory.get("Roche")-3); 
                 this.inventory.replace("Ble", this.inventory.get("Ble")-2); 
                 this.victoryPoints++;
@@ -410,17 +391,13 @@ final class IAIG extends PlayerIG {
         return super.buildRoadNextToRoad(c, selectedPath);
     }
 
-    // Fonction pour récupérer les emplacements d'arrivée de toutes les routes
-    // construites par le joueur courant :
     @Override
     protected ArrayList<LocationIG> getEndPoints() {
         return super.getEndPoints();
     }
 
-
     ////////// Fonctions des ports et du commerce maritime //////////
 
-    // Fonction qui procède à un échange de ressources via le commerce maritime :
     protected void exchangeIA(int n, String ressource) {
         if (ressource==null) {
             Set<String> keys = this.inventory.keySet();
@@ -502,7 +479,6 @@ final class IAIG extends PlayerIG {
             } catch (Exception e) {}
         } while (true);
     }
-
 
     ////////// Fonctions des cartes developpement //////////
 

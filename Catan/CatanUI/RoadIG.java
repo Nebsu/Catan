@@ -2,8 +2,6 @@ package Catan.CatanUI;
 
 import java.util.ArrayList;
 
-import javax.swing.JPanel;
-
 final class RoadIG extends PathIG {
 
     ////////// Attributs //////////

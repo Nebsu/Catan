@@ -23,6 +23,7 @@ public class Thief extends JFrame{
     
     public Thief(PlayerIG player) {
         this.player = player;
+		//Initialisation des éléments du JFrame
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 600, 190);
 		contentPane = new JPanel();
@@ -63,6 +64,7 @@ public class Thief extends JFrame{
 		nombre.setBounds(354, 27, 80, 14);
 		contentPane.add(nombre);
 
+		//Action du bouton Confirmer
 		JButton confirmer = new JButton("Confirmer");
 		confirmer.setBounds(247, 117, 89, 23);
 		confirmer.addActionListener(new ActionListener() {
@@ -96,6 +98,7 @@ public class Thief extends JFrame{
 
 		contentPane.add(confirmer);
 
+		//Ajout des choix possibles
 		getChoice.setBounds(108, 47, 132, 20);
 		contentPane.add(getChoice);
 		getChoice.add("Ble");
