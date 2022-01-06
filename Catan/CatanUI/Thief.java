@@ -19,6 +19,7 @@ public class Thief extends JFrame{
     JLabel ressource1 = new JLabel("Ressource");
     JLabel givenlbl = new JLabel("0");
     JLabel totallbl = new JLabel();
+	JLabel playername = new JLabel();
     
     public Thief(PlayerIG player) {
         this.player = player;
@@ -35,8 +36,12 @@ public class Thief extends JFrame{
 		panel.setBounds(265, 27, 60, 53);
 		contentPane.add(panel);
 		panel.setLayout(null);
-		
 
+		playername.setHorizontalAlignment(SwingConstants.CENTER);
+		playername.setFont(new Font("Tahoma", Font.PLAIN, 15));
+		playername.setBounds(155, 8, 289, 20);
+		contentPane.add(playername);
+		
 		givenlbl.setFont(new Font("Tahoma", Font.PLAIN, 15));
 		givenlbl.setHorizontalAlignment(SwingConstants.CENTER);
 		givenlbl.setBounds(10, 0, 40, 20);
@@ -62,7 +67,6 @@ public class Thief extends JFrame{
 		confirmer.setBounds(247, 117, 89, 23);
 		confirmer.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				System.out.println(total);
                 get = getChoice.getSelectedItem();
                 try {
                     given = Integer.parseInt(t.getText());
@@ -80,6 +84,8 @@ public class Thief extends JFrame{
 				}
 				Game.showInventory(player);
                 if(acc == total){
+					total = 0;
+					acc = 0;
                     Game.showInventory(player);
                     Game.PLAYBOARD.lancerDe.setEnabled(true);
                     Game.enableAllExcept(Game.PLAYBOARD.annuler);

@@ -105,12 +105,18 @@ class PlayerIG {
     
     protected boolean canConstructColony() {
         int numberOfColonies = 0;
+        boolean placeLeft = false;
         for (ColonyIG col : this.coloniesOnPlayBoard) {
             if (!col.isCity) numberOfColonies++;
         }
+        for (RoadIG r : this.roads) {
+            if(!(r.startPoint instanceof ColonyIG) || !(r.endPoint instanceof ColonyIG)){
+                placeLeft = true;
+            }
+        }
         return ((this.inventory.get("Bois")>=1 && this.inventory.get("Argile")>=1 &&
                 this.inventory.get("Laine")>=1 && this.inventory.get("Ble")>=1) &&
-                (numberOfColonies<5) && (!Game.PLAYBOARD.isFilledLocations()));
+                (numberOfColonies<5) && (!Game.PLAYBOARD.isFilledLocations()) && placeLeft);
     }
 
     protected boolean canConstructCity() {
@@ -258,7 +264,7 @@ class PlayerIG {
         // Les joueurs qui possèdent plus de 8 ressources,
         //  doivent donner la moitie de leurs ressources au voleur :
         for (int i=0; i<nbRessources.length; i++) {
-            if (nbRessources[i]>=8) Game.PLAYERS[i].giveRessources(nbRessources[i]/2);
+            if (nbRessources[i]>=8) Game.PLAYERS[i].giveRessources(nbRessources[i]);
         }
 
         // Ensuite, le joueur qui a lance les des deplace le voleur :
@@ -270,9 +276,11 @@ class PlayerIG {
 
     // Donner des ressources au voleur :
     protected void giveRessources(int n) {
+        n /= 2;
         Thief t = new Thief(this);
         t.total = n;
         t.totallbl.setText(String.valueOf(n));
+        t.playername.setText(this.name);
         t.setVisible(true);
     }
 
@@ -336,7 +344,6 @@ class PlayerIG {
         if (victim.inventory.get("Ble")>0) codes.add(4);
         if (victim.inventory.get("Roche")>0) codes.add(5);
         if (codes.isEmpty()) {
-            System.out.println(victim.name+" n'a aucune ressource, aucun vol subi");
             return;
         }
         int code = codes.get(rd.nextInt(codes.size()));
@@ -453,18 +460,38 @@ class PlayerIG {
     // Construction d'une route :
     protected boolean buildRoad(char c, int k, int l, boolean isFree, boolean beginning) {
         try {
-                if ((c=='H' && Game.PLAYBOARD.horizontalPaths[k][l] instanceof RoadIG) || 
-                    (c=='V' && Game.PLAYBOARD.verticalPaths[k][l] instanceof RoadIG)) 
-                throw new IllegalStateException();
+            if(this.canConstructRoad() || isFree){
+                RoadIG r = this.buildRoadNextToColony(c, (c=='H')? Game.PLAYBOARD.horizontalPaths[k][l] : 
+                Game.PLAYBOARD.verticalPaths[k][l], beginning);
+                if (c=='H') {
+                    Game.PLAYBOARD.remove(Game.PLAYBOARD.horizontalPaths[k][l]);
+                    Game.PLAYBOARD.horizontalPaths[k][l] = r;
+                    ((PathIG)Game.PLAYBOARD.horizontalPaths[k][l]).setBackground(this.color);
+                }
+                else {
+                    Game.PLAYBOARD.remove(Game.PLAYBOARD.verticalPaths[k][l]);
+                    Game.PLAYBOARD.verticalPaths[k][l] = r;
+                    ((PathIG)Game.PLAYBOARD.verticalPaths[k][l]).setBackground(this.color);
+                } 
+                this.roads.add(r);
+                if (!isFree) {
+                    this.inventory.replace("Bois", this.inventory.get("Bois")-1); 
+                    this.inventory.replace("Argile", this.inventory.get("Argile")-1); 
+                }
+            }else{
+                System.out.println("Vous n'avez pas assez de ressources");
+            }
+        } catch (InexistantColonyException ice) {
             try {
                 if(this.canConstructRoad() || isFree){
-                    RoadIG r = this.buildRoadNextToColony(c, (c=='H')? Game.PLAYBOARD.horizontalPaths[k][l] : 
-                    Game.PLAYBOARD.verticalPaths[k][l], beginning);
-                    if (c=='H') {
+                    if (beginning) throw new IllegalStateException();
+                    RoadIG r = this.buildRoadNextToRoad(c, (c=='H')? Game.PLAYBOARD.horizontalPaths[k][l] :
+                    Game.PLAYBOARD.verticalPaths[k][l]);
+                    if (c=='H'){
                         Game.PLAYBOARD.remove(Game.PLAYBOARD.horizontalPaths[k][l]);
-                        Game.PLAYBOARD.horizontalPaths[k][l] = r;
+                        Game.PLAYBOARD.horizontalPaths[k][l] = r; 
                         ((PathIG)Game.PLAYBOARD.horizontalPaths[k][l]).setBackground(this.color);
-                    }
+                    } 
                     else {
                         Game.PLAYBOARD.remove(Game.PLAYBOARD.verticalPaths[k][l]);
                         Game.PLAYBOARD.verticalPaths[k][l] = r;
@@ -478,39 +505,11 @@ class PlayerIG {
                 }else{
                     System.out.println("Vous n'avez pas assez de ressources");
                 }
-            } catch (InexistantColonyException ice) {
-                try {
-                    if(this.canConstructRoad() || isFree){
-                        if (beginning) throw new IllegalStateException();
-                        RoadIG r = this.buildRoadNextToRoad(c, (c=='H')? Game.PLAYBOARD.horizontalPaths[k][l] :
-                        Game.PLAYBOARD.verticalPaths[k][l]);
-                        if (c=='H'){
-                            Game.PLAYBOARD.remove(Game.PLAYBOARD.horizontalPaths[k][l]);
-                            Game.PLAYBOARD.horizontalPaths[k][l] = r; 
-                            ((PathIG)Game.PLAYBOARD.horizontalPaths[k][l]).setBackground(this.color);
-                        } 
-                        else {
-                            Game.PLAYBOARD.remove(Game.PLAYBOARD.verticalPaths[k][l]);
-                            Game.PLAYBOARD.verticalPaths[k][l] = r;
-                            ((PathIG)Game.PLAYBOARD.verticalPaths[k][l]).setBackground(this.color);
-                        } 
-                        this.roads.add(r);
-                        if (!isFree) {
-                            this.inventory.replace("Bois", this.inventory.get("Bois")-1); 
-                            this.inventory.replace("Argile", this.inventory.get("Argile")-1); 
-                        }
-                    }else{
-                        System.out.println("Vous n'avez pas assez de ressources");
-                    }
-                } catch (IllegalStateException e) {
-                    return false;
-                } catch (InexistantRoadException ire) {
-                    return false;
-                }
+            } catch (IllegalStateException e) {
+                return false;
+            } catch (InexistantRoadException ire) {
+                return false;
             }
-        } catch (IllegalStateException ill) {
-            System.out.println("Erreur : cet emplacement est occupe");
-            return false;
         }
         return true;
     }
@@ -677,10 +676,8 @@ class PlayerIG {
     protected void knight() {
         this.moveThief();
         // Ensuite, le joueur courant choisi le joueur a qui il veut voler une ressource :
-        this.selectPlayerToStealFrom(boxThief);
         // Si le joueur courant a choisi une case avec des colonies adjacentes, 
         // alors le joueur designe par le joueur courant subit le vol : 
-        if (stealVictim!=null) this.steal(stealVictim);
         this.knights++;
         if (this.knights==3 && !Game.army) {
             Game.army = true;

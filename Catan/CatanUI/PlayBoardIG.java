@@ -97,7 +97,7 @@ public class PlayBoardIG extends JFrame{
 		knightUsed.setBounds(10, 290, 70, 25);
 		contentPane.add(knightUsed);
 		knightUsed.setLayout(null);
-        knightPanellbl.setFont(new Font("Tahoma", Font.PLAIN, 25));
+        knightPanellbl.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		knightPanellbl.setHorizontalAlignment(SwingConstants.CENTER);
 		knightPanellbl.setBounds(0, 0, 70, 25);
 		knightUsed.add(knightPanellbl);

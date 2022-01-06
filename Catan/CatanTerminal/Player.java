@@ -104,12 +104,18 @@ class Player {
     
     protected boolean canConstructColony() {
         int numberOfColonies = 0;
+        boolean placeLeft = false;
         for (Colony col : this.coloniesOnPlayBoard) {
             if (!col.isCity) numberOfColonies++;
         }
+        for (Road r : this.roads) {
+            if(!(r.startPoint instanceof Colony) || !(r.endPoint instanceof Colony)){
+                placeLeft = true;
+            }
+        }
         return ((this.inventory.get("Bois")>=1 && this.inventory.get("Argile")>=1 &&
                 this.inventory.get("Laine")>=1 && this.inventory.get("Ble")>=1) &&
-                (numberOfColonies<5) && (!CatanTerminal.PLAYBOARD.isFilledLocations()));
+                (numberOfColonies<5) && (!CatanTerminal.PLAYBOARD.isFilledLocations()) && placeLeft);
     }
 
     protected boolean canConstructCity() {

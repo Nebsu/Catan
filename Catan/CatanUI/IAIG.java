@@ -64,7 +64,6 @@ final class IAIG extends PlayerIG {
     // Fonction principale (tour de l'IA) :
     @Override
     public void play() {
-        System.out.println("-------------------------------------------------------------------------------------------------");
         //System.out.println(this.color+"Au tour de "+this.name+" :"+Game.RESET);
         // Proposition d'utilisation d'une carte développement (si le joueur en a) :
         this.proposeToUseSpecialCard();
@@ -73,10 +72,12 @@ final class IAIG extends PlayerIG {
         if (dice!=7) PlayerIG.earnResources(dice);
         else {
             //System.out.println(this.color+"Voleur active"+Game.RESET);
-            this.thief();
+            // this.thief();
         }
+        this.playerMenu();
         this.specialCards.addAll(this.notUsableCards);
         this.notUsableCards.clear();
+        Game.refreshVictoryPoints();
         if (!this.specialCards.isEmpty())
             //System.out.println("Vos cartes developpement :\n"+this.specialCards+Game.RESET);
         if (this.hasAVictoryPointCard() && this.victoryPoints==9) this.victoryPoints = 10;
@@ -234,14 +235,15 @@ final class IAIG extends PlayerIG {
         }
         String line = actions.get(sel);
         switch (line) {
-            //case "ECHANGE BANQUE": System.out.println("Banque"); this.exchange(4, null); break;
-            //case "ECHANGE PORT": System.out.println("Port");this.useHarbor(); break;
+            case "ECHANGE BANQUE": System.out.println("Banque"); this.exchangeIA(4, null); break;
+            case "ECHANGE PORT": System.out.println("Port");this.useHarbor(); break;
             case "CONSTRUIRE COLONIE":System.out.println("Colonie"); this.buildColony(0,0,false); break;
             case "CONSTRUIRE VILLE":System.out.println("Ville"); this.buildCity(0,0); break;
             case "CONSTRUIRE ROUTE":System.out.println("Route"); this.buildRoad(' ',0,0,false, false); break;
             case "UTILISER CARTE":System.out.println("Carte"); this.useSpecialCard(); break;
             case "ACHETER CARTE":System.out.println("CarteAchat"); this.buySpecialCard(); break;
         }
+        this.playerMenu();
         return;
     }
 
@@ -419,13 +421,12 @@ final class IAIG extends PlayerIG {
     ////////// Fonctions des ports et du commerce maritime //////////
 
     // Fonction qui procède à un échange de ressources via le commerce maritime :
-    @Override
-    protected boolean exchange(int n, String ressource) {
+    protected void exchangeIA(int n, String ressource) {
         if (ressource==null) {
             Set<String> keys = this.inventory.keySet();
             ArrayList<String> selectables = new ArrayList<String>();
             for (String key : keys) {
-                if (this.inventory.get(key)>=4) selectables.add(key);
+                if (this.inventory.get(key)>=n) selectables.add(key);
             }
             String s = "";
             int r = 0;
@@ -444,7 +445,8 @@ final class IAIG extends PlayerIG {
                     }else s = "Bois";
                     String line = s;
                     if (!selectables.contains(line)) throw new WrongInputException();
-                    this.exchange(n, line);
+                    this.exchangeIA(n, line);
+                    return;
                 } catch (Exception e) {}
             } while (true);
         } else {
@@ -470,7 +472,7 @@ final class IAIG extends PlayerIG {
                     if (line.equals(ressource)) throw new WrongInputException();
                     Integer b = this.inventory.get(line);
                     this.inventory.put(line, b+Integer.valueOf(1));
-                    return true;
+                    return;
                 } catch (Exception e) {}
             } while (true); 
         }   
@@ -495,7 +497,7 @@ final class IAIG extends PlayerIG {
                     if (!this.canExchange(3, null)) throw new NotEnoughRessourcesException();
                 else 
                     if (!this.canExchange(2, selectedHarbor.ressource)) throw new NotEnoughRessourcesException();
-                this.exchange(selectedHarbor.price, selectedHarbor.ressource);
+                this.exchangeIA(selectedHarbor.price, selectedHarbor.ressource);
                 break;
             } catch (Exception e) {}
         } while (true);

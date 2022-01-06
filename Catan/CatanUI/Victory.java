@@ -9,6 +9,7 @@ import javax.swing.border.EmptyBorder;
 public class Victory extends JFrame{
     JPanel contentPane;
     String winnername;
+	JLabel winner = new JLabel(winnername);
 
     public Victory(){
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -24,7 +25,7 @@ public class Victory extends JFrame{
 		congrats.setBounds(158, 25, 289, 47);
 		contentPane.add(congrats);
 		
-		JLabel winner = new JLabel(winnername);
+
 		winner.setHorizontalAlignment(SwingConstants.CENTER);
 		winner.setFont(new Font("Tahoma", Font.PLAIN, 25));
 		winner.setBounds(193, 67, 200, 57);

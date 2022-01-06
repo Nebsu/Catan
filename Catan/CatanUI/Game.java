@@ -161,9 +161,9 @@ public class Game extends JFrame implements ActionListener, MouseInputListener {
                 PLAYBOARD.contentPane.add(PLAYBOARD.passeTour);
                 int dice = PLAYERS[player].throwDices();
                 PLAYBOARD.diceresult.setText(String.valueOf(dice));
-                if(dice == 7){
-                    PLAYERS[player].thief();
-                }
+                // if(dice == 7){
+                //     PLAYERS[player].thief();
+                // }
                 enableAllExcept(PLAYBOARD.annuler);
                 PlayerIG.earnResources(Integer.parseInt(PLAYBOARD.diceresult.getText()));
                 showInventory(PLAYERS[player]);
@@ -181,30 +181,8 @@ public class Game extends JFrame implements ActionListener, MouseInputListener {
                     PLAYBOARD.repaint();
                     for(int i = number-botnumber; i < number; i++){
                         if(!firstRound){
-                            PLAYBOARD.playername.setText(PLAYERS[i].name);
-                            int dice = PLAYERS[i].throwDices();
-                            PLAYBOARD.diceresult.setText(String.valueOf(dice));
-                            if(dice == 7){
-                                ((IAIG)PLAYERS[i]).thief();
-                            }
-                            PlayerIG.earnResources(Integer.parseInt(PLAYBOARD.diceresult.getText()));
-                            ((IAIG)PLAYERS[i]).playerMenu();
-                            refreshVictoryPoints();
-                            if (PLAYERS[i].hasAVictoryPointCard() && PLAYERS[i].victoryPoints==9) PLAYERS[i].victoryPoints = 10;
-                            for (int j=0; j<PLAYERS.length; j++) {
-                                if (PLAYERS[j].isWinner()) {
-                                    end = true;
-                                    winner = PLAYERS[j];
-                                    stop();
-                                    break;
-                                } 
-                            }
-                            if (PLAYERS[i].isWinner()) {
-                                end = true;
-                                winner = PLAYERS[i];
-                                stop();
-                            } 
-                            System.out.println(i);
+                            ((IAIG)PLAYERS[i]).play();
+                            hasTheLongestRoad = longestRoad();
                         }
                     }
                     if(firstRound && botnumber !=0 && firstRoundacc == 1){
@@ -247,12 +225,13 @@ public class Game extends JFrame implements ActionListener, MouseInputListener {
                             winner = PLAYERS[player];
                         } 
                         if (hasTheStrongestArmy != null){
-                            PLAYBOARD.knightUsedlbl.setText(PLAYERS[player].name);
+                            PLAYBOARD.knightPanellbl.setText(PLAYERS[player].name);
                         }
                         if(end){
                             stop();
                             Victory v = new Victory();
                             v.winnername = winner.name;
+                            v.winner.setText(winner.name);
                             v.setVisible(true);
                         }
                         PLAYBOARD.repaint();
@@ -347,6 +326,18 @@ public class Game extends JFrame implements ActionListener, MouseInputListener {
                                         disableAll();
                                         return;
                                     }
+                                }else if(roadCard == true){
+                                    if(PLAYERS[player].buildRoad('H',k,l,true,false) && roadCardacc == 0){
+                                        roadCardacc++;
+                                        return;
+                                    }
+                                    if(PLAYERS[player].buildRoad('H',k,l,true,false) && roadCardacc == 1){
+                                        roadCardacc = 0;
+                                        roadCard = false;
+                                        enableAllExcept(PLAYBOARD.annuler);
+                                        PLAYBOARD.passeTour.setEnabled(true);
+                                        return;
+                                    }
                                 }else if(canConstructRoad == true && !firstRound && roadCard == false){
                                     if(PLAYERS[player].buildRoad('H',k,l,false,false)){
                                         canConstructRoad = false;
@@ -387,6 +378,7 @@ public class Game extends JFrame implements ActionListener, MouseInputListener {
                                         roadCardacc = 0;
                                         roadCard = false;
                                         enableAllExcept(PLAYBOARD.annuler);
+                                        PLAYBOARD.passeTour.setEnabled(true);
                                         return;
                                     }
                                 }else if(canConstructRoad == true && !firstRound && roadCard == false){
