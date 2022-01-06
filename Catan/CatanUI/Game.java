@@ -37,6 +37,7 @@ public class Game extends JFrame implements ActionListener, MouseInputListener {
     static boolean canConstructCity = false;
     static boolean harborEnable = false;
     static boolean roadCard = false;
+    static boolean moveThief = false;
     static int roadCardacc = 0;
     static PopUpEchange popupechange = new PopUpEchange(null);
 
@@ -158,7 +159,11 @@ public class Game extends JFrame implements ActionListener, MouseInputListener {
             public void actionPerformed(ActionEvent e) {
                 PLAYBOARD.contentPane.remove(PLAYBOARD.lancerDe);
                 PLAYBOARD.contentPane.add(PLAYBOARD.passeTour);
-                PLAYBOARD.diceresult.setText(String.valueOf(PLAYERS[player].throwDices()));
+                int dice = PLAYERS[player].throwDices();
+                PLAYBOARD.diceresult.setText(String.valueOf(dice));
+                if(dice == 7){
+                    PLAYERS[player].thief();
+                }
                 enableAllExcept(PLAYBOARD.annuler);
                 PlayerIG.earnResources(Integer.parseInt(PLAYBOARD.diceresult.getText()));
                 showInventory(PLAYERS[player]);
@@ -177,10 +182,28 @@ public class Game extends JFrame implements ActionListener, MouseInputListener {
                     for(int i = number-botnumber; i < number; i++){
                         if(!firstRound){
                             PLAYBOARD.playername.setText(PLAYERS[i].name);
-                            PLAYBOARD.diceresult.setText(String.valueOf(PLAYERS[i].throwDices()));
+                            int dice = PLAYERS[i].throwDices();
+                            PLAYBOARD.diceresult.setText(String.valueOf(dice));
+                            if(dice == 7){
+                                ((IAIG)PLAYERS[i]).thief();
+                            }
                             PlayerIG.earnResources(Integer.parseInt(PLAYBOARD.diceresult.getText()));
                             ((IAIG)PLAYERS[i]).playerMenu();
                             refreshVictoryPoints();
+                            if (PLAYERS[i].hasAVictoryPointCard() && PLAYERS[i].victoryPoints==9) PLAYERS[i].victoryPoints = 10;
+                            for (int j=0; j<PLAYERS.length; j++) {
+                                if (PLAYERS[j].isWinner()) {
+                                    end = true;
+                                    winner = PLAYERS[j];
+                                    stop();
+                                    break;
+                                } 
+                            }
+                            if (PLAYERS[i].isWinner()) {
+                                end = true;
+                                winner = PLAYERS[i];
+                                stop();
+                            } 
                             System.out.println(i);
                         }
                     }
@@ -219,11 +242,18 @@ public class Game extends JFrame implements ActionListener, MouseInputListener {
                                 break;
                             } 
                         }
+                        if (PLAYERS[player].isWinner()) {
+                            end = true;
+                            winner = PLAYERS[player];
+                        } 
                         if (hasTheStrongestArmy != null){
                             PLAYBOARD.knightUsedlbl.setText(PLAYERS[player].name);
                         }
                         if(end){
                             stop();
+                            Victory v = new Victory();
+                            v.winnername = winner.name;
+                            v.setVisible(true);
                         }
                         PLAYBOARD.repaint();
                         return;
@@ -315,6 +345,7 @@ public class Game extends JFrame implements ActionListener, MouseInputListener {
                                         PLAYBOARD.contentPane.remove(PLAYBOARD.placerRoute);
                                         PLAYBOARD.contentPane.add(PLAYBOARD.passeTour);
                                         disableAll();
+                                        return;
                                     }
                                 }else if(canConstructRoad == true && !firstRound && roadCard == false){
                                     if(PLAYERS[player].buildRoad('H',k,l,false,false)){
@@ -323,6 +354,7 @@ public class Game extends JFrame implements ActionListener, MouseInputListener {
                                         enableAllExcept(PLAYBOARD.annuler);
                                         showInventory(PLAYERS[player]);
                                         hasTheLongestRoad = longestRoad();
+                                        return;
                                     }    
                                 }
                             }
@@ -344,23 +376,26 @@ public class Game extends JFrame implements ActionListener, MouseInputListener {
                                         PLAYBOARD.contentPane.add(PLAYBOARD.passeTour);
                                         PLAYBOARD.passeTour.setEnabled(true);
                                         disableAll();
+                                        return;
                                     }
                                 }else if(roadCard == true){
                                     if(PLAYERS[player].buildRoad('V',k,l,true,false) && roadCardacc == 0){
                                         roadCardacc++;
+                                        return;
                                     }
                                     if(PLAYERS[player].buildRoad('V',k,l,true,false) && roadCardacc == 1){
                                         roadCardacc = 0;
                                         roadCard = false;
                                         enableAllExcept(PLAYBOARD.annuler);
+                                        return;
                                     }
                                 }else if(canConstructRoad == true && !firstRound && roadCard == false){
                                     if(PLAYERS[player].buildRoad('V',k,l,false,false)){
-                                    canConstructRoad = false;
-                                    enableAllExcept(PLAYBOARD.annuler);
-                                    showInventory(PLAYERS[player]);
-                                    PLAYBOARD.passeTour.setEnabled(true);
-                                    hasTheLongestRoad = longestRoad();
+                                        canConstructRoad = false;
+                                        enableAllExcept(PLAYBOARD.annuler);
+                                        showInventory(PLAYERS[player]);
+                                        PLAYBOARD.passeTour.setEnabled(true);
+                                        hasTheLongestRoad = longestRoad();
                                         if(hasTheLongestRoad == null){
                                             PLAYBOARD.lrPlayer.setText(" ");
                                             refreshVictoryPoints();
@@ -368,6 +403,7 @@ public class Game extends JFrame implements ActionListener, MouseInputListener {
                                             PLAYBOARD.lrPlayer.setText(hasTheLongestRoad.name);
                                             refreshVictoryPoints();
                                         }
+                                        return;
                                     }
                                 }
                             }
@@ -483,6 +519,21 @@ public class Game extends JFrame implements ActionListener, MouseInputListener {
                 }
             }
         });
+
+        for(int i = 0; i < PLAYBOARD.boxes.length; i++){
+            int k = i;
+            for(int j = 0; j < PLAYBOARD.boxes[i].length; j++){
+                int l = j;
+                PLAYBOARD.boxes[i][j].addMouseListener(new MouseAdapter(){
+                    @Override
+                    public void mousePressed(MouseEvent e) {
+                        if(moveThief){
+                            PLAYERS[player].moveThief(PLAYBOARD.boxes[k][l].indexI, PLAYBOARD.boxes[k][l].indexJ);
+                        }
+                    }
+                });
+            }
+        }   
     }
 
     public static void showInventory(PlayerIG p){

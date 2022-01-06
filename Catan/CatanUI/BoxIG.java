@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import javax.swing.JPanel;
 
-final class BoxIG {
+final class BoxIG extends JPanel{
 
     ////////// Attributs ////////// 
     

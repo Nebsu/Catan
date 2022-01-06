@@ -21,13 +21,14 @@ class PlayerIG {
     protected final ArrayList<ColonyIG> coloniesOnPlayBoard; // colonies construites par le joueur sur le plateau
     protected final ArrayList<HarborIG> harbors; // ports possédés par le joueur
     protected int knights; // nombre de cartes chevalier jouées par le joueur
+    protected BoxIG boxThief;
+    protected PlayerIG stealVictim;
 
     boolean monopoleCard = false;
     boolean inventionCard = false;
     int inventionacc = 0;
     boolean harborExchange = false;
-    String monopoleResource = "";
-
+    
     ////////// Constructeur et fonctions associées à ce dernier ////////// 
 
     PlayerIG(String name, int s, Color color) {
@@ -114,9 +115,15 @@ class PlayerIG {
 
     protected boolean canConstructCity() {
         int numberOfCities = 0;
+        int numberOfColonies = 0;
         for (ColonyIG col : this.coloniesOnPlayBoard) {
-            if (col.isCity) numberOfCities++;
+            if (col.isCity){
+                numberOfCities++;
+            } else{
+                numberOfColonies++;
+            }
         }
+        if(numberOfColonies == 0)return false;
         return ((numberOfCities<4) && 
                 (this.inventory.get("Roche")>=3 && this.inventory.get("Ble")>=2));
     }
@@ -251,71 +258,45 @@ class PlayerIG {
         // Les joueurs qui possèdent plus de 8 ressources,
         //  doivent donner la moitie de leurs ressources au voleur :
         for (int i=0; i<nbRessources.length; i++) {
-            if (nbRessources[i]>=8) Game.PLAYERS[i].giveRessources(nbRessources[i]);
+            if (nbRessources[i]>=8) Game.PLAYERS[i].giveRessources(nbRessources[i]/2);
         }
+
         // Ensuite, le joueur qui a lance les des deplace le voleur :
-        BoxIG b = this.moveThief();
+        this.moveThief();
         // Ensuite, le joueur courant choisi le joueur a qui il veut voler une ressource :
-        PlayerIG victim = this.selectPlayerToStealFrom(b);
         // Si le joueur courant a choisi une case avec des colonies adjacentes, 
         // alors le joueur designe par le joueur courant subit le vol : 
-        if (victim!=null) this.steal(victim);
     }
 
     // Donner des ressources au voleur :
     protected void giveRessources(int n) {
-        System.out.println(this.name+" possède "+n+" ressources");
-        n /= 2;
-        System.out.println(this.name+" : Veuillez donner "+n+" ressources au voleur");
-        Scanner sc = new Scanner(System.in);
-        for (int i=0; i<n; i++) {
-            System.out.println("Votre inventaire : "+this.inventory);
-            System.out.println("Choisissez une ressource à donner au voleur :");
-            do {
-                try {
-                    System.out.println("Tapez Bois, Argile, Laine, Ble ou Roche :");
-                    String line = sc.nextLine();
-                    if (!line.equals("Bois") && !line.equals("Argile") && !line.equals("Laine") && 
-                        !line.equals("Ble") && !line.equals("Roche")) throw new WrongInputException();
-                    Integer a = this.inventory.get(line);
-                    if (a==0) throw new IllegalStateException(line);
-                    this.inventory.put(line, a-Integer.valueOf(1));
-                    break;
-                } catch (IllegalStateException ill) {
-                    System.out.println("Erreur : Vous n'avez plus aucun "+ill.getMessage());
-                } catch (Exception e) {
-                    System.out.println(WrongInputException.MESSAGE);
-                }
-            } while (true);
-        }
+        Thief t = new Thief(this);
+        t.total = n;
+        t.totallbl.setText(String.valueOf(n));
+        t.setVisible(true);
     }
 
     // Déplacer le voleur :
-    protected BoxIG moveThief() {
+    void moveThief(){
+        Game.moveThief = true;
+    }
+
+    protected void moveThief(int k, int l) {
+        Game.moveThief = false;
         BoxIG res = null;
-        Scanner sc = new Scanner(System.in);
-        do {
             try {
-                System.out.println(this.name+", placez le voleur sur la case de votre choix :");
-                int[] indexs = scanLocationOrPath(sc);
-                int k = indexs[0]-1; int l = indexs[1]-1;
-                if (k<0 || k>4 || l<0 || l>4) throw new IndexOutOfBoundsException();
                 if (Game.PLAYBOARD.boxes[k][l]==Game.PLAYBOARD.thief) throw new IllegalStateException();
                 Game.PLAYBOARD.boxes[k][l].hasThief = true;
                 Game.PLAYBOARD.thief.hasThief = false;
                 Game.PLAYBOARD.thief = Game.PLAYBOARD.boxes[k][l];
                 res = Game.PLAYBOARD.boxes[k][l];
-                break;
-            } catch (IndexOutOfBoundsException ind) {
-                System.out.println("Erreur : cette case n'existe pas");
-            } catch (IllegalArgumentException ill) {
-                System.out.println("Erreur : Vous etes oblige de deplacer le voleur sur une nouvelle case");
             } catch (Exception e) {
                 System.out.println(WrongInputException.MESSAGE);
             }
-        } while (true);
         Game.PLAYBOARD.updatePaths();
-        return res;
+        boxThief = res;
+        PlayerIG victim = this.selectPlayerToStealFrom(boxThief);
+        if (victim!=null) this.steal(victim);
     }
 
     // Choix de la cible du joueur pour voler des ressources : 
@@ -324,12 +305,12 @@ class PlayerIG {
         ArrayList<LocationIG> locations = b.getLocations();
         // On va verifier si le joueur possède une colonie sur l'un des ces emplacements :
         ArrayList<ColonyIG> colonies = new ArrayList<ColonyIG>();
+        Victim v = new Victim(this);
         for (LocationIG l : locations) {
             if (l instanceof ColonyIG && ((ColonyIG) l).player!=this) 
                 colonies.add((ColonyIG) l);
         }
         if (colonies.isEmpty()) {
-            System.out.println("Aucune colonie à proximite de cette case");
             return null;
         }
         ArrayList<PlayerIG> nearPlayers = new ArrayList<PlayerIG>();
@@ -337,29 +318,11 @@ class PlayerIG {
             if (!nearPlayers.contains(c.player)) nearPlayers.add(c.player);
         }
         ArrayList<String> playersNames = new ArrayList<String>();
-        for (PlayerIG p : nearPlayers) playersNames.add(p.name);
-        System.out.println("Choisissez le joueur que vous voulez racketter :");
-        PlayerIG selectedPlayer = null;
-        Scanner sc = new Scanner(System.in);
-        do {
-            try {
-                System.out.println("Tapez l'un des noms ci-dessous :");
-                for (PlayerIG p : nearPlayers) 
-                    System.out.print(p.name+"  ");
-                System.out.println();
-                String name = sc.nextLine();
-                if (!playersNames.contains(name)) throw new WrongInputException();
-                for (PlayerIG p : nearPlayers) {
-                    if (p.name.equals(name)) {
-                        selectedPlayer = p;
-                        break;
-                    }
-                }
-                break;
-            } catch (Exception e) {
-                System.out.println(WrongInputException.MESSAGE);
-            }
-        } while (true);
+        for (PlayerIG p : nearPlayers) {
+            v.getChoice.add(p.name);
+            playersNames.add(p.name);
+        } 
+        PlayerIG selectedPlayer = stealVictim;
         return selectedPlayer;
     }
 
@@ -382,31 +345,26 @@ class PlayerIG {
                     victim.inventory.put("Bois", a-Integer.valueOf(1));
                     a = this.inventory.get("Bois");
                     this.inventory.put("Bois", a+Integer.valueOf(1)); 
-                    System.out.println("Vous avez pris 1 bois a "+victim.name);
                     break;
             case 2: Integer b = victim.inventory.get("Argile");
                     victim.inventory.put("Argile", b-Integer.valueOf(1));
                     b = this.inventory.get("Argile");
                     this.inventory.put("Argile", b+Integer.valueOf(1));
-                    System.out.println("Vous avez pris 1 argile a "+victim.name);
                     break;
             case 3: Integer c = victim.inventory.get("Laine");
                     victim.inventory.put("Laine", c-Integer.valueOf(1));
                     c = this.inventory.get("Laine");
                     this.inventory.put("Laine", c+Integer.valueOf(1));
-                    System.out.println("Vous avez pris 1 laine a "+victim.name);
                     break;
             case 4: Integer d = victim.inventory.get("Ble");
                     victim.inventory.put("Ble", d-Integer.valueOf(1));
                     d = this.inventory.get("Ble");
                     this.inventory.put("Ble", d+Integer.valueOf(1));
-                    System.out.println("Vous avez pris 1 blé a "+victim.name);
                     break;
             case 5: Integer e = victim.inventory.get("Roche");
                     victim.inventory.put("Roche", e-Integer.valueOf(1));
                     e = this.inventory.get("Roche");
                     this.inventory.put("Roche", e+Integer.valueOf(1));
-                    System.out.println("Vous avez pris 1 roche a "+victim.name);
                     break;
         }
     }
@@ -717,12 +675,12 @@ class PlayerIG {
 
     // Carte chevalier :
     protected void knight() {
-        BoxIG b = this.moveThief();
+        this.moveThief();
         // Ensuite, le joueur courant choisi le joueur a qui il veut voler une ressource :
-        PlayerIG victim = this.selectPlayerToStealFrom(b);
+        this.selectPlayerToStealFrom(boxThief);
         // Si le joueur courant a choisi une case avec des colonies adjacentes, 
         // alors le joueur designe par le joueur courant subit le vol : 
-        if (victim!=null) this.steal(victim);
+        if (stealVictim!=null) this.steal(stealVictim);
         this.knights++;
         if (this.knights==3 && !Game.army) {
             Game.army = true;

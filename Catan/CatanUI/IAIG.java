@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Random;
 import java.util.Set;
 import java.awt.Color;
-import Catan.CatanTerminal.Card;
+import Catan.CatanTerminal.*;
 import Catan.Exceptions.*;
 
 final class IAIG extends PlayerIG {
@@ -95,7 +95,31 @@ final class IAIG extends PlayerIG {
 
     // Fonction principale du voleur ;
     @Override
-    protected void thief() {super.thief();} 
+    protected void thief() {
+        // On compte les ressources de chaque joueur :
+        int[] nbRessources = new int[Game.PLAYERS.length];
+        for (int i=0; i<Game.PLAYERS.length; i++) {
+            nbRessources[i] += Game.PLAYERS[i].nbRessources(null);
+        }
+        // Les joueurs qui possèdent plus de 8 ressources,
+        //  doivent donner la moitie de leurs ressources au voleur :
+        for (int i=0; i<nbRessources.length; i++) {
+            if (nbRessources[i]>=8) {
+                if(Game.PLAYERS[i] instanceof PlayerIG){
+                    ((PlayerIG)Game.PLAYERS[i]).giveRessources(nbRessources[i]);
+                }else{
+                    ((IAIG)Game.PLAYERS[i]).giveRessources(nbRessources[i]);
+                }
+
+            }
+        }
+        // Ensuite, le joueur qui a lance les des deplace le voleur :
+        BoxIG b = this.moveThief2();
+        // Ensuite, le joueur courant choisi le joueur a qui il veut voler une ressource :
+        PlayerIG victim = this.selectPlayerToStealFrom(b);
+        // Si le joueur courant a choisi une case avec des colonies adjacentes, 
+        // alors le joueur designe par le joueur courant subit le vol : 
+        if (victim!=null) this.steal(victim);} 
 
     // Donner des ressources au voleur :
     @Override
@@ -122,8 +146,7 @@ final class IAIG extends PlayerIG {
     }
 
     // Déplacer le voleur :
-    @Override
-    protected BoxIG moveThief() {
+    protected BoxIG moveThief2() {
         BoxIG res = null;
         do {
             try {
@@ -213,7 +236,7 @@ final class IAIG extends PlayerIG {
         switch (line) {
             //case "ECHANGE BANQUE": System.out.println("Banque"); this.exchange(4, null); break;
             //case "ECHANGE PORT": System.out.println("Port");this.useHarbor(); break;
-            //case "CONSTRUIRE COLONIE":System.out.println("Colonie"); this.buildColony(0,0,false); break;
+            case "CONSTRUIRE COLONIE":System.out.println("Colonie"); this.buildColony(0,0,false); break;
             case "CONSTRUIRE VILLE":System.out.println("Ville"); this.buildCity(0,0); break;
             case "CONSTRUIRE ROUTE":System.out.println("Route"); this.buildRoad(' ',0,0,false, false); break;
             case "UTILISER CARTE":System.out.println("Carte"); this.useSpecialCard(); break;
@@ -296,6 +319,7 @@ final class IAIG extends PlayerIG {
                 this.inventory.replace("Roche", this.inventory.get("Roche")-3); 
                 this.inventory.replace("Ble", this.inventory.get("Ble")-2); 
                 this.victoryPoints++;
+                this.longestRoad();
                 break;
             } catch (Exception e) {}
         } while (true);
