@@ -120,6 +120,7 @@ final class PlayBoard {
         }
     }
 
+    
     ////////// Fonctions auxiliaires //////////
 
     // Affichage du plateau :
