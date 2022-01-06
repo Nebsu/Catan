@@ -10,7 +10,7 @@ Veuillez ensuite suivre les instructions sur le terminal.
 Quand le programme vous posera une question dans la version terminal,
 veuillez taper une des réponses proposée à la lettre, pour ne pas perdre de temps.
 
-Version Interface :
+Version Interface Graphique :
 
 Ne pas fermer une fenêtre avec la croix !
 

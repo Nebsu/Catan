@@ -209,7 +209,7 @@ class Player {
         return (dice1+dice2);
     }
 
-    // Répartition des ressources selon le résultat du lancé des dés :
+    // Répartition des ressources selon le résultat du lancer des dés :
     protected final static void earnResources(int dice) {
         // On récupère la ou les cases designée(s) par les dés :
         ArrayList<Box> boxes = CatanTerminal.PLAYBOARD.getBoxes(dice);
@@ -256,7 +256,7 @@ class Player {
         for (int i=0; i<CatanTerminal.PLAYERS.length; i++) {
             nbRessources[i] += CatanTerminal.PLAYERS[i].nbRessources(null);
         }
-        // Les joueurs qui possèdent plus de 8 ressources,
+        // Les joueurs qui possèdent au moins de 8 ressources,
         //  doivent donner la moitie de leurs ressources au voleur :
         for (int i=0; i<nbRessources.length; i++) {
             if (nbRessources[i]>=8) CatanTerminal.PLAYERS[i].giveRessources(nbRessources[i]);
@@ -923,11 +923,13 @@ class Player {
                 }
                 if (b==ids.length) throw new WrongInputException();
                 Harbor selectedHarbor = CatanTerminal.PLAYBOARD.getHarbor(selectedId);
-                if (selectedHarbor.type.equals("Simple")) 
-                    if (!this.canExchange(3, null)) throw new NotEnoughRessourcesException();
-                else 
-                    if (!this.canExchange(2, selectedHarbor.ressource)) throw new NotEnoughRessourcesException();
-                this.exchange(selectedHarbor.price, selectedHarbor.ressource);
+                if (selectedHarbor.type.equals("Simple")) {
+                    if (this.canExchange(3, null)) this.exchange(3, null);
+                    else throw new NotEnoughRessourcesException();
+                } else {
+                    if (this.canExchange(2, selectedHarbor.ressource)) this.exchange(2, selectedHarbor.ressource);
+                    else throw new NotEnoughRessourcesException();
+                }
                 break;
             } catch (NotEnoughRessourcesException not) {
                 System.out.println(this.color+not+CatanTerminal.RESET);

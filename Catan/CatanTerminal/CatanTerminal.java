@@ -91,7 +91,7 @@ public final class CatanTerminal {
                 // Armée la plus puissante :
                 System.out.println("Nombre de chevaliers joues :");
                 for (int j=0; j<PLAYERS.length; j++) {
-                    System.out.println(PLAYERS[i].name+" : "+PLAYERS[i].knights);
+                    System.out.println(PLAYERS[j].name+" : "+PLAYERS[j].knights);
                 }
                 System.out.println();
                 if (hasTheStrongestArmy!=null)
